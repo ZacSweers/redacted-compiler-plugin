@@ -1,0 +1,18 @@
+apply plugin: 'org.jetbrains.kotlin.jvm'
+apply plugin: 'org.jetbrains.kotlin.kapt'
+
+compileKotlin {
+  kotlinOptions {
+    jvmTarget = "1.8"
+    freeCompilerArgs = ['-Xskip-runtime-version-check', 'true']
+  }
+}
+
+dependencies {
+  compile project(':redacted-compiler-plugin-annotation')
+  compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+  compile "org.jetbrains.kotlin:kotlin-compiler-embeddable:$kotlin_version"
+
+  compile "com.google.auto.service:auto-service:1.0-rc4"
+  kapt "com.google.auto.service:auto-service:1.0-rc4"
+}

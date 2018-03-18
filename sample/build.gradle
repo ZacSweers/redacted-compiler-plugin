@@ -1,0 +1,22 @@
+def compilerPlugin = project(':redacted-compiler-plugin')
+
+evaluationDependsOn(":$compilerPlugin.name")
+
+apply plugin: 'org.jetbrains.kotlin.jvm'
+
+def pluginJar = new File(compilerPlugin.buildDir, "libs/${compilerPlugin.name}.jar").toString()
+compileKotlin {
+  kotlinOptions {
+    freeCompilerArgs = ["-Xplugin=$pluginJar"]
+  }
+}
+
+dependencies {
+  compileOnly project(':redacted-compiler-plugin-annotation')
+  compile project(':redacted-compiler-plugin-annotation')
+  compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+}
+
+afterEvaluate {
+  tasks["compileKotlin"].dependsOn += compilerPlugin.tasks["jar"]
+}

@@ -1,0 +1,5 @@
+rootProject.name = 'redacted-compiler-plugin'
+include ':redacted-compiler-plugin'
+include ':redacted-compiler-plugin-annotation'
+include ':sample'
+
