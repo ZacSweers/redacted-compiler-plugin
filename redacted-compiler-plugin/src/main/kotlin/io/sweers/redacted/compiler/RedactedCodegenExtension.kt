@@ -30,6 +30,7 @@ import org.jetbrains.kotlin.resolve.BindingContext
 import org.jetbrains.kotlin.resolve.descriptorUtil.annotationClass
 import org.jetbrains.kotlin.resolve.descriptorUtil.builtIns
 import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameSafe
+import org.jetbrains.kotlin.resolve.descriptorUtil.getAllSuperclassesWithoutAny
 import org.jetbrains.kotlin.resolve.jvm.AsmTypes
 import org.jetbrains.kotlin.resolve.jvm.diagnostics.OtherOrigin
 import org.jetbrains.kotlin.resolve.substitutedUnderlyingType
@@ -55,10 +56,11 @@ class RedactedCodegenExtension(
   override fun generateClassSyntheticParts(codegen: ImplementationBodyCodegen) {
     val targetClass = codegen.descriptor
     log("Reading ${targetClass.name}")
-    if (targetClass.isData) {
+    val extendsRedactedBase = targetClass.getAllSuperclassesWithoutAny().any { it.fqNameSafe == REDACTED_BASE_CLASS_FQNAME }
+    if (targetClass.isData && !extendsRedactedBase) {
       log("Not a data class")
       messageCollector.report(CompilerMessageSeverity.ERROR,
-          "Redacted is not supported on data classes!",
+          "Redacted is not supported on data classes unless they extend RedactedBase!",
           // I don't know how to get a location from a descriptor :(
           CompilerMessageLocation.create(null))
       return
@@ -94,7 +96,7 @@ class RedactedCodegenExtension(
         v = codegen.v,
         generationState = codegen.state
     ).generateToStringMethod(
-        targetClass.findToStringFunction()!!,
+        targetClass.findToStringFunction(useRedacted = extendsRedactedBase)!!,
         properties
     )
   }
@@ -248,14 +250,15 @@ private class ToStringGenerator(
   }
 }
 
-private fun ClassDescriptor.findToStringFunction(): SimpleFunctionDescriptor? {
+private fun ClassDescriptor.findToStringFunction(useRedacted: Boolean): SimpleFunctionDescriptor? {
   return unsubstitutedMemberScope
-      .getContributedFunctions(Name.identifier("toString"), WHEN_GET_ALL_DESCRIPTORS)
+      .getContributedFunctions(Name.identifier(if (useRedacted) "toRedactedString" else "toString"), WHEN_GET_ALL_DESCRIPTORS)
       .first()
 }
 
 // Can't import the annotation here because it's for some reason not visible when the plugin runs
 private val REDACTED_CLASS_FQNAME = FqName("io.sweers.redacted.annotation.Redacted")
+private val REDACTED_BASE_CLASS_FQNAME = FqName("io.sweers.redacted.annotation.RedactedBase")
 
 private val PropertyDescriptor.isRedacted: Boolean
   get() {
