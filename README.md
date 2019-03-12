@@ -24,7 +24,7 @@ Run the `Runner` main method in the `sample`.
 Caveats
 ----------
 * Does not work on data classes, because Kotlin's built-in code gen will always try to write the `toString()` function and thus duplicate.
-* The kotlin or gradle deamons do caching I don't quite understand, so to re-run you need to run `./gradlew --stop` and `./gradlew clean` first between runs.
+* The kotlin or gradle deamons do caching I don't quite understand, so to re-run you may need to run `./gradlew --stop` and `./gradlew clean` first between runs.
 
 License
 -------
