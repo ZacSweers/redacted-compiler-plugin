@@ -6,7 +6,7 @@ A proof-of-concept Kotlin compiler plugin that generates redacted `toString()` i
 Similar to [`auto-value-redacted`](https://github.com/square/auto-value-redacted), where the following class:
 
 ```kotlin
-class Person(val name: String, @Redacted val ssn: String)
+data class Person(val name: String, @Redacted val ssn: String)
 ```
 
 produces the following `toString()`
@@ -23,7 +23,6 @@ Run the `Runner` main method in the `sample`.
 
 Caveats
 ----------
-* Does not work on data classes, because Kotlin's built-in code gen will always try to write the `toString()` function and thus duplicate.
 * The kotlin or gradle deamons do caching I don't quite understand, so to re-run you may need to run `./gradlew --stop` and `./gradlew clean` first between runs.
 
 License

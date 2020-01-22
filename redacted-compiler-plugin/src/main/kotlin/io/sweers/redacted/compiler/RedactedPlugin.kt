@@ -12,6 +12,7 @@ import org.jetbrains.kotlin.com.intellij.openapi.project.Project
 import org.jetbrains.kotlin.compiler.plugin.ComponentRegistrar
 import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.extensions.ProjectExtensionDescriptor
+import org.jetbrains.kotlin.resolve.extensions.SyntheticResolveExtension
 
 @AutoService(ComponentRegistrar::class)
 class TestComponentRegistrar : ComponentRegistrar {
@@ -25,6 +26,9 @@ class TestComponentRegistrar : ComponentRegistrar {
 
     ExpressionCodegenExtension.registerExtensionAsFirst(project,
         RedactedCodegenExtension(messageCollector))
+
+    SyntheticResolveExtension.registerExtensionAsFirst(project,
+        RedactedSyntheticResolveExtension(messageCollector))
   }
 }
 
