@@ -55,14 +55,6 @@ class RedactedCodegenExtension(
   override fun generateClassSyntheticParts(codegen: ImplementationBodyCodegen) {
     val targetClass = codegen.descriptor
     log("Reading ${targetClass.name}")
-    if (targetClass.isData) {
-      log("Not a data class")
-      messageCollector.report(CompilerMessageSeverity.ERROR,
-          "Redacted is not supported on data classes!",
-          // I don't know how to get a location from a descriptor :(
-          CompilerMessageLocation.create(null))
-      return
-    }
     val constructor = targetClass.constructors.first { it.isPrimary }
     val properties: List<PropertyDescriptor> = constructor.valueParameters
 //        .filter { it.hasValOrVar() }
