@@ -1,5 +1,5 @@
 apply plugin: 'org.jetbrains.kotlin.jvm'
-apply plugin: 'maven-publish'
+apply plugin: "com.vanniktech.maven.publish"
 
 compileKotlin {
   kotlinOptions {
@@ -9,12 +9,4 @@ compileKotlin {
 
 dependencies {
   compileOnly "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-}
-
-publishing {
-  publications {
-    maven(MavenPublication) {
-      from components.java
-    }
-  }
 }

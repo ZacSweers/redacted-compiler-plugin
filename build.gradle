@@ -3,9 +3,10 @@ buildscript {
         mavenLocal()
         jcenter()
     }
+
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath "io.sweers.redacted:redacted-compiler-gradle-plugin:$version"
+        classpath 'com.vanniktech:gradle-maven-publish-plugin:0.8.0'
     }
 }
 
