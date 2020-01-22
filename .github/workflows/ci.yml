@@ -1,0 +1,28 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    name: JDK ${{ matrix.java_version }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # TODO Add 9, 10, 11, 12, and 13?
+        java_version: [1.8]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Gradle Wrapper Validation
+        uses: gradle/wrapper-validation-action@v1
+      - name: Install JDK ${{ matrix.java_version }}
+        uses: actions/setup-java@v1
+        with:
+          java-version: ${{ matrix.java_version }}
+      - name: Build with Gradle
+        run: ./gradlew clean check --stacktrace
+      - name: Reclaim memory
+        run: ./gradlew --stop && jps|grep -E 'KotlinCompileDaemon|GradleDaemon'| awk '{print $1}'| xargs kill -9
+      - name: Upload snapshot (master only)
+        run: ./gradlew uploadArchives -PSONATYPE_NEXUS_USERNAME=${{ secrets.SonatypeUsername }} -PSONATYPE_NEXUS_PASSWORD=${{ secrets.SonatypePassword }}
+        if: success() && github.ref == 'refs/heads/master' && github.event_name != 'pull_request' && matrix.java_version == '1.8'
