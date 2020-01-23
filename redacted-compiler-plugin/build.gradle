@@ -10,8 +10,8 @@ compileKotlin {
 }
 
 dependencies {
+  compileOnly "org.jetbrains.kotlin:kotlin-compiler-embeddable:$kotlin_version"
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-  implementation "org.jetbrains.kotlin:kotlin-compiler-embeddable:$kotlin_version"
 
   compileOnly "com.google.auto.service:auto-service-annotations:$autoservice_version"
   kapt "com.google.auto.service:auto-service:$autoservice_version"
