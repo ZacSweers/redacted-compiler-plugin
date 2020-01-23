@@ -1,17 +1,19 @@
 buildscript {
     repositories {
+        mavenCentral()
         jcenter()
     }
 
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath 'com.vanniktech:gradle-maven-publish-plugin:0.8.0'
+        classpath "com.vanniktech:gradle-maven-publish-plugin:${maven_publish_plugin_version}"
         classpath "dev.zacsweers.redacted:redacted-compiler-plugin-gradle"
     }
 }
 
 allprojects {
     repositories {
+        mavenCentral()
         jcenter()
     }
 }
