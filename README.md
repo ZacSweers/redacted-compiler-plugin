@@ -37,6 +37,8 @@ buildscript {
   }  
 }
 
+apply plugin: 'dev.zacsweers.redacted.redacted-gradle-plugin'
+
 redacted {
   redactedAnnotation = "your.annotation.here.Redacted" // Required
   enabled = true // Default
