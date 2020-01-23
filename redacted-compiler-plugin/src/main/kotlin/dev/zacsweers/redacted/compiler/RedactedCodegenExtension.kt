@@ -1,9 +1,8 @@
-package io.sweers.redacted.compiler
+package dev.zacsweers.redacted.compiler
 
 import io.sweers.redacted.annotation.Redacted
 import org.jetbrains.annotations.NotNull
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageLocation
-import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity.WARNING
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.codegen.AsmUtil
@@ -255,5 +254,6 @@ val REDACTED_CLASS_FQNAME = FqName("io.sweers.redacted.annotation.Redacted")
 
 val PropertyDescriptor.isRedacted: Boolean
   get() {
-    return this.annotations.hasAnnotation(REDACTED_CLASS_FQNAME)
+    return this.annotations.hasAnnotation(
+        REDACTED_CLASS_FQNAME)
   }

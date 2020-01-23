@@ -1,6 +1,5 @@
-package io.sweers.redacted.compiler
+package dev.zacsweers.redacted.compiler
 
-import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.descriptors.CallableMemberDescriptor
 import org.jetbrains.kotlin.descriptors.ClassDescriptor
 import org.jetbrains.kotlin.descriptors.Modality
@@ -9,21 +8,16 @@ import org.jetbrains.kotlin.descriptors.SimpleFunctionDescriptor
 import org.jetbrains.kotlin.descriptors.Visibilities
 import org.jetbrains.kotlin.descriptors.annotations.Annotations
 import org.jetbrains.kotlin.descriptors.impl.SimpleFunctionDescriptorImpl
-import org.jetbrains.kotlin.descriptors.impl.referencedProperty
 import org.jetbrains.kotlin.name.Name
 import org.jetbrains.kotlin.resolve.BindingContext
-import org.jetbrains.kotlin.resolve.descriptorUtil.annotationClass
 import org.jetbrains.kotlin.resolve.descriptorUtil.builtIns
-import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameSafe
 import org.jetbrains.kotlin.resolve.extensions.SyntheticResolveExtension
 
 /**
  * A [SyntheticResolveExtension] that replaces the open toString descriptor
  * with a final descriptor for data classes.
  */
-class RedactedSyntheticResolveExtension(
-    private val messageCollector: MessageCollector
-) : SyntheticResolveExtension {
+class RedactedSyntheticResolveExtension : SyntheticResolveExtension {
 
   override fun generateSyntheticMethods(
       thisDescriptor: ClassDescriptor,

@@ -1,4 +1,4 @@
-package io.sweers.redacted.compiler
+package dev.zacsweers.redacted.compiler
 
 import com.google.auto.service.AutoService
 import org.jetbrains.kotlin.compiler.plugin.AbstractCliOption
