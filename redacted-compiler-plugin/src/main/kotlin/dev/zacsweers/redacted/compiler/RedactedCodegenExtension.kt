@@ -42,7 +42,8 @@ import org.jetbrains.org.objectweb.asm.commons.InstructionAdapter
  */
 class RedactedCodegenExtension(
     private val messageCollector: MessageCollector,
-    private val replacementString: String
+    private val replacementString: String,
+    private val fqRedactedAnnotation: FqName
 ) : ExpressionCodegenExtension {
 
   private fun log(message: String) {
@@ -66,7 +67,7 @@ class RedactedCodegenExtension(
           log("Property is ${it.referencedProperty}")
 //          log("Annotations are ${it.annotations.getAllAnnotations().joinToString { it.annotation.fqName.toString() }}")
           log("Property annotations ${it.referencedProperty?.annotations?.joinToString { it.annotationClass?.fqNameSafe.toString() }}")
-          it.isRedacted
+          it.isRedacted(fqRedactedAnnotation)
         }
     if (redactedParams.isEmpty()) {
       log("No redacted params")
@@ -75,7 +76,7 @@ class RedactedCodegenExtension(
 
     log("Reading params")
     val finalProperties = properties
-        .map { it to it.isRedacted }
+        .map { it to it.isRedacted(fqRedactedAnnotation) }
     log("Found params: ${finalProperties.joinToString { it.first.name.asString() }}")
 
     ToStringGenerator(
@@ -85,7 +86,8 @@ class RedactedCodegenExtension(
         fieldOwnerContext = codegen.context,
         v = codegen.v,
         generationState = codegen.state,
-        replacementString = replacementString
+        replacementString = replacementString,
+        fqRedactedAnnotation = fqRedactedAnnotation
     ).generateToStringMethod(
         targetClass.findToStringFunction()!!,
         properties
@@ -100,7 +102,8 @@ private class ToStringGenerator(
     private val fieldOwnerContext: FieldOwnerContext<*>,
     private val v: ClassBuilder,
     private val generationState: GenerationState,
-    private val replacementString: String
+    private val replacementString: String,
+    private val fqRedactedAnnotation: FqName
 ) {
   private val typeMapper: KotlinTypeMapper = generationState.typeMapper
   private val underlyingType: JvmKotlinType
@@ -166,7 +169,7 @@ private class ToStringGenerator(
 
     var first = true
     for (propertyDescriptor in properties) {
-      val isRedacted = propertyDescriptor.isRedacted
+      val isRedacted = propertyDescriptor.isRedacted(fqRedactedAnnotation)
       val possibleValue = if (isRedacted) "\"$replacementString\"" else ""
       if (first) {
         iv.aconst(classDescriptor.name.toString() + "(" + propertyDescriptor.name
@@ -248,11 +251,6 @@ private fun ClassDescriptor.findToStringFunction(): SimpleFunctionDescriptor? {
       .first()
 }
 
-// Can't import the annotation here because it's for some reason not visible when the plugin runs
-val REDACTED_CLASS_FQNAME = FqName("dev.zacsweers.redacted.annotation.Redacted")
-
-val PropertyDescriptor.isRedacted: Boolean
-  get() {
-    return this.annotations.hasAnnotation(
-        REDACTED_CLASS_FQNAME)
-  }
+internal fun PropertyDescriptor.isRedacted(redactedAnnotation: FqName): Boolean {
+  return annotations.hasAnnotation(redactedAnnotation)
+}

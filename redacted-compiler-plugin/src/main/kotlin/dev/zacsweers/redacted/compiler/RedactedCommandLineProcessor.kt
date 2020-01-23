@@ -9,6 +9,7 @@ import org.jetbrains.kotlin.config.CompilerConfigurationKey
 
 val KEY_ENABLED = CompilerConfigurationKey<Boolean>("enabled")
 val KEY_REPLACEMENT_STRING = CompilerConfigurationKey<String>("replacementString")
+val KEY_REDACTED_ANNOTATION = CompilerConfigurationKey<String>("redactedAnnotation")
 
 @AutoService(CommandLineProcessor::class)
 class RedactedCommandLineProcessor : CommandLineProcessor {
@@ -18,7 +19,8 @@ class RedactedCommandLineProcessor : CommandLineProcessor {
   override val pluginOptions: Collection<AbstractCliOption> =
       listOf(
           CliOption("enabled", "<true | false>", "", required = true),
-          CliOption("replacementString", "String", "", required = true)
+          CliOption("replacementString", "String", "", required = true),
+          CliOption("redactedAnnotation", "String", "", required = true)
       )
 
   override fun processOption(
@@ -28,6 +30,7 @@ class RedactedCommandLineProcessor : CommandLineProcessor {
   ) = when (option.optionName) {
     "enabled" -> configuration.put(KEY_ENABLED, value.toBoolean())
     "replacementString" -> configuration.put(KEY_REPLACEMENT_STRING, value)
+    "redactedAnnotation" -> configuration.put(KEY_REDACTED_ANNOTATION, value)
     else -> error("Unknown plugin option: ${option.optionName}")
   }
 }

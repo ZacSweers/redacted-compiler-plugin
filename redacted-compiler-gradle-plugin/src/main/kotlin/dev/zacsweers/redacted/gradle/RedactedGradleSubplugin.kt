@@ -34,10 +34,14 @@ class RedactedGradleSubplugin : KotlinGradleSubplugin<AbstractCompile> {
       kotlinCompilation: KotlinCompilation<KotlinCommonOptions>?
   ): List<SubpluginOption> {
     val extension = project.extensions.findByType(RedactedPluginExtension::class.java) ?: RedactedPluginExtension()
+    val annotation = requireNotNull(extension.redactedAnnotation) {
+      "Redacted annotation must be specified!"
+    }
 
     return listOf(
         SubpluginOption(key = "enabled", value = extension.enabled.toString()),
-        SubpluginOption(key = "replacementString", value = extension.replacementString)
+        SubpluginOption(key = "replacementString", value = extension.replacementString),
+        SubpluginOption(key = "redactedAnnotation", value = annotation)
     )
   }
 }

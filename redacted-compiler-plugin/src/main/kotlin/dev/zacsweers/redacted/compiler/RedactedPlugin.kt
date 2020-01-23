@@ -11,6 +11,7 @@ import org.jetbrains.kotlin.com.intellij.openapi.project.Project
 import org.jetbrains.kotlin.compiler.plugin.ComponentRegistrar
 import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.extensions.ProjectExtensionDescriptor
+import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.resolve.extensions.SyntheticResolveExtension
 
 @AutoService(ComponentRegistrar::class)
@@ -26,10 +27,12 @@ class TestComponentRegistrar : ComponentRegistrar {
         MessageCollector.NONE)
 
     val replacementString = checkNotNull(configuration[KEY_REPLACEMENT_STRING])
+    val redactedAnnotation = checkNotNull(configuration[KEY_REDACTED_ANNOTATION])
+    val fqRedactedAnnotation = FqName(redactedAnnotation)
     ExpressionCodegenExtension.registerExtensionAsFirst(project,
-        RedactedCodegenExtension(messageCollector, replacementString))
+        RedactedCodegenExtension(messageCollector, replacementString, fqRedactedAnnotation))
 
-    SyntheticResolveExtension.registerExtensionAsFirst(project, RedactedSyntheticResolveExtension())
+    SyntheticResolveExtension.registerExtensionAsFirst(project, RedactedSyntheticResolveExtension(fqRedactedAnnotation))
   }
 }
 

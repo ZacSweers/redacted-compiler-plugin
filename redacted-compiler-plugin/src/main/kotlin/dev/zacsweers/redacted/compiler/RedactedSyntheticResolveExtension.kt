@@ -8,6 +8,7 @@ import org.jetbrains.kotlin.descriptors.SimpleFunctionDescriptor
 import org.jetbrains.kotlin.descriptors.Visibilities
 import org.jetbrains.kotlin.descriptors.annotations.Annotations
 import org.jetbrains.kotlin.descriptors.impl.SimpleFunctionDescriptorImpl
+import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
 import org.jetbrains.kotlin.resolve.BindingContext
 import org.jetbrains.kotlin.resolve.descriptorUtil.builtIns
@@ -17,7 +18,9 @@ import org.jetbrains.kotlin.resolve.extensions.SyntheticResolveExtension
  * A [SyntheticResolveExtension] that replaces the open toString descriptor
  * with a final descriptor for data classes.
  */
-class RedactedSyntheticResolveExtension : SyntheticResolveExtension {
+class RedactedSyntheticResolveExtension(
+    private val fqRedactedAnnotation: FqName
+) : SyntheticResolveExtension {
 
   override fun generateSyntheticMethods(
       thisDescriptor: ClassDescriptor,
@@ -32,7 +35,7 @@ class RedactedSyntheticResolveExtension : SyntheticResolveExtension {
     val properties: List<PropertyDescriptor> = constructor.valueParameters
         .mapNotNull { bindingContext.get(BindingContext.VALUE_PARAMETER_AS_PROPERTY, it) }
 
-    val redactedParams = properties.filter { it.isRedacted }
+    val redactedParams = properties.filter { it.isRedacted(fqRedactedAnnotation) }
 
     if (name.asString() == "toString" && redactedParams.isNotEmpty()) {
       // Remove the open toString descriptor

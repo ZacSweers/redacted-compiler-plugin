@@ -10,7 +10,6 @@ compileKotlin {
 }
 
 dependencies {
-  compile project(':redacted-compiler-plugin-annotation')
   compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
   compile "org.jetbrains.kotlin:kotlin-compiler-embeddable:$kotlin_version"
 
