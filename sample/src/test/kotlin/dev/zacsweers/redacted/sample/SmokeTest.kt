@@ -7,6 +7,6 @@ class SmokeTest {
   @Test
   fun person() {
     val person = User("Bob", "2815551234")
-    assertThat(person.toString()).isEqualTo("User(name=Bob, ssn=██)")
+    assertThat(person.toString()).isEqualTo("User(name=Bob, phoneNumber=██)")
   }
 }
