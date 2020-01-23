@@ -1,7 +1,16 @@
 apply plugin: 'org.jetbrains.kotlin.jvm'
+apply plugin: 'maven-publish'
 
 compileKotlin {
   kotlinOptions {
     jvmTarget = "1.8"
+  }
+}
+
+publishing {
+  publications {
+    maven(MavenPublication) {
+      from components.java
+    }
   }
 }
