@@ -1,16 +1,30 @@
-plugins {
-    id "com.gradle.plugin-publish" version "0.10.1"
+buildscript {
+    repositories {
+        jcenter()
+    }
+
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath 'com.vanniktech:gradle-maven-publish-plugin:0.8.0'
+    }
 }
 
 apply plugin: "java-gradle-plugin"
 apply plugin: "org.jetbrains.kotlin.jvm"
 apply plugin: "org.jetbrains.kotlin.kapt"
-apply plugin: "maven-publish"
+apply plugin: "com.vanniktech.maven.publish"
+
+repositories {
+    jcenter()
+}
+
+group = GROUP
+version = VERSION_NAME
 
 gradlePlugin {
     plugins {
         redactedPlugin {
-            id = 'io.sweers.redacted.redacted-plugin'
+            id = 'dev.zacsweers.redacted.redacted-gradle-plugin'
             implementationClass = 'io.sweers.redacted.gradle.RedactedGradlePlugin'
         }
     }
@@ -22,24 +36,4 @@ dependencies {
 
     compileOnly "com.google.auto.service:auto-service-annotations:$autoservice_version"
     kapt "com.google.auto.service:auto-service:$autoservice_version"
-}
-
-pluginBundle {
-    website = 'https://github.com/ZacSweers/redacted-compiler-plugin/'
-    vcsUrl = 'https://github.com/ZacSweers/redacted-compiler-plugin/'
-    description = 'Redacted Compiler Gradle Plugin'
-    tags = ['kotlin', 'compiler', 'plugin']
-    plugins {
-        redactedPlugin {
-            displayName = 'Redacted Compiler Gradle Plugin'
-        }
-    }
-}
-
-publishing {
-    publications {
-        maven(MavenPublication) {
-            from components.java
-        }
-    }
 }
