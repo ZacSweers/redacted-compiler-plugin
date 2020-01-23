@@ -43,7 +43,9 @@ import org.jetbrains.org.objectweb.asm.commons.InstructionAdapter
  * respect [Redacted] annotations.
  */
 class RedactedCodegenExtension(
-    private val messageCollector: MessageCollector) : ExpressionCodegenExtension {
+    private val messageCollector: MessageCollector,
+    private val replacementString: String
+) : ExpressionCodegenExtension {
 
   private fun log(message: String) {
     messageCollector.report(
@@ -55,7 +57,7 @@ class RedactedCodegenExtension(
   override fun generateClassSyntheticParts(codegen: ImplementationBodyCodegen) {
     val targetClass = codegen.descriptor
     log("Reading ${targetClass.name}")
-    val constructor = targetClass.constructors.first { it.isPrimary }
+    val constructor = targetClass.constructors.firstOrNull { it.isPrimary } ?: return
     val properties: List<PropertyDescriptor> = constructor.valueParameters
 //        .filter { it.hasValOrVar() }
         .mapNotNull { codegen.bindingContext.get(BindingContext.VALUE_PARAMETER_AS_PROPERTY, it) }
@@ -84,7 +86,8 @@ class RedactedCodegenExtension(
         classAsmType = codegen.typeMapper.mapType(targetClass),
         fieldOwnerContext = codegen.context,
         v = codegen.v,
-        generationState = codegen.state
+        generationState = codegen.state,
+        replacementString = replacementString
     ).generateToStringMethod(
         targetClass.findToStringFunction()!!,
         properties
@@ -98,7 +101,8 @@ private class ToStringGenerator(
     private val classAsmType: Type,
     private val fieldOwnerContext: FieldOwnerContext<*>,
     private val v: ClassBuilder,
-    private val generationState: GenerationState
+    private val generationState: GenerationState,
+    private val replacementString: String
 ) {
   private val typeMapper: KotlinTypeMapper = generationState.typeMapper
   private val underlyingType: JvmKotlinType
@@ -165,7 +169,7 @@ private class ToStringGenerator(
     var first = true
     for (propertyDescriptor in properties) {
       val isRedacted = propertyDescriptor.isRedacted
-      val possibleValue = if (isRedacted) "\"██\"" else ""
+      val possibleValue = if (isRedacted) "\"$replacementString\"" else ""
       if (first) {
         iv.aconst(classDescriptor.name.toString() + "(" + propertyDescriptor.name
             .asString() + "=$possibleValue")
@@ -247,9 +251,9 @@ private fun ClassDescriptor.findToStringFunction(): SimpleFunctionDescriptor? {
 }
 
 // Can't import the annotation here because it's for some reason not visible when the plugin runs
-private val REDACTED_CLASS_FQNAME = FqName("io.sweers.redacted.annotation.Redacted")
+val REDACTED_CLASS_FQNAME = FqName("io.sweers.redacted.annotation.Redacted")
 
-private val PropertyDescriptor.isRedacted: Boolean
+val PropertyDescriptor.isRedacted: Boolean
   get() {
     return this.annotations.hasAnnotation(REDACTED_CLASS_FQNAME)
   }
