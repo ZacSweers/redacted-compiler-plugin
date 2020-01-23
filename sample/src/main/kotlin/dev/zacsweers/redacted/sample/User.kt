@@ -1,7 +1,7 @@
 package dev.zacsweers.redacted.sample
 
-data class Person(
+data class User(
     val name: String,
-    @Redacted val ssn: String
+    @Redacted val phoneNumber: String
 )
 

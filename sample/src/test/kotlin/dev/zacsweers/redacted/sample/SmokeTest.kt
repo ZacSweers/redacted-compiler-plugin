@@ -6,7 +6,7 @@ import org.junit.Test
 class SmokeTest {
   @Test
   fun person() {
-    val person = Person("John Doe", "123-456-7890")
-    assertThat(person.toString()).isEqualTo("Person(name=John Doe, ssn=██)")
+    val person = User("Bob", "2815551234")
+    assertThat(person.toString()).isEqualTo("User(name=Bob, ssn=██)")
   }
 }
