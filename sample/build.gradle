@@ -19,4 +19,7 @@ configurations.all {
 dependencies {
   compileOnly project(':redacted-compiler-plugin-annotation')
   implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+  
+  testImplementation "junit:junit:4.13"
+  testImplementation "com.google.truth:truth:1.0.1"
 }
