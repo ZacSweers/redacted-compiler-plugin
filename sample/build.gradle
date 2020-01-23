@@ -1,5 +1,5 @@
 apply plugin: 'org.jetbrains.kotlin.jvm'
-apply plugin: 'io.sweers.redacted.redacted-plugin'
+apply plugin: 'dev.zacsweers.redacted.redacted-gradle-plugin'
 
 redactedPlugin {
   enabled = true
