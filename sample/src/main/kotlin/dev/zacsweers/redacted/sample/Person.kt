@@ -1,6 +1,6 @@
 package dev.zacsweers.redacted.sample
 
-import io.sweers.redacted.annotation.Redacted
+import dev.zacsweers.redacted.annotation.Redacted
 
 data class Person(
     val name: String,
