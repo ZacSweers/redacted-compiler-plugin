@@ -7,6 +7,10 @@ compileKotlin {
   }
 }
 
+dependencies {
+  compileOnly "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+}
+
 publishing {
   publications {
     maven(MavenPublication) {
