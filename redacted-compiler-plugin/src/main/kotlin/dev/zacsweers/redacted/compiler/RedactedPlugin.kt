@@ -3,6 +3,7 @@ package dev.zacsweers.redacted.compiler
 import com.google.auto.service.AutoService
 import org.jetbrains.kotlin.cli.common.CLIConfigurationKeys
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
+import org.jetbrains.kotlin.cli.common.messages.MessageCollector.Companion
 import org.jetbrains.kotlin.codegen.extensions.ExpressionCodegenExtension
 import org.jetbrains.kotlin.com.intellij.mock.MockProject
 import org.jetbrains.kotlin.com.intellij.openapi.extensions.Extensions
@@ -22,9 +23,15 @@ class TestComponentRegistrar : ComponentRegistrar {
 
     if (configuration[KEY_ENABLED] == false) return
 
+    val verbose = configuration[KEY_VERBOSE] == true
+
     // see https://github.com/JetBrains/kotlin/blob/1.1.2/plugins/annotation-collector/src/org/jetbrains/kotlin/annotation/AnnotationCollectorPlugin.kt#L92
-    val messageCollector = configuration.get(CLIConfigurationKeys.MESSAGE_COLLECTOR_KEY,
-        MessageCollector.NONE)
+    val messageCollector = if (verbose) {
+      configuration.get(CLIConfigurationKeys.MESSAGE_COLLECTOR_KEY,
+          MessageCollector.NONE)
+    } else {
+      MessageCollector.NONE
+    }
 
     val replacementString = checkNotNull(configuration[KEY_REPLACEMENT_STRING])
     val redactedAnnotation = checkNotNull(configuration[KEY_REDACTED_ANNOTATION])

@@ -40,6 +40,7 @@ class RedactedGradleSubplugin : KotlinGradleSubplugin<AbstractCompile> {
 
     return listOf(
         SubpluginOption(key = "enabled", value = extension.enabled.toString()),
+        SubpluginOption(key = "verbose", value = extension.enabled.toString()),
         SubpluginOption(key = "replacementString", value = extension.replacementString),
         SubpluginOption(key = "redactedAnnotation", value = annotation)
     )

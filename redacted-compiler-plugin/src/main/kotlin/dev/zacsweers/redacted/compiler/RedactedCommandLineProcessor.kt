@@ -8,6 +8,7 @@ import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.config.CompilerConfigurationKey
 
 val KEY_ENABLED = CompilerConfigurationKey<Boolean>("enabled")
+val KEY_VERBOSE = CompilerConfigurationKey<Boolean>("verbose")
 val KEY_REPLACEMENT_STRING = CompilerConfigurationKey<String>("replacementString")
 val KEY_REDACTED_ANNOTATION = CompilerConfigurationKey<String>("redactedAnnotation")
 
@@ -19,6 +20,7 @@ class RedactedCommandLineProcessor : CommandLineProcessor {
   override val pluginOptions: Collection<AbstractCliOption> =
       listOf(
           CliOption("enabled", "<true | false>", "", required = true),
+          CliOption("verbose", "<true | false>", "", required = true),
           CliOption("replacementString", "String", "", required = true),
           CliOption("redactedAnnotation", "String", "", required = true)
       )
@@ -29,6 +31,7 @@ class RedactedCommandLineProcessor : CommandLineProcessor {
       configuration: CompilerConfiguration
   ) = when (option.optionName) {
     "enabled" -> configuration.put(KEY_ENABLED, value.toBoolean())
+    "verbose" -> configuration.put(KEY_ENABLED, value.toBoolean())
     "replacementString" -> configuration.put(KEY_REPLACEMENT_STRING, value)
     "redactedAnnotation" -> configuration.put(KEY_REDACTED_ANNOTATION, value)
     else -> error("Unknown plugin option: ${option.optionName}")
