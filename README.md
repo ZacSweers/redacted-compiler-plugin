@@ -1,29 +1,53 @@
 redacted-compiler-plugin
 ========================
 
-A proof-of-concept Kotlin compiler plugin that generates redacted `toString()` implementations.
+## Work in progress!
 
-Similar to [`auto-value-redacted`](https://github.com/square/auto-value-redacted), where the following class:
+A Kotlin compiler plugin that generates redacted `toString()` implementations.
+
+Inspired by the [`auto-value-redacted`](https://github.com/square/auto-value-redacted) extension for AutoValue.
+
+## Usage
+
+Include the gradle plugin in your project, define a `@Redacted` annotation, and apply it to any 
+properties that you wish to redact.
 
 ```kotlin
-data class Person(val name: String, @Redacted val ssn: String)
+@Retention(BINARY)
+@Target(PROPERTY)
+annotation class Redacted
 ```
-
-produces the following `toString()`
 
 ```kotlin
-val person = Person("John Doe", "123-456-7890")
-
-println(person) // --> Person(name=Foo, ssn="██")
+data class User(val name: String, @Redacted val phoneNumber: String)
 ```
 
-Running
-----------
-Run the `Runner` main method in the `sample`.
+When you call `toString()` any `@Redacted` properties are hidden:
 
-Caveats
-----------
-* The kotlin or gradle deamons do caching I don't quite understand, so to re-run you may need to run `./gradlew --stop` and `./gradlew clean` first between runs.
+```
+User(name=Bob, phoneNumber=██)
+```
+
+## Installation
+
+Apply the gradle plugin and define values on the `redacted` extension.
+
+```gradle
+buildscript {
+  dependencies {
+    classpath "dev.zacsweers.redacted:redacted-compiler-plugin-gradle:x.y.z"
+  }  
+}
+
+redacted {
+  redactedAnnotation = "your.annotation.here.Redacted" // Required
+  enabled = true // Default
+  replacementString = "██" // Default
+}
+
+```
+
+Snapshots of the development version are available in [Sonatype's `snapshots` repository][snapshots].
 
 License
 -------
@@ -41,3 +65,5 @@ License
     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
     See the License for the specific language governing permissions and
     limitations under the License.
+
+ [snapshots]: https://oss.sonatype.org/content/repositories/snapshots/
