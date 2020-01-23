@@ -18,9 +18,6 @@ repositories {
     jcenter()
 }
 
-group = GROUP
-version = VERSION_NAME
-
 compileKotlin {
     kotlinOptions {
         jvmTarget = "1.8"
