@@ -1,8 +1,6 @@
 redacted-compiler-plugin
 ========================
 
-## Work in progress!
-
 A Kotlin compiler plugin that generates redacted `toString()` implementations.
 
 Inspired by the [`auto-value-redacted`](https://github.com/square/auto-value-redacted) extension for AutoValue.
