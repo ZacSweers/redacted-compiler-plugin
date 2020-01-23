@@ -4,13 +4,17 @@ import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.descriptors.CallableMemberDescriptor
 import org.jetbrains.kotlin.descriptors.ClassDescriptor
 import org.jetbrains.kotlin.descriptors.Modality
+import org.jetbrains.kotlin.descriptors.PropertyDescriptor
 import org.jetbrains.kotlin.descriptors.SimpleFunctionDescriptor
 import org.jetbrains.kotlin.descriptors.Visibilities
 import org.jetbrains.kotlin.descriptors.annotations.Annotations
 import org.jetbrains.kotlin.descriptors.impl.SimpleFunctionDescriptorImpl
+import org.jetbrains.kotlin.descriptors.impl.referencedProperty
 import org.jetbrains.kotlin.name.Name
 import org.jetbrains.kotlin.resolve.BindingContext
+import org.jetbrains.kotlin.resolve.descriptorUtil.annotationClass
 import org.jetbrains.kotlin.resolve.descriptorUtil.builtIns
+import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameSafe
 import org.jetbrains.kotlin.resolve.extensions.SyntheticResolveExtension
 
 /**
@@ -29,7 +33,14 @@ class RedactedSyntheticResolveExtension(
       result: MutableCollection<SimpleFunctionDescriptor>
   ) {
     super.generateSyntheticMethods(thisDescriptor, name, bindingContext, fromSupertypes, result)
-    if (name.asString() == "toString") {
+
+    val constructor = thisDescriptor.constructors.firstOrNull { it.isPrimary } ?: return
+    val properties: List<PropertyDescriptor> = constructor.valueParameters
+        .mapNotNull { bindingContext.get(BindingContext.VALUE_PARAMETER_AS_PROPERTY, it) }
+
+    val redactedParams = properties.filter { it.isRedacted }
+
+    if (name.asString() == "toString" && redactedParams.isNotEmpty()) {
       // Remove the open toString descriptor
       result.clear()
       // Add a final toString descriptor

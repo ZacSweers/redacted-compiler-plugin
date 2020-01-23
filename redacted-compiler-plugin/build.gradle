@@ -1,10 +1,11 @@
 apply plugin: 'org.jetbrains.kotlin.jvm'
 apply plugin: 'org.jetbrains.kotlin.kapt'
+apply plugin: 'maven-publish'
 
 compileKotlin {
   kotlinOptions {
     jvmTarget = "1.8"
-    freeCompilerArgs = ['-Xskip-runtime-version-check', 'true']
+    //freeCompilerArgs = ['-Xskip-runtime-version-check', 'true']
   }
 }
 
@@ -13,6 +14,15 @@ dependencies {
   compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
   compile "org.jetbrains.kotlin:kotlin-compiler-embeddable:$kotlin_version"
 
-  compile "com.google.auto.service:auto-service:1.0-rc4"
-  kapt "com.google.auto.service:auto-service:1.0-rc4"
+  compile "com.google.auto.service:auto-service:$autoservice_version"
+  kapt "com.google.auto.service:auto-service:$autoservice_version"
+}
+
+
+publishing {
+  publications {
+    maven(MavenPublication) {
+      from components.java
+    }
+  }
 }
