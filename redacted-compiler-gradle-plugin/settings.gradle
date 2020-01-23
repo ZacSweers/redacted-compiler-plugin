@@ -6,4 +6,4 @@ pluginManagement {
   }
 }
 
-rootProject.name = "gradle-plugin"
+rootProject.name = "redacted-compiler-gradle-plugin"
