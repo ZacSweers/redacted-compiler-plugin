@@ -1,9 +1,8 @@
 apply plugin: 'org.jetbrains.kotlin.jvm'
 apply plugin: 'dev.zacsweers.redacted.redacted-gradle-plugin'
 
-redactedPlugin {
+redacted {
   redactedAnnotation = "dev.zacsweers.redacted.sample.Redacted"
-  enabled = true
 }
 
 configurations.all {

@@ -5,7 +5,7 @@ import org.gradle.api.Project
 
 class RedactedGradlePlugin : Plugin<Project> {
   override fun apply(target: Project) {
-    target.extensions.create("redactedPlugin", RedactedPluginExtension::class.java)
+    target.extensions.create("redacted", RedactedPluginExtension::class.java)
   }
 }
 
