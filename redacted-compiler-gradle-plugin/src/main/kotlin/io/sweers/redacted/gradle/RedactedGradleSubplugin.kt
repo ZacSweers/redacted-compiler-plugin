@@ -19,9 +19,10 @@ class RedactedGradleSubplugin : KotlinGradleSubplugin<AbstractCompile> {
 
   override fun getPluginArtifact(): SubpluginArtifact =
       SubpluginArtifact(
-          groupId = "io.sweers.redacted",
-          artifactId = "redacted-compiler-plugin",
-          version = "0.0.1" // TODO: What's the best way to keep this synced?
+          groupId = "dev.zacsweers.redacted",
+          artifactId = "redacted-compiler-plugin-gradle",
+          // TODO: What's the best way to keep this synced?
+          version = "0.1.0"
       )
 
   override fun apply(
