@@ -1,4 +1,4 @@
-package io.sweers.sample
+package dev.zacsweers.redacted.sample
 
 import io.sweers.redacted.annotation.Redacted
 
