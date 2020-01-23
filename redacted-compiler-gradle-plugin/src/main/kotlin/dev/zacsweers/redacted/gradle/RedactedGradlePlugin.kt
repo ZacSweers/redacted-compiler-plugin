@@ -1,4 +1,4 @@
-package io.sweers.redacted.gradle
+package dev.zacsweers.redacted.gradle
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project

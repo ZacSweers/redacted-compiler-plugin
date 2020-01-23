@@ -25,7 +25,7 @@ gradlePlugin {
     plugins {
         redactedPlugin {
             id = 'dev.zacsweers.redacted.redacted-gradle-plugin'
-            implementationClass = 'io.sweers.redacted.gradle.RedactedGradlePlugin'
+            implementationClass = 'dev.zacsweers.redacted.gradle.RedactedGradlePlugin'
         }
     }
 }

@@ -1,6 +1,5 @@
 package dev.zacsweers.redacted.compiler
 
-import io.sweers.redacted.annotation.Redacted
 import org.jetbrains.annotations.NotNull
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageLocation
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity.WARNING
@@ -39,7 +38,7 @@ import org.jetbrains.org.objectweb.asm.commons.InstructionAdapter
 
 /**
  * A compiler codegen extension that generates custom toString() implementations that
- * respect [Redacted] annotations.
+ * respect `Redacted` annotations.
  */
 class RedactedCodegenExtension(
     private val messageCollector: MessageCollector,
@@ -250,7 +249,7 @@ private fun ClassDescriptor.findToStringFunction(): SimpleFunctionDescriptor? {
 }
 
 // Can't import the annotation here because it's for some reason not visible when the plugin runs
-val REDACTED_CLASS_FQNAME = FqName("io.sweers.redacted.annotation.Redacted")
+val REDACTED_CLASS_FQNAME = FqName("dev.zacsweers.redacted.annotation.Redacted")
 
 val PropertyDescriptor.isRedacted: Boolean
   get() {

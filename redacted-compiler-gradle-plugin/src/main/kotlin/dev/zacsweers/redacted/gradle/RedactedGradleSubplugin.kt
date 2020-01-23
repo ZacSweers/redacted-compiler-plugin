@@ -1,4 +1,4 @@
-package io.sweers.redacted.gradle
+package dev.zacsweers.redacted.gradle
 
 import com.google.auto.service.AutoService
 import org.gradle.api.Project
