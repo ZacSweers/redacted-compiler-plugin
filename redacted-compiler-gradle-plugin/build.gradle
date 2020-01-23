@@ -1,11 +1,22 @@
+// Yank properties from shared file
+Properties props = new Properties()
+file("../gradle.properties").withInputStream { props.load(it) }
+props.each { key, val ->
+    ext.set(key, val)
+}
 buildscript {
+    Properties buildScriptProps = new Properties()
+    file("../gradle.properties").withInputStream { buildScriptProps.load(it) }
+    buildScriptProps.each { key, val ->
+        ext.set(key, val)
+    }
     repositories {
         jcenter()
     }
 
     dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath 'com.vanniktech:gradle-maven-publish-plugin:0.8.0'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlin_version}"
+        classpath "com.vanniktech:gradle-maven-publish-plugin:${maven_publish_plugin_version}"
     }
 }
 
@@ -16,6 +27,27 @@ apply plugin: "com.vanniktech.maven.publish"
 
 repositories {
     jcenter()
+}
+
+//region Version.kt template for setting the project version in the build
+sourceSets {
+    main.java.srcDirs += "$buildDir/generated/sources/version-templates/kotlin/main"
+}
+
+TaskProvider copyVersionTemplatesProvider = tasks.register("copyVersionTemplates", Copy) {
+    from rootProject.layout.projectDirectory.dir("version-templates")
+    into project.layout.buildDirectory.dir("generated/sources/version-templates/kotlin/main")
+    expand('projectVersion': "${project.version}")
+    filteringCharset = 'UTF-8'
+}
+//endregion
+
+compileKotlin {
+    dependsOn copyVersionTemplatesProvider
+    kotlinOptions {
+        jvmTarget = "1.8"
+        freeCompilerArgs += ['-progressive']
+    }
 }
 
 compileKotlin {

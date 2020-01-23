@@ -21,8 +21,7 @@ class RedactedGradleSubplugin : KotlinGradleSubplugin<AbstractCompile> {
       SubpluginArtifact(
           groupId = "dev.zacsweers.redacted",
           artifactId = "redacted-compiler-plugin",
-          // TODO: What's the best way to keep this synced?
-          version = "1.0.0-SNAPSHOT"
+          version = VERSION
       )
 
   override fun apply(
