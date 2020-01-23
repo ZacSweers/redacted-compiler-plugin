@@ -170,7 +170,7 @@ private class ToStringGenerator(
     var first = true
     for (propertyDescriptor in properties) {
       val isRedacted = propertyDescriptor.isRedacted(fqRedactedAnnotation)
-      val possibleValue = if (isRedacted) "\"$replacementString\"" else ""
+      val possibleValue = if (isRedacted) replacementString else ""
       if (first) {
         iv.aconst(classDescriptor.name.toString() + "(" + propertyDescriptor.name
             .asString() + "=$possibleValue")
