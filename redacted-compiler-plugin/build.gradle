@@ -1,6 +1,6 @@
 apply plugin: 'org.jetbrains.kotlin.jvm'
 apply plugin: 'org.jetbrains.kotlin.kapt'
-apply plugin: 'maven-publish'
+apply plugin: "com.vanniktech.maven.publish"
 
 compileKotlin {
   kotlinOptions {
@@ -16,13 +16,4 @@ dependencies {
 
   compileOnly "com.google.auto.service:auto-service-annotations:$autoservice_version"
   kapt "com.google.auto.service:auto-service:$autoservice_version"
-}
-
-
-publishing {
-  publications {
-    maven(MavenPublication) {
-      from components.java
-    }
-  }
 }
