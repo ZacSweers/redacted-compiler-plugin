@@ -27,4 +27,4 @@ jobs:
           ./gradlew uploadArchives -PSONATYPE_NEXUS_USERNAME=${{ secrets.SonatypeUsername }} -PSONATYPE_NEXUS_PASSWORD=${{ secrets.SonatypePassword }}
           cd redacted-compiler-gradle-plugin
           ./gradlew uploadArchives -PSONATYPE_NEXUS_USERNAME=${{ secrets.SonatypeUsername }} -PSONATYPE_NEXUS_PASSWORD=${{ secrets.SonatypePassword }}
-        if: success() && github.ref == 'refs/heads/master' && github.event_name != 'pull_request' && matrix.java_version == '1.8'
+        if: success() && github.ref == 'refs/heads/master' && github.event_name != 'pull_request' && matrix.ci_java_version == '1.8'
