@@ -1,5 +1,6 @@
 buildscript {
     repositories {
+        google()
         mavenCentral()
         jcenter()
     }
@@ -7,6 +8,7 @@ buildscript {
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "com.vanniktech:gradle-maven-publish-plugin:${maven_publish_plugin_version}"
+        classpath "com.android.tools.build:gradle:3.5.3"
         classpath "dev.zacsweers.redacted:redacted-compiler-plugin-gradle"
     }
 }
@@ -14,6 +16,7 @@ buildscript {
 String resolvedJvmTarget = System.getenv().getOrDefault("ci_java_version", "1.8")
 allprojects {
     repositories {
+        google()
         mavenCentral()
         jcenter()
     }
@@ -23,6 +26,19 @@ allprojects {
             kotlinOptions {
                 jvmTarget = resolvedJvmTarget
                 freeCompilerArgs += ['-progressive']
+            }
+        }
+    }
+}
+
+subprojects {
+    configurations.all {
+        resolutionStrategy {
+            dependencySubstitution {
+                // The kotlin plugin will try to add the redacted-compiler-plugin to dependencies with a version
+                // We have it local to this project, so we want it to just substitute that with the local project
+                // Not needed for external consumers
+                substitute module('dev.zacsweers.redacted:redacted-compiler-plugin') with project(':redacted-compiler-plugin')
             }
         }
     }

@@ -4,3 +4,5 @@
 .iml
 .project
 .classpath
+*.iml
+local.properties
