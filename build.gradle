@@ -1,5 +1,6 @@
 buildscript {
     repositories {
+        google()
         mavenCentral()
         jcenter()
     }
@@ -7,6 +8,7 @@ buildscript {
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "com.vanniktech:gradle-maven-publish-plugin:${maven_publish_plugin_version}"
+        classpath "com.android.tools.build:gradle:3.5.3"
         classpath "dev.zacsweers.redacted:redacted-compiler-plugin-gradle"
     }
 }
@@ -14,6 +16,7 @@ buildscript {
 String resolvedJvmTarget = System.getenv().getOrDefault("ci_java_version", "1.8")
 allprojects {
     repositories {
+        google()
         mavenCentral()
         jcenter()
     }

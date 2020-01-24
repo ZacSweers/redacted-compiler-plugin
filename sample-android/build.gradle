@@ -1,0 +1,41 @@
+apply plugin: 'com.android.library'
+apply plugin: 'org.jetbrains.kotlin.android'
+apply plugin: 'dev.zacsweers.redacted.redacted-gradle-plugin'
+
+redacted {
+  redactedAnnotation = "dev.zacsweers.redacted.sample.Redacted"
+  androidVariantFilter {
+    if (buildType.name == "debug") {
+      overrideEnabled(false)
+    }
+  }
+}
+
+configurations.all {
+  resolutionStrategy {
+    dependencySubstitution {
+      // The kotlin plugin will try to add the redacted-compiler-plugin to dependencies with a version
+      // We have it local to this project, so we want it to just substitute that with the local project
+      // Not needed for external consumers
+      substitute module('dev.zacsweers.redacted:redacted-compiler-plugin') with project(':redacted-compiler-plugin')
+    }
+  }
+}
+
+android {
+  compileSdkVersion 29
+
+  sourceSets {
+    main.java.srcDirs += 'src/main/kotlin'
+    testDebug.java.srcDirs += 'src/testDebug/kotlin'
+    testRelease.java.srcDirs += 'src/testRelease/kotlin'
+  }
+}
+
+dependencies {
+  implementation project(":sample")
+  implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+  
+  testImplementation "junit:junit:4.13"
+  testImplementation "com.google.truth:truth:1.0.1"
+}
