@@ -1,9 +1,9 @@
 package dev.zacsweers.redacted.compiler
 
 import com.google.auto.service.AutoService
+import org.jetbrains.annotations.TestOnly
 import org.jetbrains.kotlin.cli.common.CLIConfigurationKeys
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
-import org.jetbrains.kotlin.cli.common.messages.MessageCollector.Companion
 import org.jetbrains.kotlin.codegen.extensions.ExpressionCodegenExtension
 import org.jetbrains.kotlin.com.intellij.mock.MockProject
 import org.jetbrains.kotlin.com.intellij.openapi.extensions.Extensions
@@ -16,30 +16,43 @@ import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.resolve.extensions.SyntheticResolveExtension
 
 @AutoService(ComponentRegistrar::class)
-class TestComponentRegistrar : ComponentRegistrar {
+class RedactedComponentRegistrar constructor() : ComponentRegistrar {
+
+  private var testConfiguration: CompilerConfiguration? = null
+
+  // No way to define options yet https://github.com/tschuchortdev/kotlin-compile-testing/issues/34
+  @TestOnly
+  constructor(
+      redactedAnnotation: String,
+      enabled: Boolean = true,
+      verbose: Boolean = false,
+      replacementString: String = "██") : this() {
+    testConfiguration = CompilerConfiguration().apply {
+      put(KEY_ENABLED, enabled)
+      put(KEY_ENABLED, verbose)
+      put(KEY_REPLACEMENT_STRING, replacementString)
+      put(KEY_REDACTED_ANNOTATION, redactedAnnotation)
+    }
+  }
 
   override fun registerProjectComponents(project: MockProject,
       configuration: CompilerConfiguration) {
 
-    if (configuration[KEY_ENABLED] == false) return
+    val actualConfiguration = testConfiguration ?: configuration
+    if (actualConfiguration[KEY_ENABLED] == false) return
 
-    val verbose = configuration[KEY_VERBOSE] == true
-
-    // see https://github.com/JetBrains/kotlin/blob/1.1.2/plugins/annotation-collector/src/org/jetbrains/kotlin/annotation/AnnotationCollectorPlugin.kt#L92
-    val messageCollector = if (verbose) {
-      configuration.get(CLIConfigurationKeys.MESSAGE_COLLECTOR_KEY,
-          MessageCollector.NONE)
-    } else {
-      MessageCollector.NONE
-    }
-
-    val replacementString = checkNotNull(configuration[KEY_REPLACEMENT_STRING])
-    val redactedAnnotation = checkNotNull(configuration[KEY_REDACTED_ANNOTATION])
+    val realMessageCollector = configuration.get(CLIConfigurationKeys.MESSAGE_COLLECTOR_KEY,
+        MessageCollector.NONE)
+    val messageCollector = testConfiguration?.get(CLIConfigurationKeys.MESSAGE_COLLECTOR_KEY,
+        realMessageCollector) ?: realMessageCollector
+    val replacementString = checkNotNull(actualConfiguration[KEY_REPLACEMENT_STRING])
+    val redactedAnnotation = checkNotNull(actualConfiguration[KEY_REDACTED_ANNOTATION])
     val fqRedactedAnnotation = FqName(redactedAnnotation)
     ExpressionCodegenExtension.registerExtensionAsFirst(project,
         RedactedCodegenExtension(messageCollector, replacementString, fqRedactedAnnotation))
 
-    SyntheticResolveExtension.registerExtensionAsFirst(project, RedactedSyntheticResolveExtension(fqRedactedAnnotation))
+    SyntheticResolveExtension.registerExtensionAsFirst(project,
+        RedactedSyntheticResolveExtension(fqRedactedAnnotation))
   }
 }
 
