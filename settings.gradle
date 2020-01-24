@@ -1,5 +1,6 @@
 rootProject.name = 'redacted-compiler-plugin'
 include ':redacted-compiler-plugin'
+include ':redacted-compiler-plugin-annotations'
 include ':sample'
 
 // Only enable android project on JDK 8 until android tools catch up
