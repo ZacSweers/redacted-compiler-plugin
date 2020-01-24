@@ -25,11 +25,9 @@ class RedactedComponentRegistrar constructor() : ComponentRegistrar {
   constructor(
       redactedAnnotation: String,
       enabled: Boolean = true,
-      verbose: Boolean = false,
       replacementString: String = "██") : this() {
     testConfiguration = CompilerConfiguration().apply {
       put(KEY_ENABLED, enabled)
-      put(KEY_ENABLED, verbose)
       put(KEY_REPLACEMENT_STRING, replacementString)
       put(KEY_REDACTED_ANNOTATION, redactedAnnotation)
     }
