@@ -39,8 +39,11 @@ class RedactedGradleSubplugin : KotlinGradleSubplugin<AbstractCompile> {
       kotlinCompilation: KotlinCompilation<KotlinCommonOptions>?
   ): List<SubpluginOption> {
     val extension = project.extensions.findByType(RedactedPluginExtension::class.java) ?: RedactedPluginExtension()
-    val annotation = requireNotNull(extension.redactedAnnotation) {
-      "Redacted annotation must be specified!"
+    val annotation = extension.redactedAnnotation
+
+    // Default annotation is used, so add it as a dependency
+    if (annotation == DEFAULT_ANNOTATION) {
+      project.dependencies.add("implementation", "dev.zacsweers.redacted:redacted-compiler-plugin-annotations:$VERSION")
     }
 
     val extensionFilter = extension.variantFilter

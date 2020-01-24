@@ -35,10 +35,14 @@ subprojects {
     configurations.all {
         resolutionStrategy {
             dependencySubstitution {
-                // The kotlin plugin will try to add the redacted-compiler-plugin to dependencies with a version
+                // The Kotlin plugin will try to add the redacted-compiler-plugin to dependencies with a version
                 // We have it local to this project, so we want it to just substitute that with the local project
                 // Not needed for external consumers
                 substitute module('dev.zacsweers.redacted:redacted-compiler-plugin') with project(':redacted-compiler-plugin')
+
+                // The Gradle plugin will add the annotations artifact to dependencies if a custom annotation isn't defined.
+                // Not needed for external consumers
+                substitute module('dev.zacsweers.redacted:redacted-compiler-plugin-annotations') with project(':redacted-compiler-plugin-annotations')
             }
         }
     }

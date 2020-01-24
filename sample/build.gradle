@@ -1,10 +1,6 @@
 apply plugin: 'org.jetbrains.kotlin.jvm'
 apply plugin: 'dev.zacsweers.redacted.redacted-gradle-plugin'
 
-redacted {
-  redactedAnnotation = "dev.zacsweers.redacted.sample.Redacted"
-}
-
 dependencies {
   implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
   

@@ -3,7 +3,6 @@ apply plugin: 'org.jetbrains.kotlin.android'
 apply plugin: 'dev.zacsweers.redacted.redacted-gradle-plugin'
 
 redacted {
-  redactedAnnotation = "dev.zacsweers.redacted.sample.Redacted"
   androidVariantFilter {
     if (buildType.name == "debug") {
       overrideEnabled(false)
