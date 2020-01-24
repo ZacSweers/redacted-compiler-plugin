@@ -84,7 +84,6 @@ class RedactedPluginTest {
           workingDir = temporaryFolder.root
           compilerPlugins = listOf<ComponentRegistrar>(
               RedactedComponentRegistrar("dev.zacsweers.redacted.compiler.test.Redacted"))
-          kaptArgs
           inheritClassPath = true
           sources = sourceFiles.asList() + redacted
           verbose = false
