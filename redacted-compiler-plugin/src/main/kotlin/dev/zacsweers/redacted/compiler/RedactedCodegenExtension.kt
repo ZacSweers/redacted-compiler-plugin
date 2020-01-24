@@ -21,6 +21,7 @@ import org.jetbrains.kotlin.descriptors.ClassDescriptor
 import org.jetbrains.kotlin.descriptors.FunctionDescriptor
 import org.jetbrains.kotlin.descriptors.PropertyDescriptor
 import org.jetbrains.kotlin.descriptors.SimpleFunctionDescriptor
+import org.jetbrains.kotlin.descriptors.annotations.Annotated
 import org.jetbrains.kotlin.descriptors.impl.referencedProperty
 import org.jetbrains.kotlin.incremental.components.NoLookupLocation.WHEN_GET_ALL_DESCRIPTORS
 import org.jetbrains.kotlin.name.FqName
@@ -61,18 +62,28 @@ class RedactedCodegenExtension(
   override fun generateClassSyntheticParts(codegen: ImplementationBodyCodegen) {
     val targetClass = codegen.descriptor
     log("Reading ${targetClass.name}")
-    val constructor = targetClass.constructors.firstOrNull { it.isPrimary } ?: return
-    val properties: List<PropertyDescriptor> = constructor.valueParameters
-        .mapNotNull { codegen.bindingContext.get(BindingContext.VALUE_PARAMETER_AS_PROPERTY, it) }
 
-    val redactedParams = properties
-        .filter { property ->
-          log("Reading param ${property.name}")
-          log("Property is ${property.referencedProperty}")
-          log("Property annotations ${property.referencedProperty?.annotations?.joinToString { it.annotationClass?.fqNameSafe.toString() }}")
-          property.isRedacted(fqRedactedAnnotation)
-        }
-    if (redactedParams.isEmpty()) {
+    val classIsRedacted = targetClass.isRedacted(fqRedactedAnnotation)
+
+    val redactedParams: Boolean
+    val properties: List<PropertyDescriptor>
+    if (classIsRedacted) {
+      redactedParams = false
+      properties = emptyList()
+    } else {
+      val constructor = targetClass.constructors.firstOrNull { it.isPrimary } ?: return
+      properties = constructor.valueParameters
+          .mapNotNull { codegen.bindingContext.get(BindingContext.VALUE_PARAMETER_AS_PROPERTY, it) }
+
+      redactedParams = properties
+          .any { property ->
+            log("Reading param ${property.name}")
+            log("Property is ${property.referencedProperty}")
+            log("Property annotations ${property.referencedProperty?.annotations?.joinToString { it.annotationClass?.fqNameSafe.toString() }}")
+            property.isRedacted(fqRedactedAnnotation)
+          }
+    }
+    if (!redactedParams && !classIsRedacted) {
       log("No redacted params")
       return
     } else if (!targetClass.isData) {
@@ -85,11 +96,6 @@ class RedactedCodegenExtension(
       )
       return
     }
-
-    log("Reading params")
-    val finalProperties = properties
-        .map { it to it.isRedacted(fqRedactedAnnotation) }
-    log("Found params: ${finalProperties.joinToString { it.first.name.asString() }}")
 
     ToStringGenerator(
         declaration = codegen.myClass as KtClassOrObject,
@@ -149,8 +155,7 @@ private class ToStringGenerator(
         classDescriptor.defaultType.substitutedUnderlyingType())
   }
 
-  fun generateToStringMethod(function: FunctionDescriptor,
-      properties: List<PropertyDescriptor>) {
+  fun generateToStringMethod(function: FunctionDescriptor, properties: List<PropertyDescriptor>) {
     val context = fieldOwnerContext.intoFunction(function)
     val methodOrigin = OtherOrigin(function)
     val toStringMethodName = mapFunctionName(function)
@@ -179,46 +184,52 @@ private class ToStringGenerator(
     mv.visitCode()
     AsmUtil.genStringBuilderConstructor(iv)
 
-    var first = true
-    for (propertyDescriptor in properties) {
-      val isRedacted = propertyDescriptor.isRedacted(fqRedactedAnnotation)
-      val possibleValue = if (isRedacted) replacementString else ""
-      if (first) {
-        iv.aconst(classDescriptor.name.toString() + "(" + propertyDescriptor.name
-            .asString() + "=$possibleValue")
-        first = false
-      } else {
-        iv.aconst(", " + propertyDescriptor.name
-            .asString() + "=$possibleValue")
-      }
+    if (properties.isEmpty()) {
+      // This is a redacted class, so just emit a single replacementString
+      iv.aconst(classDescriptor.name.toString() + "(" + replacementString)
       AsmUtil.genInvokeAppendMethod(iv, AsmTypes.JAVA_STRING_TYPE, null)
-
-      if (!isRedacted) {
-        val type = genOrLoadOnStack(iv, context, propertyDescriptor, 0)
-        var asmType = type.type
-        var kotlinType = type.kotlinType
-
-        if (asmType.sort == Type.ARRAY) {
-          val elementType = AsmUtil.correctElementType(asmType)
-          if (elementType.sort == Type.OBJECT || elementType.sort == Type.ARRAY) {
-            iv.invokestatic("java/util/Arrays",
-                "toString",
-                "([Ljava/lang/Object;)Ljava/lang/String;",
-                false)
-            asmType = AsmTypes.JAVA_STRING_TYPE
-            kotlinType = function.builtIns
-                .stringType
-          } else if (elementType.sort != Type.CHAR) {
-            iv.invokestatic("java/util/Arrays",
-                "toString",
-                "(" + asmType.descriptor + ")Ljava/lang/String;",
-                false)
-            asmType = AsmTypes.JAVA_STRING_TYPE
-            kotlinType = function.builtIns
-                .stringType
-          }
+    } else {
+      var first = true
+      for (propertyDescriptor in properties) {
+        val isRedacted = propertyDescriptor.isRedacted(fqRedactedAnnotation)
+        val possibleValue = if (isRedacted) replacementString else ""
+        if (first) {
+          iv.aconst(classDescriptor.name.toString() + "(" + propertyDescriptor.name
+              .asString() + "=$possibleValue")
+          first = false
+        } else {
+          iv.aconst(", " + propertyDescriptor.name
+              .asString() + "=$possibleValue")
         }
-        AsmUtil.genInvokeAppendMethod(iv, asmType, kotlinType, typeMapper)
+        AsmUtil.genInvokeAppendMethod(iv, AsmTypes.JAVA_STRING_TYPE, null)
+
+        if (!isRedacted) {
+          val type = genOrLoadOnStack(iv, context, propertyDescriptor, 0)
+          var asmType = type.type
+          var kotlinType = type.kotlinType
+
+          if (asmType.sort == Type.ARRAY) {
+            val elementType = AsmUtil.correctElementType(asmType)
+            if (elementType.sort == Type.OBJECT || elementType.sort == Type.ARRAY) {
+              iv.invokestatic("java/util/Arrays",
+                  "toString",
+                  "([Ljava/lang/Object;)Ljava/lang/String;",
+                  false)
+              asmType = AsmTypes.JAVA_STRING_TYPE
+              kotlinType = function.builtIns
+                  .stringType
+            } else if (elementType.sort != Type.CHAR) {
+              iv.invokestatic("java/util/Arrays",
+                  "toString",
+                  "(" + asmType.descriptor + ")Ljava/lang/String;",
+                  false)
+              asmType = AsmTypes.JAVA_STRING_TYPE
+              kotlinType = function.builtIns
+                  .stringType
+            }
+          }
+          AsmUtil.genInvokeAppendMethod(iv, asmType, kotlinType, typeMapper)
+        }
       }
     }
 
@@ -264,6 +275,6 @@ private fun ClassDescriptor.findToStringFunction(): SimpleFunctionDescriptor? {
       .first()
 }
 
-internal fun PropertyDescriptor.isRedacted(redactedAnnotation: FqName): Boolean {
+internal fun Annotated.isRedacted(redactedAnnotation: FqName): Boolean {
   return annotations.hasAnnotation(redactedAnnotation)
 }

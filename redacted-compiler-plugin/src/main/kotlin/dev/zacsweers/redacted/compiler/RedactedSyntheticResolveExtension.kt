@@ -31,13 +31,14 @@ class RedactedSyntheticResolveExtension(
   ) {
     super.generateSyntheticMethods(thisDescriptor, name, bindingContext, fromSupertypes, result)
 
-    val constructor = thisDescriptor.constructors.firstOrNull { it.isPrimary } ?: return
-    val properties: List<PropertyDescriptor> = constructor.valueParameters
-        .mapNotNull { bindingContext.get(BindingContext.VALUE_PARAMETER_AS_PROPERTY, it) }
+    val isRedacted = thisDescriptor.isRedacted(fqRedactedAnnotation) || run {
+      val constructor = thisDescriptor.constructors.firstOrNull { it.isPrimary } ?: return
+      val properties: List<PropertyDescriptor> = constructor.valueParameters
+          .mapNotNull { bindingContext.get(BindingContext.VALUE_PARAMETER_AS_PROPERTY, it) }
+      properties.any { it.isRedacted(fqRedactedAnnotation) }
+    }
 
-    val redactedParams = properties.filter { it.isRedacted(fqRedactedAnnotation) }
-
-    if (name.asString() == "toString" && redactedParams.isNotEmpty()) {
+    if (name.asString() == "toString" && isRedacted) {
       // Remove the open toString descriptor
       result.clear()
       // Add a final toString descriptor

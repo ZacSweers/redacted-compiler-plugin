@@ -14,9 +14,7 @@ properties that you wish to redact.
 @Retention(BINARY)
 @Target(PROPERTY)
 annotation class Redacted
-```
 
-```kotlin
 data class User(val name: String, @Redacted val phoneNumber: String)
 ```
 
@@ -24,6 +22,21 @@ When you call `toString()` any `@Redacted` properties are hidden:
 
 ```
 User(name=Bob, phoneNumber=██)
+```
+
+If your annotation is applied to the class, then `toString()` will emit a single replacement string:
+
+```kotlin
+@Retention(BINARY)
+@Target(CLASS)
+annotation class Redacted
+
+@Redacted
+data class SensitiveData(val ssn: String, val birthday: String)
+```
+
+```
+SensitiveData(██)
 ```
 
 ## Installation

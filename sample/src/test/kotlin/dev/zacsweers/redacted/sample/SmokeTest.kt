@@ -6,9 +6,18 @@ import org.junit.Test
 class SmokeTest {
   @Test
   fun userExample() {
-    val person = User("Bob", "2815551234")
-    assertThat(person.toString()).isEqualTo("User(name=Bob, phoneNumber=██)")
+    val user = User("Bob", "2815551234")
+    assertThat(user.toString()).isEqualTo("User(name=Bob, phoneNumber=██)")
   }
+
+  @Test
+  fun classExample() {
+    val sensitiveData = SensitiveData("123-456-7890", "1/1/00")
+    assertThat(sensitiveData.toString()).isEqualTo("SensitiveData(██)")
+  }
+
+  @Redacted
+  data class SensitiveData(val ssn: String, val birthday: String)
 
   @Test
   fun complex() {
