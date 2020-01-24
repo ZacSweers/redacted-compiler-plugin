@@ -63,16 +63,14 @@ class RedactedCodegenExtension(
     log("Reading ${targetClass.name}")
     val constructor = targetClass.constructors.firstOrNull { it.isPrimary } ?: return
     val properties: List<PropertyDescriptor> = constructor.valueParameters
-//        .filter { it.hasValOrVar() }
         .mapNotNull { codegen.bindingContext.get(BindingContext.VALUE_PARAMETER_AS_PROPERTY, it) }
 
     val redactedParams = properties
-        .filter {
-          log("Reading param ${it.name}")
-          log("Property is ${it.referencedProperty}")
-//          log("Annotations are ${it.annotations.getAllAnnotations().joinToString { it.annotation.fqName.toString() }}")
-          log("Property annotations ${it.referencedProperty?.annotations?.joinToString { it.annotationClass?.fqNameSafe.toString() }}")
-          it.isRedacted(fqRedactedAnnotation)
+        .filter { property ->
+          log("Reading param ${property.name}")
+          log("Property is ${property.referencedProperty}")
+          log("Property annotations ${property.referencedProperty?.annotations?.joinToString { it.annotationClass?.fqNameSafe.toString() }}")
+          property.isRedacted(fqRedactedAnnotation)
         }
     if (redactedParams.isEmpty()) {
       log("No redacted params")
@@ -241,6 +239,7 @@ private class ToStringGenerator(
     annotation?.visitEnd()
   }
 
+  @Suppress("SameParameterValue")
   private fun genOrLoadOnStack(iv: InstructionAdapter,
       context: MethodContext,
       propertyDescriptor: PropertyDescriptor,
