@@ -22,7 +22,7 @@ class RedactedComponentRegistrar constructor() : ComponentRegistrar {
 
   // No way to define options yet https://github.com/tschuchortdev/kotlin-compile-testing/issues/34
   @TestOnly
-  constructor(
+  internal constructor(
       redactedAnnotation: String,
       enabled: Boolean = true,
       replacementString: String = "██") : this() {
