@@ -41,7 +41,7 @@ SensitiveData(██)
 
 ## Installation
 
-Apply the gradle plugin and define values on the `redacted` extension.
+Apply the gradle plugin.
 
 ```gradle
 buildscript {
@@ -51,10 +51,25 @@ buildscript {
 }
 
 apply plugin: 'dev.zacsweers.redacted.redacted-gradle-plugin'
+```
 
+And that's it! The default configuration will add the `-annotations` artifact (which has a
+`@Redacted` annotation you can use) and wire it all automatically. Just annotate what you want to
+redact.
+
+You can configure custom behavior with properties on the `redacted` extension.
+
+```
 redacted {
-  redactedAnnotation = "your.annotation.here.Redacted" // Required
+  // Define a custom annotation. The -annotations artifact won't be automatically added to
+  // dependencies if you define your own!
+  redactedAnnotation = "dev.zacsweers.redacted.annotations.Redacted" // Default
+
+  // Define whether or not this is enabled. Useful if you want to gate this behind a dynamic
+  // build configuration.
   enabled = true // Default
+
+  // Define a custom replacement string for redactions.
   replacementString = "██" // Default
 }
 ```
