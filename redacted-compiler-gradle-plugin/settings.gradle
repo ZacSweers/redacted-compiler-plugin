@@ -1,0 +1,9 @@
+pluginManagement {
+  repositories {
+    gradlePluginPortal()
+    mavenCentral()
+    jcenter()
+  }
+}
+
+rootProject.name = "redacted-compiler-gradle-plugin"

@@ -1,28 +1,16 @@
 apply plugin: 'org.jetbrains.kotlin.jvm'
 apply plugin: 'org.jetbrains.kotlin.kapt'
-apply plugin: 'maven-publish'
-
-compileKotlin {
-  kotlinOptions {
-    jvmTarget = "1.8"
-    //freeCompilerArgs = ['-Xskip-runtime-version-check', 'true']
-  }
-}
+apply plugin: "com.vanniktech.maven.publish"
 
 dependencies {
-  compile project(':redacted-compiler-plugin-annotation')
-  compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-  compile "org.jetbrains.kotlin:kotlin-compiler-embeddable:$kotlin_version"
+  compileOnly "org.jetbrains.kotlin:kotlin-compiler-embeddable:$kotlin_version"
+  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
 
-  compile "com.google.auto.service:auto-service:$autoservice_version"
+  compileOnly "com.google.auto.service:auto-service-annotations:$autoservice_version"
   kapt "com.google.auto.service:auto-service:$autoservice_version"
-}
 
-
-publishing {
-  publications {
-    maven(MavenPublication) {
-      from components.java
-    }
-  }
+  testImplementation "org.jetbrains.kotlin:kotlin-compiler-embeddable:$kotlin_version"
+  testImplementation "com.github.tschuchortdev:kotlin-compile-testing:1.2.5"
+  testImplementation "junit:junit:4.13"
+  testImplementation "com.google.truth:truth:1.0.1"
 }

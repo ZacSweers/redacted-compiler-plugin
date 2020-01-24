@@ -1,17 +1,29 @@
 buildscript {
     repositories {
-        mavenLocal()
+        mavenCentral()
         jcenter()
     }
+
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath "io.sweers.redacted:redacted-compiler-gradle-plugin:$version"
+        classpath "com.vanniktech:gradle-maven-publish-plugin:${maven_publish_plugin_version}"
+        classpath "dev.zacsweers.redacted:redacted-compiler-plugin-gradle"
     }
 }
 
+String resolvedJvmTarget = System.getenv().getOrDefault("ci_java_version", "1.8")
 allprojects {
     repositories {
-        mavenLocal()
+        mavenCentral()
         jcenter()
+    }
+
+    pluginManager.withPlugin("org.jetbrains.kotlin.jvm") {
+        project.tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+            kotlinOptions {
+                jvmTarget = resolvedJvmTarget
+                freeCompilerArgs += ['-progressive']
+            }
+        }
     }
 }

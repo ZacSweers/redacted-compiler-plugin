@@ -1,11 +1,24 @@
 apply plugin: 'org.jetbrains.kotlin.jvm'
-apply plugin: 'io.sweers.redacted.redacted-plugin'
+apply plugin: 'dev.zacsweers.redacted.redacted-gradle-plugin'
 
-redactedPlugin {
-  enabled = true
+redacted {
+  redactedAnnotation = "dev.zacsweers.redacted.sample.Redacted"
+}
+
+configurations.all {
+  resolutionStrategy {
+    dependencySubstitution {
+      // The kotlin plugin will try to add the redacted-compiler-plugin to dependencies with a version
+      // We have it local to this project, so we want it to just substitute that with the local project
+      // Not needed for external consumers
+      substitute module('dev.zacsweers.redacted:redacted-compiler-plugin') with project(':redacted-compiler-plugin')
+    }
+  }
 }
 
 dependencies {
-  compileOnly project(':redacted-compiler-plugin-annotation')
-  compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+  implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+  
+  testImplementation "junit:junit:4.13"
+  testImplementation "com.google.truth:truth:1.0.1"
 }
