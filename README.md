@@ -72,8 +72,9 @@ in most multi-variant projects anyway, but something to be aware of.
 
 ```groovy
 redacted {
-  // ...
+  enabled = true // Default
   androidVariantFilter {
+    // Don't enable on debug
     if (buildType.name == "debug") {
       overrideEnabled(false)
     }
