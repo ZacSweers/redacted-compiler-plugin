@@ -86,8 +86,9 @@ Snapshots of the development version are available in [Sonatype's `snapshots` re
 
 ## Caveats
 
-Kotlin compiler plugins are not a stable API! Compiled outputs from this plugin _should_ be stable,
+- Kotlin compiler plugins are not a stable API! Compiled outputs from this plugin _should_ be stable,
 but usage in newer versions of kotlinc are not guaranteed to be stable.
+- IDE support is not currently possible. See [#8](https://github.com/ZacSweers/redacted-compiler-plugin/issues/8).
 
 License
 -------
