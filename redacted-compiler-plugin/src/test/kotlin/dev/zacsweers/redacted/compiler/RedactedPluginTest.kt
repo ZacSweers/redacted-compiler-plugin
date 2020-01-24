@@ -6,7 +6,6 @@ import com.tschuchort.compiletesting.SourceFile
 import com.tschuchort.compiletesting.SourceFile.Companion.kotlin
 import org.jetbrains.kotlin.compiler.plugin.ComponentRegistrar
 import org.jetbrains.kotlin.config.JvmTarget
-import org.jetbrains.kotlin.config.JvmTarget.Companion
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
