@@ -7,10 +7,10 @@ import org.jetbrains.kotlin.compiler.plugin.CommandLineProcessor
 import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.config.CompilerConfigurationKey
 
-val KEY_ENABLED = CompilerConfigurationKey<Boolean>("enabled")
-val KEY_VERBOSE = CompilerConfigurationKey<Boolean>("verbose")
-val KEY_REPLACEMENT_STRING = CompilerConfigurationKey<String>("replacementString")
-val KEY_REDACTED_ANNOTATION = CompilerConfigurationKey<String>("redactedAnnotation")
+internal val KEY_ENABLED = CompilerConfigurationKey<Boolean>("enabled")
+internal val KEY_VERBOSE = CompilerConfigurationKey<Boolean>("verbose")
+internal val KEY_REPLACEMENT_STRING = CompilerConfigurationKey<String>("replacementString")
+internal val KEY_REDACTED_ANNOTATION = CompilerConfigurationKey<String>("redactedAnnotation")
 
 @AutoService(CommandLineProcessor::class)
 class RedactedCommandLineProcessor : CommandLineProcessor {
