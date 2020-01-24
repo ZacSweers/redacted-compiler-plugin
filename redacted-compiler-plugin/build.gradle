@@ -2,13 +2,6 @@ apply plugin: 'org.jetbrains.kotlin.jvm'
 apply plugin: 'org.jetbrains.kotlin.kapt'
 apply plugin: "com.vanniktech.maven.publish"
 
-compileKotlin {
-  kotlinOptions {
-    jvmTarget = "1.8"
-    freeCompilerArgs += ['-progressive']
-  }
-}
-
 dependencies {
   compileOnly "org.jetbrains.kotlin:kotlin-compiler-embeddable:$kotlin_version"
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"

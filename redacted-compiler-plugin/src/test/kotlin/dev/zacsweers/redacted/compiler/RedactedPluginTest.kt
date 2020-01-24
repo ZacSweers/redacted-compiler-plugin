@@ -5,6 +5,8 @@ import com.tschuchort.compiletesting.KotlinCompilation
 import com.tschuchort.compiletesting.SourceFile
 import com.tschuchort.compiletesting.SourceFile.Companion.kotlin
 import org.jetbrains.kotlin.compiler.plugin.ComponentRegistrar
+import org.jetbrains.kotlin.config.JvmTarget
+import org.jetbrains.kotlin.config.JvmTarget.Companion
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
@@ -87,6 +89,7 @@ class RedactedPluginTest {
           inheritClassPath = true
           sources = sourceFiles.asList() + redacted
           verbose = false
+          jvmTarget = JvmTarget.fromString(System.getenv()["ci_java_version"] ?: "1.8")!!.description
         }
   }
 
