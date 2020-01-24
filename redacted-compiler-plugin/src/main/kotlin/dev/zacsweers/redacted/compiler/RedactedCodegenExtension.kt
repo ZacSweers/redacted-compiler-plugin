@@ -3,8 +3,9 @@ package dev.zacsweers.redacted.compiler
 import org.jetbrains.annotations.NotNull
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageLocation
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
-import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity.INFO
+import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity.LOGGING
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
+import org.jetbrains.kotlin.cli.common.messages.MessageUtil
 import org.jetbrains.kotlin.codegen.AsmUtil
 import org.jetbrains.kotlin.codegen.ClassBuilder
 import org.jetbrains.kotlin.codegen.FunctionCodegen
@@ -31,11 +32,14 @@ import org.jetbrains.kotlin.resolve.descriptorUtil.builtIns
 import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameSafe
 import org.jetbrains.kotlin.resolve.jvm.AsmTypes
 import org.jetbrains.kotlin.resolve.jvm.diagnostics.OtherOrigin
+import org.jetbrains.kotlin.resolve.source.getPsi
 import org.jetbrains.kotlin.resolve.substitutedUnderlyingType
 import org.jetbrains.org.objectweb.asm.AnnotationVisitor
 import org.jetbrains.org.objectweb.asm.Opcodes
 import org.jetbrains.org.objectweb.asm.Type
 import org.jetbrains.org.objectweb.asm.commons.InstructionAdapter
+
+internal const val LOG_PREFIX = "*** REDACTED:"
 
 /**
  * A compiler codegen extension that generates custom toString() implementations that
@@ -49,8 +53,8 @@ class RedactedCodegenExtension(
 
   private fun log(message: String) {
     messageCollector.report(
-        INFO,
-        "*** REDACTED: $message",
+        LOGGING,
+        "$LOG_PREFIX $message",
         CompilerMessageLocation.create(null))
   }
 
@@ -75,9 +79,11 @@ class RedactedCodegenExtension(
       return
     } else if (!targetClass.isData) {
       log("Not a data class")
+      val psi = codegen.descriptor.source.getPsi()
+      val location = MessageUtil.psiElementToMessageLocation(psi)
       messageCollector.report(CompilerMessageSeverity.ERROR,
           "@Redacted is only supported on data classes!",
-          CompilerMessageLocation.create(codegen.descriptor.fqNameSafe.asString())
+          location
       )
       return
     }
