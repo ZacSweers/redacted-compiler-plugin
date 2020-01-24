@@ -67,7 +67,7 @@ except with an `overrideEnabled` function to override the enabled status and the
 `defaultConfig` property. If not overridden, the default is to match the `redacted` extension's value.
 Other `VariantFilter` APIs should behave as expected (buildType, flavors, name, etc).
 
-_Note:_ Variants with different `enabled` values will have to be compiled separately. This is common
+**Note:** Variants with different `enabled` values will have to be compiled separately. This is common
 in most multi-variant projects anyway, but something to be aware of.
 
 ```groovy
