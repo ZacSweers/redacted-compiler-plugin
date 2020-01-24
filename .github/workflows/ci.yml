@@ -8,8 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        # TODO Add 9, 10, 11, 12, and 13?
-        java_version: [1.8]
+        java_version: [1.8, 9, 19, 11, 12, 13]
     steps:
       - name: Checkout
         uses: actions/checkout@v1
