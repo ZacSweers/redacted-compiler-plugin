@@ -31,7 +31,7 @@ class RedactedCommandLineProcessor : CommandLineProcessor {
       configuration: CompilerConfiguration
   ) = when (option.optionName) {
     "enabled" -> configuration.put(KEY_ENABLED, value.toBoolean())
-    "verbose" -> configuration.put(KEY_ENABLED, value.toBoolean())
+    "verbose" -> configuration.put(KEY_VERBOSE, value.toBoolean())
     "replacementString" -> configuration.put(KEY_REPLACEMENT_STRING, value)
     "redactedAnnotation" -> configuration.put(KEY_REDACTED_ANNOTATION, value)
     else -> error("Unknown plugin option: ${option.optionName}")
