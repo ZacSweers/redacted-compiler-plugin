@@ -13,5 +13,4 @@ open class RedactedPluginExtension {
   var redactedAnnotation: String? = null
   var enabled: Boolean = true
   var replacementString: String = "██"
-  var verbose: Boolean = false
 }

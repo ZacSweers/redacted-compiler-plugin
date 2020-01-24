@@ -43,7 +43,6 @@ redacted {
   redactedAnnotation = "your.annotation.here.Redacted" // Required
   enabled = true // Default
   replacementString = "██" // Default
-  verbose = false // Default
 }
 
 ```
