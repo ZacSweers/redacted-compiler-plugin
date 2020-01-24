@@ -20,7 +20,8 @@ class RedactedComponentRegistrar constructor() : ComponentRegistrar {
 
   private var testConfiguration: CompilerConfiguration? = null
 
-  // No way to define options yet https://github.com/tschuchortdev/kotlin-compile-testing/issues/34
+  // No way to define options yet in compile testing
+  // https://github.com/tschuchortdev/kotlin-compile-testing/issues/34
   @TestOnly
   internal constructor(
       redactedAnnotation: String,
