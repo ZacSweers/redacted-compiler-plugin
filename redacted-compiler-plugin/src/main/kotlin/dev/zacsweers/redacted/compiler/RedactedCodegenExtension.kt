@@ -2,7 +2,8 @@ package dev.zacsweers.redacted.compiler
 
 import org.jetbrains.annotations.NotNull
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageLocation
-import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity.WARNING
+import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
+import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity.INFO
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.codegen.AsmUtil
 import org.jetbrains.kotlin.codegen.ClassBuilder
@@ -48,7 +49,7 @@ class RedactedCodegenExtension(
 
   private fun log(message: String) {
     messageCollector.report(
-        WARNING,
+        INFO,
         "*** REDACTED: $message",
         CompilerMessageLocation.create(null))
   }
@@ -71,6 +72,13 @@ class RedactedCodegenExtension(
         }
     if (redactedParams.isEmpty()) {
       log("No redacted params")
+      return
+    } else if (!targetClass.isData) {
+      log("Not a data class")
+      messageCollector.report(CompilerMessageSeverity.ERROR,
+          "@Redacted is only supported on data classes!",
+          CompilerMessageLocation.create(codegen.descriptor.fqNameSafe.asString())
+      )
       return
     }
 
