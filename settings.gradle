@@ -3,7 +3,7 @@ include ':redacted-compiler-plugin'
 include ':sample'
 
 // Only enable android project on JDK 8 until android tools catch up
-if (!JavaVersion.current().isJava9Compatible()) {
+if (!JavaVersion.current().isJava9Compatible() && System.getenv("ANDROID_HOME") != null) {
   include ':sample-android'
 }
 
