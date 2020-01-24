@@ -4,7 +4,7 @@ on: [push, pull_request]
 
 jobs:
   build:
-    name: JDK ${{ matrix.java_version }}
+    name: JDK ${{ matrix.ci_java_version }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
