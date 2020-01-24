@@ -49,6 +49,11 @@ redacted {
 
 Snapshots of the development version are available in [Sonatype's `snapshots` repository][snapshots].
 
+## Caveats
+
+Kotlin compiler plugins are not a stable API! Compiled outputs from this plugin _should_ be stable,
+but usage in newer versions of kotlinc are not guaranteed to be stable.
+
 License
 -------
 
