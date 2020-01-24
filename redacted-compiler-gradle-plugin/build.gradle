@@ -50,13 +50,6 @@ compileKotlin {
     }
 }
 
-compileKotlin {
-    kotlinOptions {
-        jvmTarget = "1.8"
-        freeCompilerArgs += ['-progressive']
-    }
-}
-
 gradlePlugin {
     plugins {
         redactedPlugin {
