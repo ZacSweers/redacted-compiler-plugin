@@ -11,7 +11,7 @@ Include the gradle plugin in your project, define a `@Redacted` annotation, and 
 properties that you wish to redact.
 
 ```kotlin
-@Retention(BINARY)
+@Retention(SOURCE)
 @Target(PROPERTY)
 annotation class Redacted
 
@@ -27,7 +27,7 @@ User(name=Bob, phoneNumber=██)
 If your annotation is applied to the class, then `toString()` will emit a single replacement string:
 
 ```kotlin
-@Retention(BINARY)
+@Retention(SOURCE)
 @Target(CLASS)
 annotation class Redacted
 
