@@ -5,6 +5,7 @@ import com.tschuchort.compiletesting.KotlinCompilation
 import com.tschuchort.compiletesting.PluginOption
 import com.tschuchort.compiletesting.SourceFile
 import com.tschuchort.compiletesting.SourceFile.Companion.kotlin
+import org.jetbrains.kotlin.compiler.plugin.CommandLineProcessor
 import org.jetbrains.kotlin.config.JvmTarget
 import org.junit.Rule
 import org.junit.Test
@@ -88,10 +89,9 @@ class RedactedPluginTest {
           val processor = RedactedCommandLineProcessor()
           commandLineProcessors = listOf(processor)
           pluginOptions = listOf(
-              PluginOption(processor.pluginId, KEY_ENABLED.toString(), "true"),
-              PluginOption(processor.pluginId, KEY_REPLACEMENT_STRING.toString(), "██"),
-              PluginOption(processor.pluginId, KEY_REDACTED_ANNOTATION.toString(),
-                  "dev.zacsweers.redacted.compiler.test.Redacted"),
+              processor.option(KEY_ENABLED, "true"),
+              processor.option(KEY_REPLACEMENT_STRING, "██"),
+              processor.option(KEY_REDACTED_ANNOTATION, "dev.zacsweers.redacted.compiler.test.Redacted"),
           )
           inheritClassPath = true
           sources = sourceFiles.asList() + redacted
@@ -99,6 +99,10 @@ class RedactedPluginTest {
           jvmTarget = JvmTarget.fromString(
               System.getenv()["ci_java_version"] ?: "1.8")!!.description
         }
+  }
+
+  private fun CommandLineProcessor.option(key: Any, value: Any?): PluginOption {
+    return PluginOption(pluginId, key.toString(), value.toString())
   }
 
   private fun compile(vararg sourceFiles: SourceFile): KotlinCompilation.Result {
