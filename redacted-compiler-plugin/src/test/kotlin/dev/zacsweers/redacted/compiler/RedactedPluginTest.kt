@@ -2,9 +2,10 @@ package dev.zacsweers.redacted.compiler
 
 import com.google.common.truth.Truth.assertThat
 import com.tschuchort.compiletesting.KotlinCompilation
+import com.tschuchort.compiletesting.PluginOption
 import com.tschuchort.compiletesting.SourceFile
 import com.tschuchort.compiletesting.SourceFile.Companion.kotlin
-import org.jetbrains.kotlin.compiler.plugin.ComponentRegistrar
+import org.jetbrains.kotlin.compiler.plugin.CommandLineProcessor
 import org.jetbrains.kotlin.config.JvmTarget
 import org.junit.Rule
 import org.junit.Test
@@ -43,7 +44,8 @@ class RedactedPluginTest {
 
     // Full log is something like this:
     // e: /path/to/NonDataClass.kt: (5, 1): @Redacted is only supported on data classes!
-    assertThat(result.messages).contains("NonDataClass.kt: (5, 1): @Redacted is only supported on data classes!")
+    assertThat(result.messages).contains(
+        "NonDataClass.kt: (5, 1): @Redacted is only supported on data classes!")
   }
 
   @Test
@@ -83,13 +85,24 @@ class RedactedPluginTest {
     return KotlinCompilation()
         .apply {
           workingDir = temporaryFolder.root
-          compilerPlugins = listOf<ComponentRegistrar>(
-              RedactedComponentRegistrar("dev.zacsweers.redacted.compiler.test.Redacted"))
+          compilerPlugins = listOf(RedactedComponentRegistrar())
+          val processor = RedactedCommandLineProcessor()
+          commandLineProcessors = listOf(processor)
+          pluginOptions = listOf(
+              processor.option(KEY_ENABLED, "true"),
+              processor.option(KEY_REPLACEMENT_STRING, "██"),
+              processor.option(KEY_REDACTED_ANNOTATION, "dev.zacsweers.redacted.compiler.test.Redacted"),
+          )
           inheritClassPath = true
           sources = sourceFiles.asList() + redacted
           verbose = false
-          jvmTarget = JvmTarget.fromString(System.getenv()["ci_java_version"] ?: "1.8")!!.description
+          jvmTarget = JvmTarget.fromString(
+              System.getenv()["ci_java_version"] ?: "1.8")!!.description
         }
+  }
+
+  private fun CommandLineProcessor.option(key: Any, value: Any?): PluginOption {
+    return PluginOption(pluginId, key.toString(), value.toString())
   }
 
   private fun compile(vararg sourceFiles: SourceFile): KotlinCompilation.Result {

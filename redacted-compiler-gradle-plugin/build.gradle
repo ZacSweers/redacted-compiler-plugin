@@ -13,6 +13,9 @@ buildscript {
     repositories {
         google()
         jcenter()
+        maven {
+            url "https://dl.bintray.com/kotlin/kotlin-eap"
+        }
     }
 
     dependencies {
@@ -29,6 +32,9 @@ apply plugin: "com.vanniktech.maven.publish"
 repositories {
     google()
     jcenter()
+    maven {
+        url "https://dl.bintray.com/kotlin/kotlin-eap"
+    }
 }
 
 //region Version.kt template for setting the project version in the build
@@ -56,7 +62,7 @@ gradlePlugin {
     plugins {
         redactedPlugin {
             id = 'dev.zacsweers.redacted.redacted-gradle-plugin'
-            implementationClass = 'dev.zacsweers.redacted.gradle.RedactedGradlePlugin'
+            implementationClass = 'dev.zacsweers.redacted.gradle.RedactedGradleSubplugin'
         }
     }
 }

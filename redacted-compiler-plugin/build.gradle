@@ -10,7 +10,7 @@ dependencies {
   kapt "com.google.auto.service:auto-service:$autoservice_version"
 
   testImplementation "org.jetbrains.kotlin:kotlin-compiler-embeddable:$kotlin_version"
-  testImplementation "com.github.tschuchortdev:kotlin-compile-testing:1.2.5"
+  testImplementation "com.github.tschuchortdev:kotlin-compile-testing:1.2.9"
   testImplementation "junit:junit:4.13"
   testImplementation "com.google.truth:truth:1.0.1"
 }

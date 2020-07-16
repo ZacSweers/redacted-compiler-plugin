@@ -3,16 +3,8 @@ package dev.zacsweers.redacted.gradle
 import com.android.builder.model.BuildType
 import com.android.builder.model.ProductFlavor
 import org.gradle.api.Action
-import org.gradle.api.Plugin
-import org.gradle.api.Project
 
 internal const val DEFAULT_ANNOTATION = "dev.zacsweers.redacted.annotations.Redacted"
-
-class RedactedGradlePlugin : Plugin<Project> {
-  override fun apply(target: Project) {
-    target.extensions.create("redacted", RedactedPluginExtension::class.java)
-  }
-}
 
 open class RedactedPluginExtension {
   var redactedAnnotation: String = DEFAULT_ANNOTATION
