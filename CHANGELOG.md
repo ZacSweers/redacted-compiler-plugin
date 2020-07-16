@@ -1,6 +1,14 @@
 Changelog
 =========
 
+0.2.0-1.4-M3
+------------
+
+_2020-07-16_
+
+This is identical in functionality to 0.2.0 but built against Kotlin 1.4-M3. This version is not considered
+stable and should only be used for testing compatibility with Kotlin 1.4 pre-releases.
+
 0.2.0
 -----
 
