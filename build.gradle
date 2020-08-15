@@ -3,9 +3,6 @@ buildscript {
         google()
         mavenCentral()
         jcenter()
-        maven {
-            url "https://dl.bintray.com/kotlin/kotlin-eap"
-        }
     }
 
     dependencies {
@@ -22,9 +19,6 @@ allprojects {
         google()
         mavenCentral()
         jcenter()
-        maven {
-            url "https://dl.bintray.com/kotlin/kotlin-eap"
-        }
     }
 
     pluginManager.withPlugin("org.jetbrains.kotlin.jvm") {
