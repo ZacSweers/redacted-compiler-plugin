@@ -19,7 +19,8 @@ import org.jetbrains.kotlin.resolve.extensions.SyntheticResolveExtension
  * with a final descriptor for data classes.
  */
 class RedactedSyntheticResolveExtension(
-    private val fqRedactedAnnotation: FqName
+    private val fqRedactedAnnotation: FqName,
+    private val redactAllDataClasses: Boolean
 ) : SyntheticResolveExtension {
 
   override fun generateSyntheticMethods(
@@ -31,7 +32,7 @@ class RedactedSyntheticResolveExtension(
   ) {
     super.generateSyntheticMethods(thisDescriptor, name, bindingContext, fromSupertypes, result)
 
-    val isRedacted = thisDescriptor.isRedacted(fqRedactedAnnotation) || run {
+    val isRedacted = (redactAllDataClasses && thisDescriptor.isData) || thisDescriptor.isRedacted(fqRedactedAnnotation) || run {
       val constructor = thisDescriptor.constructors.firstOrNull { it.isPrimary } ?: return
       val properties: List<PropertyDescriptor> = constructor.valueParameters
           .mapNotNull { bindingContext.get(BindingContext.VALUE_PARAMETER_AS_PROPERTY, it) }

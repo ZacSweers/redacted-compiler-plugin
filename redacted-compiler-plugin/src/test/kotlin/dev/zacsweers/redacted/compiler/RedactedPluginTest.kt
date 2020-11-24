@@ -92,6 +92,7 @@ class RedactedPluginTest {
               processor.option(KEY_ENABLED, "true"),
               processor.option(KEY_REPLACEMENT_STRING, "██"),
               processor.option(KEY_REDACTED_ANNOTATION, "dev.zacsweers.redacted.compiler.test.Redacted"),
+              processor.option(KEY_REDACT_ALL_DATA_CLASSES, "false")
           )
           inheritClassPath = true
           sources = sourceFiles.asList() + redacted

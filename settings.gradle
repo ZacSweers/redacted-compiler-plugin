@@ -2,6 +2,7 @@ rootProject.name = 'redacted-compiler-plugin'
 include ':redacted-compiler-plugin'
 include ':redacted-compiler-plugin-annotations'
 include ':sample'
+include ':sample-redact-all'
 
 // Only enable android project on JDK 8 until android tools catch up
 if (!JavaVersion.current().isJava9Compatible() && System.getenv("ANDROID_HOME") != null) {

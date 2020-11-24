@@ -71,6 +71,10 @@ redacted {
 
   // Define a custom replacement string for redactions.
   replacementString = "██" // Default
+
+  // Define whether you want to redact every data class regardless of the @Redact annotation. This 
+  // will redact as if you annotated each class
+  redactAllDataClasses = false // Default
 }
 ```
 
@@ -88,6 +92,7 @@ in most multi-variant projects anyway, but something to be aware of.
 ```groovy
 redacted {
   enabled = true // Default
+  redactAllDataClasses = false // Default
   androidVariantFilter {
     // Don't enable on debug
     if (buildType.name == "debug") {

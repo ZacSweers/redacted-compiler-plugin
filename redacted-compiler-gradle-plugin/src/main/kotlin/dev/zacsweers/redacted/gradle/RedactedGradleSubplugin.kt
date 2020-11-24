@@ -49,6 +49,7 @@ class RedactedGradleSubplugin : KotlinCompilerPluginSupportPlugin {
 
     val extensionFilter = extension.variantFilter
     var enabled = extension.enabled
+    var redactAllDataClasses = extension.redactAllDataClasses
 
     // If we're an android setup
     if (extensionFilter != null && kotlinCompilation is KotlinJvmAndroidCompilation) {
@@ -56,13 +57,14 @@ class RedactedGradleSubplugin : KotlinCompilerPluginSupportPlugin {
       val variant = unwrapVariant(variantData)
       if (variant != null) {
         project.logger.debug("Resolving enabled status for android variant ${variant.name}")
-        val filter = VariantFilterImpl(variant, enabled)
+        val filter = VariantFilterImpl(variant, enabled,redactAllDataClasses)
         extensionFilter.execute(filter)
-        project.logger.debug("Variant '${variant.name}' redacted flag set to ${filter._enabled}")
+        project.logger.debug("Variant '${variant.name}' redacted flag set to ${filter._enabled} redactAllDataClasses set to ${filter._redactAllDataClasses}")
         enabled = filter._enabled
+        redactAllDataClasses = filter._redactAllDataClasses
       } else {
         project.logger.lifecycle(
-            "Unable to resolve variant type for $variantData. Falling back to default behavior of '$enabled'")
+            "Unable to resolve variant type for $variantData. Falling back to default behavior of '$enabled' with redactAllDataClasses as ${redactAllDataClasses}")
       }
     }
 
@@ -70,7 +72,8 @@ class RedactedGradleSubplugin : KotlinCompilerPluginSupportPlugin {
       listOf(
           SubpluginOption(key = "enabled", value = enabled.toString()),
           SubpluginOption(key = "replacementString", value = extension.replacementString),
-          SubpluginOption(key = "redactedAnnotation", value = annotation)
+          SubpluginOption(key = "redactedAnnotation", value = annotation),
+          SubpluginOption(key = "redactAllDataClasses", value = redactAllDataClasses.toString())
       )
     }
   }
@@ -89,11 +92,16 @@ private fun unwrapVariant(variantData: Any?): BaseVariant? {
   }
 }
 
-private class VariantFilterImpl(variant: BaseVariant, enableDefault: Boolean) : VariantFilter {
+private class VariantFilterImpl(variant: BaseVariant, enableDefault: Boolean,redactAllDataClassesDefault: Boolean) : VariantFilter {
   var _enabled: Boolean = enableDefault
+  var _redactAllDataClasses: Boolean = redactAllDataClassesDefault
 
   override fun overrideEnabled(enabled: Boolean) {
     this._enabled = enabled
+  }
+
+  override fun overrideRedactAllDataClasses(redactAllDataClasses: Boolean) {
+    this._redactAllDataClasses = redactAllDataClasses
   }
 
   override val buildType: BuildType = variant.buildType

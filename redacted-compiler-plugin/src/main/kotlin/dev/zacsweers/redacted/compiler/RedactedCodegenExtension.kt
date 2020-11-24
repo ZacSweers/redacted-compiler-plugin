@@ -49,7 +49,8 @@ internal const val LOG_PREFIX = "*** REDACTED:"
 class RedactedCodegenExtension(
     private val messageCollector: MessageCollector,
     private val replacementString: String,
-    private val fqRedactedAnnotation: FqName
+    private val fqRedactedAnnotation: FqName,
+    private val redactAllDataClasses: Boolean
 ) : ExpressionCodegenExtension {
 
   private fun log(message: String) {
@@ -63,7 +64,7 @@ class RedactedCodegenExtension(
     val targetClass = codegen.descriptor
     log("Reading ${targetClass.name}")
 
-    val classIsRedacted = targetClass.isRedacted(fqRedactedAnnotation)
+    val classIsRedacted = (redactAllDataClasses && targetClass.isData) || targetClass.isRedacted(fqRedactedAnnotation)
 
     val redactedParams: Boolean
     val properties: List<PropertyDescriptor>
