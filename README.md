@@ -71,6 +71,9 @@ redacted {
 
   // Define a custom replacement string for redactions.
   replacementString = "██" // Default
+
+  // Define whether or not class names are output into the toString method or redacted
+  redactClassName = false // Default
 }
 ```
 
