@@ -16,6 +16,7 @@ import org.jetbrains.kotlin.codegen.StringConcatGenerator
 import org.jetbrains.kotlin.codegen.context.FieldOwnerContext
 import org.jetbrains.kotlin.codegen.context.MethodContext
 import org.jetbrains.kotlin.codegen.extensions.ExpressionCodegenExtension
+import org.jetbrains.kotlin.codegen.serialization.JvmSerializationBindings
 import org.jetbrains.kotlin.codegen.state.GenerationState
 import org.jetbrains.kotlin.codegen.state.KotlinTypeMapper
 import org.jetbrains.kotlin.descriptors.ClassDescriptor
@@ -39,6 +40,7 @@ import org.jetbrains.org.objectweb.asm.AnnotationVisitor
 import org.jetbrains.org.objectweb.asm.Opcodes
 import org.jetbrains.org.objectweb.asm.Type
 import org.jetbrains.org.objectweb.asm.commons.InstructionAdapter
+import org.jetbrains.org.objectweb.asm.commons.Method
 
 
 internal const val LOG_PREFIX = "*** REDACTED:"
@@ -240,6 +242,19 @@ private class ToStringGenerator(
     iv.areturn(AsmTypes.JAVA_STRING_TYPE)
 
     FunctionCodegen.endVisit(mv, toStringMethodName, declaration)
+
+    if (isInErasedInlineClass) {
+      recordMethodForFunctionIfRequired(function, toStringMethodName, toStringDesc)
+    }
+  }
+
+  private fun recordMethodForFunctionIfRequired(
+      function: FunctionDescriptor,
+      name: String,
+      desc: String
+  ) {
+    v.serializationBindings.put(JvmSerializationBindings.METHOD_FOR_FUNCTION, function, Method(name,
+        desc))
   }
 
   private fun mapFunctionName(functionDescriptor: FunctionDescriptor): String {
