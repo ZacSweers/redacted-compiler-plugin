@@ -162,7 +162,8 @@ private class ToStringGenerator(
     val toStringMethodName = mapFunctionName(function)
     val mv = v.newMethod(methodOrigin, access, toStringMethodName, toStringDesc, null, null)
 
-    if (fieldOwnerContext.contextKind != ERASED_INLINE_CLASS && classDescriptor.isInline) {
+    val isInErasedInlineClass = fieldOwnerContext.contextKind == ERASED_INLINE_CLASS
+    if (!isInErasedInlineClass && classDescriptor.isInline) {
       FunctionCodegen.generateMethodInsideInlineClassWrapper(
           methodOrigin,
           function,
@@ -172,8 +173,10 @@ private class ToStringGenerator(
       return
     }
 
-    visitEndForAnnotationVisitor(
-        mv.visitAnnotation(Type.getDescriptor(NotNull::class.java), false))
+    if (!isInErasedInlineClass) {
+      visitEndForAnnotationVisitor(
+          mv.visitAnnotation(Type.getDescriptor(NotNull::class.java), false))
+    }
 
     if (!generationState.classBuilderMode.generateBodies) {
       FunctionCodegen.endVisit(mv, toStringMethodName, declaration)
