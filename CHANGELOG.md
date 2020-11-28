@@ -4,7 +4,7 @@ Changelog
 0.4.0
 ------------
 
-_2020-11-27
+_2020-11-27_
 
 **This version requires Kotlin 1.4.20 or higher!**
 
