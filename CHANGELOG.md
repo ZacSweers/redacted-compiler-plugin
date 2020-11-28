@@ -1,6 +1,17 @@
 Changelog
 =========
 
+0.4.0
+------------
+
+_2020-11-27
+
+**This version requires Kotlin 1.4.20 or higher!**
+
+* Compatible with Kotlin 1.4.20
+* Supports Kotlin's new `StringConcatFactory` automatically when `-Xstring-concat` is enabled.
+  * See the [Kotlin 1.4.20 announcement post](https://blog.jetbrains.com/kotlin/2020/11/kotlin-1-4-20-released/) for details on `-Xstring-concat`.
+
 0.3.0
 ------------
 
