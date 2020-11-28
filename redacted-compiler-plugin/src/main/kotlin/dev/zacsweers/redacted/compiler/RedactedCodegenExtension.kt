@@ -12,9 +12,11 @@ import org.jetbrains.kotlin.codegen.FunctionCodegen
 import org.jetbrains.kotlin.codegen.ImplementationBodyCodegen
 import org.jetbrains.kotlin.codegen.JvmKotlinType
 import org.jetbrains.kotlin.codegen.OwnerKind.ERASED_INLINE_CLASS
+import org.jetbrains.kotlin.codegen.StringConcatGenerator
 import org.jetbrains.kotlin.codegen.context.FieldOwnerContext
 import org.jetbrains.kotlin.codegen.context.MethodContext
 import org.jetbrains.kotlin.codegen.extensions.ExpressionCodegenExtension
+import org.jetbrains.kotlin.codegen.serialization.JvmSerializationBindings
 import org.jetbrains.kotlin.codegen.state.GenerationState
 import org.jetbrains.kotlin.codegen.state.KotlinTypeMapper
 import org.jetbrains.kotlin.descriptors.ClassDescriptor
@@ -29,7 +31,6 @@ import org.jetbrains.kotlin.name.Name
 import org.jetbrains.kotlin.psi.KtClassOrObject
 import org.jetbrains.kotlin.resolve.BindingContext
 import org.jetbrains.kotlin.resolve.descriptorUtil.annotationClass
-import org.jetbrains.kotlin.resolve.descriptorUtil.builtIns
 import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameSafe
 import org.jetbrains.kotlin.resolve.jvm.AsmTypes
 import org.jetbrains.kotlin.resolve.jvm.diagnostics.OtherOrigin
@@ -39,6 +40,8 @@ import org.jetbrains.org.objectweb.asm.AnnotationVisitor
 import org.jetbrains.org.objectweb.asm.Opcodes
 import org.jetbrains.org.objectweb.asm.Type
 import org.jetbrains.org.objectweb.asm.commons.InstructionAdapter
+import org.jetbrains.org.objectweb.asm.commons.Method
+
 
 internal const val LOG_PREFIX = "*** REDACTED:"
 
@@ -107,7 +110,7 @@ class RedactedCodegenExtension(
         replacementString = replacementString,
         fqRedactedAnnotation = fqRedactedAnnotation
     ).generateToStringMethod(
-        targetClass.findToStringFunction()!!,
+        targetClass.findToStringFunction(),
         properties
     )
   }
@@ -161,7 +164,8 @@ private class ToStringGenerator(
     val toStringMethodName = mapFunctionName(function)
     val mv = v.newMethod(methodOrigin, access, toStringMethodName, toStringDesc, null, null)
 
-    if (fieldOwnerContext.contextKind != ERASED_INLINE_CLASS && classDescriptor.isInline) {
+    val isInErasedInlineClass = fieldOwnerContext.contextKind == ERASED_INLINE_CLASS
+    if (!isInErasedInlineClass && classDescriptor.isInline) {
       FunctionCodegen.generateMethodInsideInlineClassWrapper(
           methodOrigin,
           function,
@@ -171,8 +175,10 @@ private class ToStringGenerator(
       return
     }
 
-    visitEndForAnnotationVisitor(
-        mv.visitAnnotation(Type.getDescriptor(NotNull::class.java), false))
+    if (!isInErasedInlineClass) {
+      visitEndForAnnotationVisitor(
+          mv.visitAnnotation(Type.getDescriptor(NotNull::class.java), false))
+    }
 
     if (!generationState.classBuilderMode.generateBodies) {
       FunctionCodegen.endVisit(mv, toStringMethodName, declaration)
@@ -181,13 +187,14 @@ private class ToStringGenerator(
 
     val iv = InstructionAdapter(mv)
 
+    val concatGenerator = StringConcatGenerator.create(generationState, iv)
     mv.visitCode()
-    AsmUtil.genStringBuilderConstructor(iv)
+    concatGenerator.genStringBuilderConstructorIfNeded()
 
     if (properties.isEmpty()) {
       // This is a redacted class, so just emit a single replacementString
       iv.aconst(classDescriptor.name.toString() + "(" + replacementString)
-      AsmUtil.genInvokeAppendMethod(iv, AsmTypes.JAVA_STRING_TYPE, null)
+      concatGenerator.invokeAppend(AsmTypes.JAVA_STRING_TYPE)
     } else {
       var first = true
       for (propertyDescriptor in properties) {
@@ -201,12 +208,11 @@ private class ToStringGenerator(
           iv.aconst(", " + propertyDescriptor.name
               .asString() + "=$possibleValue")
         }
-        AsmUtil.genInvokeAppendMethod(iv, AsmTypes.JAVA_STRING_TYPE, null)
+        concatGenerator.invokeAppend(AsmTypes.JAVA_STRING_TYPE)
 
         if (!isRedacted) {
           val type = genOrLoadOnStack(iv, context, propertyDescriptor, 0)
           var asmType = type.type
-          var kotlinType = type.kotlinType
 
           if (asmType.sort == Type.ARRAY) {
             val elementType = AsmUtil.correctElementType(asmType)
@@ -216,30 +222,39 @@ private class ToStringGenerator(
                   "([Ljava/lang/Object;)Ljava/lang/String;",
                   false)
               asmType = AsmTypes.JAVA_STRING_TYPE
-              kotlinType = function.builtIns
-                  .stringType
             } else if (elementType.sort != Type.CHAR) {
               iv.invokestatic("java/util/Arrays",
                   "toString",
                   "(" + asmType.descriptor + ")Ljava/lang/String;",
                   false)
               asmType = AsmTypes.JAVA_STRING_TYPE
-              kotlinType = function.builtIns
-                  .stringType
             }
           }
-          AsmUtil.genInvokeAppendMethod(iv, asmType, kotlinType, typeMapper)
+          concatGenerator.invokeAppend(asmType)
         }
       }
     }
 
     iv.aconst(")")
-    AsmUtil.genInvokeAppendMethod(iv, AsmTypes.JAVA_STRING_TYPE, null)
+    concatGenerator.invokeAppend(AsmTypes.JAVA_STRING_TYPE)
 
     iv.invokevirtual("java/lang/StringBuilder", "toString", "()Ljava/lang/String;", false)
     iv.areturn(AsmTypes.JAVA_STRING_TYPE)
 
     FunctionCodegen.endVisit(mv, toStringMethodName, declaration)
+
+    if (isInErasedInlineClass) {
+      recordMethodForFunctionIfRequired(function, toStringMethodName, toStringDesc)
+    }
+  }
+
+  private fun recordMethodForFunctionIfRequired(
+      function: FunctionDescriptor,
+      name: String,
+      desc: String
+  ) {
+    v.serializationBindings.put(JvmSerializationBindings.METHOD_FOR_FUNCTION, function, Method(name,
+        desc))
   }
 
   private fun mapFunctionName(functionDescriptor: FunctionDescriptor): String {
@@ -269,7 +284,7 @@ private class ToStringGenerator(
   }
 }
 
-private fun ClassDescriptor.findToStringFunction(): SimpleFunctionDescriptor? {
+private fun ClassDescriptor.findToStringFunction(): SimpleFunctionDescriptor {
   return unsubstitutedMemberScope
       .getContributedFunctions(Name.identifier("toString"), WHEN_GET_ALL_DESCRIPTORS)
       .first()

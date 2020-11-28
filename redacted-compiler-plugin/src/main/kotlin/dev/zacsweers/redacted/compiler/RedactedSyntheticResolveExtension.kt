@@ -2,10 +2,10 @@ package dev.zacsweers.redacted.compiler
 
 import org.jetbrains.kotlin.descriptors.CallableMemberDescriptor
 import org.jetbrains.kotlin.descriptors.ClassDescriptor
+import org.jetbrains.kotlin.descriptors.DescriptorVisibilities
 import org.jetbrains.kotlin.descriptors.Modality
 import org.jetbrains.kotlin.descriptors.PropertyDescriptor
 import org.jetbrains.kotlin.descriptors.SimpleFunctionDescriptor
-import org.jetbrains.kotlin.descriptors.Visibilities
 import org.jetbrains.kotlin.descriptors.annotations.Annotations
 import org.jetbrains.kotlin.descriptors.impl.SimpleFunctionDescriptorImpl
 import org.jetbrains.kotlin.name.FqName
@@ -55,7 +55,7 @@ class RedactedSyntheticResolveExtension(
           emptyList(),
           thisDescriptor.builtIns.stringType,
           Modality.FINAL,
-          Visibilities.PUBLIC
+          DescriptorVisibilities.PUBLIC
       )
     }
   }
