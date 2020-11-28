@@ -1,9 +1,18 @@
 apply plugin: 'org.jetbrains.kotlin.jvm'
 apply plugin: 'dev.zacsweers.redacted.redacted-gradle-plugin'
 
+if (JavaVersion.current().java9Compatible) {
+  println "Enabling string-concat"
+  compileKotlin {
+    kotlinOptions {
+      freeCompilerArgs = freeCompilerArgs + "-Xstring-concat=indy-with-constants"
+    }
+  }
+}
+
 dependencies {
   implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
   
-  testImplementation "junit:junit:4.13"
-  testImplementation "com.google.truth:truth:1.0.1"
+  testImplementation "junit:junit:4.13.1"
+  testImplementation "com.google.truth:truth:1.1"
 }
