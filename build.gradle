@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 buildscript {
     repositories {
         google()
@@ -22,17 +24,28 @@ allprojects {
     }
 
     pluginManager.withPlugin("org.jetbrains.kotlin.jvm") {
-        project.tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+        project.tasks.withType(KotlinCompile).configureEach {
             kotlinOptions {
                 jvmTarget = resolvedJvmTarget
                 freeCompilerArgs += ['-progressive', '-Xjvm-default=all']
+                useIR = false
+            }
+        }
+    }
+
+    pluginManager.withPlugin("org.jetbrains.kotlin.android") {
+        project.tasks.withType(KotlinCompile).configureEach {
+            kotlinOptions {
+                jvmTarget = resolvedJvmTarget
+                freeCompilerArgs += ['-progressive', '-Xjvm-default=all']
+                useIR = false
             }
         }
     }
 }
 
 subprojects {
-    configurations.all {
+    configurations.configureEach {
         resolutionStrategy {
             dependencySubstitution {
                 // The Kotlin plugin will try to add the redacted-compiler-plugin to dependencies with a version
