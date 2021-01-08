@@ -10,6 +10,12 @@ if (JavaVersion.current().java9Compatible) {
   }
 }
 
+compileKotlin {
+  kotlinOptions {
+    useIr = hasProperty("useIr") && Boolean.parseBoolean(property("useIr"))
+  }
+}
+
 dependencies {
   implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
   
