@@ -8,7 +8,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        ci_java_version: [1.8, 11, 12, 13, 14]
+        ci_java_version: [1.8, 11, 12, 13, 14, 15]
+        ci_use_ir: [true, false]
     steps:
       - name: Checkout
         uses: actions/checkout@v1
@@ -19,7 +20,7 @@ jobs:
         with:
           java-version: ${{ matrix.ci_java_version }}
       - name: Build with Gradle
-        run: ./gradlew clean check --stacktrace
+        run: ./gradlew clean check --stacktrace -PuseIr=${{ matrix.ci_use_ir }}
       - name: Reclaim memory
         run: ./gradlew --stop && jps|grep -E 'KotlinCompileDaemon|GradleDaemon'| awk '{print $1}'| xargs kill -9
       - name: Upload snapshot (main only)
