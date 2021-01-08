@@ -20,7 +20,7 @@ jobs:
         with:
           java-version: ${{ matrix.ci_java_version }}
       - name: Build with Gradle
-        run: ./gradlew clean check --stacktrace -PuseIr=${{ matrix.ci_use_ir }}
+        run: ./gradlew clean check --stacktrace -PuseIR=${{ matrix.ci_use_ir }}
       - name: Reclaim memory
         run: ./gradlew --stop && jps|grep -E 'KotlinCompileDaemon|GradleDaemon'| awk '{print $1}'| xargs kill -9
       - name: Upload snapshot (main only)

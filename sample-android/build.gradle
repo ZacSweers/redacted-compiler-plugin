@@ -24,7 +24,7 @@ android {
 
 tasks.withType(KotlinCompile.class).configureEach {
   kotlinOptions {
-    useIr = hasProperty("useIr") && Boolean.parseBoolean(property("useIr"))
+    useIR = hasProperty("useIR") && Boolean.parseBoolean(property("useIR"))
   }
 }
 
