@@ -1,6 +1,8 @@
 package dev.zacsweers.redacted.compiler
 
 import com.google.auto.service.AutoService
+import dev.zacsweers.redacted.compiler.ir.RedactedIrGenerationExtension
+import org.jetbrains.kotlin.backend.common.extensions.IrGenerationExtension
 import org.jetbrains.kotlin.cli.common.CLIConfigurationKeys
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.codegen.extensions.ExpressionCodegenExtension
@@ -9,6 +11,7 @@ import org.jetbrains.kotlin.com.intellij.openapi.extensions.impl.ExtensionPointI
 import org.jetbrains.kotlin.com.intellij.openapi.project.Project
 import org.jetbrains.kotlin.compiler.plugin.ComponentRegistrar
 import org.jetbrains.kotlin.config.CompilerConfiguration
+import org.jetbrains.kotlin.config.JVMConfigurationKeys
 import org.jetbrains.kotlin.extensions.ProjectExtensionDescriptor
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.resolve.extensions.SyntheticResolveExtension
@@ -31,6 +34,13 @@ class RedactedComponentRegistrar : ComponentRegistrar {
 
     SyntheticResolveExtension.registerExtensionAsFirst(project,
         RedactedSyntheticResolveExtension(fqRedactedAnnotation))
+
+    if (configuration.getBoolean(JVMConfigurationKeys.IR)) {
+      IrGenerationExtension.registerExtension(
+          project,
+          RedactedIrGenerationExtension(messageCollector, replacementString, fqRedactedAnnotation)
+      )
+    }
   }
 }
 
