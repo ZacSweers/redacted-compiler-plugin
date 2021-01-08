@@ -1,18 +1,15 @@
 apply plugin: 'org.jetbrains.kotlin.jvm'
 apply plugin: 'dev.zacsweers.redacted.redacted-gradle-plugin'
 
-if (JavaVersion.current().java9Compatible) {
-  println "Enabling string-concat"
-  compileKotlin {
-    kotlinOptions {
-      freeCompilerArgs = freeCompilerArgs + "-Xstring-concat=indy-with-constants"
-    }
-  }
-}
 
 compileKotlin {
   kotlinOptions {
     useIR = hasProperty("useIR") && Boolean.parseBoolean(property("useIR"))
+    if (JavaVersion.current().java9Compatible) {
+      println "Enabling string-concat"
+      freeCompilerArgs += "-Xstring-concat=indy-with-constants"
+      jvmTarget = JavaVersion.current().toString()
+    }
   }
 }
 
