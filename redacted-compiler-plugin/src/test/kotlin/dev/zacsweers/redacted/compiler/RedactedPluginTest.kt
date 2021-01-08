@@ -10,11 +10,22 @@ import org.jetbrains.kotlin.config.JvmTarget
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
+import org.junit.runner.RunWith
+import org.junit.runners.Parameterized
 
-class RedactedPluginTest {
+@RunWith(Parameterized::class)
+class RedactedPluginTest(private val useIr: Boolean) {
 
-  // TODO parameterize this
-  private val useIr = true
+  companion object {
+    @JvmStatic
+    @Parameterized.Parameters(name = "useIr={0}")
+    fun data() : Collection<Array<Any>> {
+      return listOf(
+          arrayOf(true),
+          arrayOf(false)
+      )
+    }
+  }
 
   @Rule
   @JvmField
@@ -43,12 +54,14 @@ class RedactedPluginTest {
           class NonDataClass(@Redacted val a: Int)
           """
     ))
-    assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.COMPILATION_ERROR)
+    // Kotlin reports an error message from IR as an internal error for some reason, so we just
+    // check "not ok"
+    assertThat(result.exitCode).isNotEqualTo(KotlinCompilation.ExitCode.OK)
 
     // Full log is something like this:
     // e: /path/to/NonDataClass.kt: (5, 1): @Redacted is only supported on data classes!
     assertThat(result.messages).contains(
-        "NonDataClass.kt: (5, 1): @Redacted is only supported on data classes!")
+        "@Redacted is only supported on data classes!")
   }
 
   @Test

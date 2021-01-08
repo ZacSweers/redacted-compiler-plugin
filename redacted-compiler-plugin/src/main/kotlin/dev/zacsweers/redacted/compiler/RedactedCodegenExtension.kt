@@ -46,7 +46,7 @@ import org.jetbrains.org.objectweb.asm.Type
 import org.jetbrains.org.objectweb.asm.commons.InstructionAdapter
 import org.jetbrains.org.objectweb.asm.commons.Method
 
-internal const val LOG_PREFIX = "*** REDACTED:"
+internal const val LOG_PREFIX = "*** REDACTED"
 
 /**
  * A compiler codegen extension that generates custom toString() implementations that

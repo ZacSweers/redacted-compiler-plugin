@@ -28,10 +28,11 @@ import org.jetbrains.kotlin.ir.symbols.impl.IrValueParameterSymbolImpl
 import org.jetbrains.kotlin.ir.types.createType
 import org.jetbrains.kotlin.ir.types.isArray
 import org.jetbrains.kotlin.ir.util.hasAnnotation
-import org.jetbrains.kotlin.ir.util.isFakeOverride
 import org.jetbrains.kotlin.ir.util.isPrimitiveArray
 import org.jetbrains.kotlin.ir.util.primaryConstructor
 import org.jetbrains.kotlin.ir.util.properties
+
+internal const val LOG_PREFIX = "*** REDACTED (IR):"
 
 @OptIn(ObsoleteDescriptorBasedAPI::class)
 internal class RedactedIrVisitor(
@@ -51,7 +52,7 @@ internal class RedactedIrVisitor(
     log("Reading <$declaration>")
 
     val declarationParent = declaration.parent
-    if (declarationParent is IrClass && declaration.isFakeOverride && declaration.isToString()) {
+    if (declarationParent is IrClass /* && declaration.isFakeOverride */ && declaration.isToString()) {
       val primaryConstructor = declarationParent.primaryConstructor ?: return super.visitFunctionNew(declaration)
       val constructorParameters = primaryConstructor
           .valueParameters
@@ -68,6 +69,10 @@ internal class RedactedIrVisitor(
         properties += Property(prop, isRedacted, parameter)
       }
       if (anyRedacted) {
+        if (!declarationParent.isData) {
+          declarationParent.reportError("@Redacted is only supported on data classes!")
+          return super.visitFunctionNew(declaration)
+        }
         declaration.convertToGeneratedToString(properties)
       }
     }
@@ -175,11 +180,11 @@ internal class RedactedIrVisitor(
   }
 
   private fun log(message: String) {
-    messageCollector.report(CompilerMessageSeverity.LOGGING, "REDACTED COMPILER PLUGIN (IR): $message")
+    messageCollector.report(CompilerMessageSeverity.LOGGING, "$LOG_PREFIX $message")
   }
 
   private fun IrClass.reportError(message: String) {
     val location = CompilerMessageLocation.create(name.asString())
-    messageCollector.report(CompilerMessageSeverity.ERROR, "REDACTED COMPILER PLUGIN (IR): $message", location)
+    messageCollector.report(CompilerMessageSeverity.ERROR, "$LOG_PREFIX $message", location)
   }
 }
