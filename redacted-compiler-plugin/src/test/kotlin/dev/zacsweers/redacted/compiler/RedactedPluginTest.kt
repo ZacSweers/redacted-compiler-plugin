@@ -13,6 +13,9 @@ import org.junit.rules.TemporaryFolder
 
 class RedactedPluginTest {
 
+  // TODO parameterize this
+  private val useIr = true
+
   @Rule
   @JvmField
   var temporaryFolder: TemporaryFolder = TemporaryFolder()
@@ -81,11 +84,28 @@ class RedactedPluginTest {
     assertThat(result.messages).doesNotContain(LOG_PREFIX)
   }
 
+  @Test
+  fun simpleTest() {
+    val result = compile(kotlin("source.kt",
+        """
+          package dev.zacsweers.redacted.compiler.test
+
+          import dev.zacsweers.redacted.compiler.test.Redacted
+
+          data class Test(@Redacted val a: Int)
+          """
+    ))
+    assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.OK)
+  }
+
   private fun prepareCompilation(vararg sourceFiles: SourceFile): KotlinCompilation {
     return KotlinCompilation()
         .apply {
           workingDir = temporaryFolder.root
           compilerPlugins = listOf(RedactedComponentRegistrar())
+          if (useIr) {
+            kotlincArguments = listOf("-Xuse-ir")
+          }
           val processor = RedactedCommandLineProcessor()
           commandLineProcessors = listOf(processor)
           pluginOptions = listOf(
