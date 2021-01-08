@@ -1,6 +1,15 @@
 Changelog
 =========
 
+0.5.0
+------------
+
+_2021-01-08_
+
+* **New!** Experimental support for Kotlin IR. Note that IR is still incubating and subject to change.
+* Update Kotlin to `1.4.21`.
+* Tested up to JDK 15.
+
 0.4.0
 ------------
 
