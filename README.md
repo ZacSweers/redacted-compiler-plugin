@@ -44,13 +44,9 @@ SensitiveData(██)
 Apply the gradle plugin.
 
 ```gradle
-buildscript {
-  dependencies {
-    classpath "dev.zacsweers.redacted:redacted-compiler-plugin-gradle:x.y.z"
-  }  
+plugins {
+  id("dev.zacsweers.redacted.redacted-gradle-plugin") version <version>
 }
-
-apply plugin: 'dev.zacsweers.redacted.redacted-gradle-plugin'
 ```
 
 And that's it! The default configuration will add the `-annotations` artifact (which has a
