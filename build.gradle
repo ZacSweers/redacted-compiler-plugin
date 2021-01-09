@@ -19,7 +19,10 @@ buildscript {
 apply plugin: "binary-compatibility-validator"
 
 apiValidation {
-    ignoredProjects += ["sample", "sample-android"]
+    if (!JavaVersion.current().isJava9Compatible() && System.getenv("ANDROID_HOME") != null) {
+        ignoredProjects += 'sample-android'
+    }
+    ignoredProjects += ["sample"]
 }
 
 String resolvedJvmTarget = System.getenv().getOrDefault("ci_java_version", "1.8")
