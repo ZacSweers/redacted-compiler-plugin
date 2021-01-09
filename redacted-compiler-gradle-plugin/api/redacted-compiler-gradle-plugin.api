@@ -9,15 +9,12 @@ public final class dev/zacsweers/redacted/gradle/RedactedGradleSubplugin : org/j
 	public fun isApplicable (Lorg/jetbrains/kotlin/gradle/plugin/KotlinCompilation;)Z
 }
 
-public class dev/zacsweers/redacted/gradle/RedactedPluginExtension {
-	public fun <init> ()V
+public abstract class dev/zacsweers/redacted/gradle/RedactedPluginExtension {
+	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
 	public final fun androidVariantFilter (Lorg/gradle/api/Action;)V
-	public final fun getEnabled ()Z
-	public final fun getRedactedAnnotation ()Ljava/lang/String;
-	public final fun getReplacementString ()Ljava/lang/String;
-	public final fun setEnabled (Z)V
-	public final fun setRedactedAnnotation (Ljava/lang/String;)V
-	public final fun setReplacementString (Ljava/lang/String;)V
+	public final fun getEnabled ()Lorg/gradle/api/provider/Property;
+	public final fun getRedactedAnnotation ()Lorg/gradle/api/provider/Property;
+	public final fun getReplacementString ()Lorg/gradle/api/provider/Property;
 }
 
 public abstract interface class dev/zacsweers/redacted/gradle/VariantFilter {
