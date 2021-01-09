@@ -44,7 +44,7 @@ class RedactedComponentRegistrar : ComponentRegistrar {
   }
 }
 
-fun <T : Any> ProjectExtensionDescriptor<T>.registerExtensionAsFirst(
+internal fun <T : Any> ProjectExtensionDescriptor<T>.registerExtensionAsFirst(
     project: Project,
     extension: T
 ) {
