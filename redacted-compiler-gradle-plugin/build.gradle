@@ -18,6 +18,7 @@ buildscript {
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlin_version}"
         classpath "com.vanniktech:gradle-maven-publish-plugin:${maven_publish_plugin_version}"
+        classpath "org.jetbrains.kotlinx:binary-compatibility-validator:0.3.0"
     }
 }
 
@@ -25,6 +26,7 @@ apply plugin: "java-gradle-plugin"
 apply plugin: "org.jetbrains.kotlin.jvm"
 apply plugin: "org.jetbrains.kotlin.kapt"
 apply plugin: "com.vanniktech.maven.publish"
+apply plugin: "binary-compatibility-validator"
 
 repositories {
     google()

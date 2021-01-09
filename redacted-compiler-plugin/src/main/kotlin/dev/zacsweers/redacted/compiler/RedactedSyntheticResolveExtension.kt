@@ -18,7 +18,7 @@ import org.jetbrains.kotlin.resolve.extensions.SyntheticResolveExtension
  * A [SyntheticResolveExtension] that replaces the open toString descriptor
  * with a final descriptor for data classes.
  */
-class RedactedSyntheticResolveExtension(
+internal class RedactedSyntheticResolveExtension(
     private val fqRedactedAnnotation: FqName
 ) : SyntheticResolveExtension {
 

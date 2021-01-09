@@ -52,7 +52,7 @@ internal const val LOG_PREFIX = "*** REDACTED"
  * A compiler codegen extension that generates custom toString() implementations that
  * respect `Redacted` annotations.
  */
-class RedactedCodegenExtension(
+internal class RedactedCodegenExtension(
     private val messageCollector: MessageCollector,
     private val replacementString: String,
     private val fqRedactedAnnotation: FqName
@@ -130,7 +130,9 @@ private class ToStringGenerator(
     private val fqRedactedAnnotation: FqName
 ) {
   private val typeMapper: KotlinTypeMapper = generationState.typeMapper
-  private val underlyingType: JvmKotlinType
+  private val underlyingType = JvmKotlinType(
+      typeMapper.mapType(classDescriptor),
+      classDescriptor.defaultType.substitutedUnderlyingType())
   private val isInErasedInlineClass = fieldOwnerContext.contextKind == ERASED_INLINE_CLASS
 
   private val toStringDesc: String
@@ -155,12 +157,6 @@ private class ToStringGenerator(
 
       return access
     }
-
-  init {
-    this.underlyingType = JvmKotlinType(
-        typeMapper.mapType(classDescriptor),
-        classDescriptor.defaultType.substitutedUnderlyingType())
-  }
 
   fun generateToStringMethod(function: FunctionDescriptor, properties: List<PropertyDescriptor>) {
     val context = fieldOwnerContext.intoFunction(function)

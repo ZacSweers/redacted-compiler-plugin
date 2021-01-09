@@ -3,13 +3,24 @@ package dev.zacsweers.redacted.gradle
 import com.android.builder.model.BuildType
 import com.android.builder.model.ProductFlavor
 import org.gradle.api.Action
+import org.gradle.api.model.ObjectFactory
+import org.gradle.api.provider.Property
+import javax.inject.Inject
 
 internal const val DEFAULT_ANNOTATION = "dev.zacsweers.redacted.annotations.Redacted"
 
-open class RedactedPluginExtension {
-  var redactedAnnotation: String = DEFAULT_ANNOTATION
-  var enabled: Boolean = true
-  var replacementString: String = "██"
+abstract class RedactedPluginExtension @Inject constructor(
+    objects: ObjectFactory
+) {
+  val redactedAnnotation: Property<String> = objects.property(String::class.java)
+      .convention(DEFAULT_ANNOTATION)
+
+  val enabled: Property<Boolean> = objects.property(Boolean::class.javaObjectType)
+      .convention(true)
+
+  val replacementString: Property<String> = objects.property(String::class.java)
+      .convention("██")
+
   internal var variantFilter: Action<VariantFilter>? = null
 
   /**
