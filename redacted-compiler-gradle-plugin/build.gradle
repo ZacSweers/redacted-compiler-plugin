@@ -67,7 +67,6 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation "org.jetbrains.kotlin:kotlin-gradle-plugin-api:$kotlin_version"
     compileOnly "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-    compileOnly "com.android.tools.build:gradle:4.1.1"
 
     compileOnly "com.google.auto.service:auto-service-annotations:$autoservice_version"
     kapt "com.google.auto.service:auto-service:$autoservice_version"
