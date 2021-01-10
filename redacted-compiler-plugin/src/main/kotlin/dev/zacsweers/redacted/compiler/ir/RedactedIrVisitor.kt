@@ -6,6 +6,7 @@ import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageLocation
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
+import org.jetbrains.kotlin.cli.common.messages.MessageUtil
 import org.jetbrains.kotlin.descriptors.impl.LazyClassReceiverParameterDescriptor
 import org.jetbrains.kotlin.ir.IrStatement
 import org.jetbrains.kotlin.ir.ObsoleteDescriptorBasedAPI
@@ -32,6 +33,7 @@ import org.jetbrains.kotlin.ir.util.hasAnnotation
 import org.jetbrains.kotlin.ir.util.isPrimitiveArray
 import org.jetbrains.kotlin.ir.util.primaryConstructor
 import org.jetbrains.kotlin.ir.util.properties
+import org.jetbrains.kotlin.resolve.source.getPsi
 
 internal const val LOG_PREFIX = "*** REDACTED (IR):"
 
@@ -205,7 +207,7 @@ internal class RedactedIrVisitor(
   }
 
   private fun IrClass.reportError(message: String) {
-    val location = CompilerMessageLocation.create(name.asString())
+    val location = MessageUtil.psiElementToMessageLocation(descriptor.source.getPsi())
     messageCollector.report(CompilerMessageSeverity.ERROR, "$LOG_PREFIX $message", location)
   }
 }
