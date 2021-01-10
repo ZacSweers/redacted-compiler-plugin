@@ -4,21 +4,12 @@ apply plugin: 'com.android.library'
 apply plugin: 'org.jetbrains.kotlin.android'
 apply plugin: 'dev.zacsweers.redacted.redacted-gradle-plugin'
 
-redacted {
-  androidVariantFilter {
-    if (buildType.name == "debug") {
-      overrideEnabled(false)
-    }
-  }
-}
-
 android {
   compileSdkVersion 29
 
   sourceSets {
     main.java.srcDirs += 'src/main/kotlin'
-    testDebug.java.srcDirs += 'src/testDebug/kotlin'
-    testRelease.java.srcDirs += 'src/testRelease/kotlin'
+    test.java.srcDirs += 'src/test/kotlin'
   }
 }
 

@@ -99,6 +99,21 @@ class RedactedPluginTest(private val useIr: Boolean) {
   }
 
   @Test
+  fun customReplacement() {
+    val result = compile(kotlin("source.kt",
+        """
+          package dev.zacsweers.redacted.compiler.test
+
+          import dev.zacsweers.redacted.compiler.test.Redacted
+
+          data class Test(@Redacted val a: Int)
+          """
+    ))
+    assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.OK)
+    assertThat(result.messages).doesNotContain(LOG_PREFIX)
+  }
+
+  @Test
   fun classAnnotated() {
     val result = compile(kotlin("source.kt",
         """
