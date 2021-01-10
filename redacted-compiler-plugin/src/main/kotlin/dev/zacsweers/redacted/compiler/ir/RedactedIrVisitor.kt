@@ -53,12 +53,14 @@ internal class RedactedIrVisitor(
 
     val declarationParent = declaration.parent
     if (declarationParent is IrClass /* && declaration.isFakeOverride */ && declaration.isToString()) {
-      val primaryConstructor = declarationParent.primaryConstructor ?: return super.visitFunctionNew(declaration)
+      val primaryConstructor = declarationParent.primaryConstructor
+          ?: return super.visitFunctionNew(declaration)
       val constructorParameters = primaryConstructor
           .valueParameters
           .associateBy { it.name.asString() }
 
       val properties = mutableListOf<Property>()
+      val classIsRedacted = declarationParent.hasAnnotation(redactedAnnotation)
       var anyRedacted = false
       for (prop in declarationParent.properties) {
         val parameter = constructorParameters[prop.name.asString()] ?: continue
@@ -68,12 +70,12 @@ internal class RedactedIrVisitor(
         }
         properties += Property(prop, isRedacted, parameter)
       }
-      if (anyRedacted) {
+      if (classIsRedacted || anyRedacted) {
         if (!declarationParent.isData) {
           declarationParent.reportError("@Redacted is only supported on data classes!")
           return super.visitFunctionNew(declaration)
         }
-        declaration.convertToGeneratedToString(properties)
+        declaration.convertToGeneratedToString(properties, classIsRedacted)
       }
     }
 
@@ -83,7 +85,10 @@ internal class RedactedIrVisitor(
   private fun IrFunction.isToString(): Boolean =
       name.asString() == "toString" && valueParameters.isEmpty() && returnType == pluginContext.irBuiltIns.stringType
 
-  private fun IrFunction.convertToGeneratedToString(properties: List<Property>) {
+  private fun IrFunction.convertToGeneratedToString(
+      properties: List<Property>,
+      classIsRedacted: Boolean
+  ) {
     val parent = parent as IrClass
 
     origin = RedactedOrigin
@@ -91,7 +96,12 @@ internal class RedactedIrVisitor(
     mutateWithNewDispatchReceiverParameterForParentClass()
 
     body = DeclarationIrBuilder(pluginContext, symbol).irBlockBody {
-      +irReturn(generateToStringMethodBody(parent, this@convertToGeneratedToString, properties))
+      +irReturn(generateToStringMethodBody(
+          irClass = parent,
+          irFunction = this@convertToGeneratedToString,
+          irProperties = properties,
+          classIsRedacted = classIsRedacted
+      ))
     }
 
     reflectivelySetFakeOverride(false)
@@ -105,7 +115,8 @@ internal class RedactedIrVisitor(
         startOffset = originalReceiver.startOffset,
         endOffset = originalReceiver.endOffset,
         origin = originalReceiver.origin,
-        symbol = IrValueParameterSymbolImpl(LazyClassReceiverParameterDescriptor(parentClass.descriptor)),
+        symbol = IrValueParameterSymbolImpl(
+            LazyClassReceiverParameterDescriptor(parentClass.descriptor)),
         name = originalReceiver.name,
         index = originalReceiver.index,
         type = parentClass.symbol.createType(hasQuestionMark = false, emptyList()),
@@ -137,34 +148,40 @@ internal class RedactedIrVisitor(
   private fun IrBuilderWithScope.generateToStringMethodBody(
       irClass: IrClass,
       irFunction: IrFunction,
-      irProperties: List<Property>
+      irProperties: List<Property>,
+      classIsRedacted: Boolean
   ): IrExpression {
     val irConcat = irConcat()
     irConcat.addArgument(irString(irClass.name.asString() + "("))
-    var first = true
-    for (property in irProperties) {
-      if (!first) irConcat.addArgument(irString(", "))
+    if (classIsRedacted) {
+      irConcat.addArgument(irString(replacementString))
+    } else {
+      var first = true
+      for (property in irProperties) {
+        if (!first) irConcat.addArgument(irString(", "))
 
-      irConcat.addArgument(irString(property.ir.name.asString() + "="))
+        irConcat.addArgument(irString(property.ir.name.asString() + "="))
 
-      if (property.isRedacted) {
-        irConcat.addArgument(irString(replacementString))
-      } else {
-        val irPropertyValue = irGetField(irFunction.irThis(), property.ir.backingField!!)
+        if (property.isRedacted) {
+          irConcat.addArgument(irString(replacementString))
+        } else {
+          val irPropertyValue = irGetField(irFunction.irThis(), property.ir.backingField!!)
 
-        val param = property.parameter
-        val irPropertyStringValue =
-            if (param.type.isArray() || param.type.isPrimitiveArray()) {
-              irCall(context.irBuiltIns.dataClassArrayMemberToStringSymbol, context.irBuiltIns.stringType).apply {
-                putValueArgument(0, irPropertyValue)
+          val param = property.parameter
+          val irPropertyStringValue =
+              if (param.type.isArray() || param.type.isPrimitiveArray()) {
+                irCall(context.irBuiltIns.dataClassArrayMemberToStringSymbol,
+                    context.irBuiltIns.stringType).apply {
+                  putValueArgument(0, irPropertyValue)
+                }
+              } else {
+                irPropertyValue
               }
-            } else {
-              irPropertyValue
-            }
 
-        irConcat.addArgument(irPropertyStringValue)
+          irConcat.addArgument(irPropertyStringValue)
+        }
+        first = false
       }
-      first = false
     }
     irConcat.addArgument(irString(")"))
     return irConcat
