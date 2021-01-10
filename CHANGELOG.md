@@ -1,6 +1,16 @@
 Changelog
 =========
 
+0.6.0
+------------
+
+_2021-01-09_
+
+* Gradle plugin extension now uses modern Gradle `Property` APIs. Minimum Gradle version is now 5.1.
+* Android-specific APIs (i.e. `variantFilter`) are now removed. If you still want this, consider
+configuring this manually in your own build however you see fit in tandem with the `enabled` property.
+* **Fix:** IR supports redacted classes now too.
+
 0.5.0
 ------------
 
