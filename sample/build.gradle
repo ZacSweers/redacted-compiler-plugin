@@ -1,7 +1,9 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 apply plugin: 'org.jetbrains.kotlin.jvm'
 apply plugin: 'dev.zacsweers.redacted.redacted-gradle-plugin'
 
-compileKotlin {
+tasks.withType(KotlinCompile).configureEach {
   kotlinOptions {
     useIR = hasProperty("useIR") && Boolean.parseBoolean(property("useIR"))
     if (JavaVersion.current().java9Compatible) {
