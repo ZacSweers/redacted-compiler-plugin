@@ -37,9 +37,10 @@ class RedactedPluginTest(private val useIr: Boolean) {
       
       import kotlin.annotation.AnnotationRetention.BINARY
       import kotlin.annotation.AnnotationTarget.PROPERTY
+      import kotlin.annotation.AnnotationTarget.CLASS
       
       @Retention(BINARY)
-      @Target(PROPERTY)
+      @Target(PROPERTY, CLASS)
       annotation class Redacted
       """)
 
@@ -98,12 +99,36 @@ class RedactedPluginTest(private val useIr: Boolean) {
   }
 
   @Test
+  fun classAnnotated() {
+    val result = compile(kotlin("source.kt",
+        """
+          package dev.zacsweers.redacted.compiler.test
+
+          import dev.zacsweers.redacted.compiler.test.Redacted
+
+          @Redacted
+          data class SensitiveData(val ssn: String, val birthday: String)
+          """
+    ))
+    assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.OK)
+    val complex = result.classLoader.loadClass("dev.zacsweers.redacted.compiler.test.SensitiveData")
+        .kotlin
+        .constructors
+        .first()
+        .call("123-456-7890", "1/1/00")
+    assertThat(complex.toString()).isEqualTo("SensitiveData(██)")
+  }
+
+  @Test
   fun complex() {
     val result = compile(kotlin("source.kt",
         """
           package dev.zacsweers.redacted.compiler.test
 
           import dev.zacsweers.redacted.compiler.test.Redacted
+          
+          // This should be ignored
+          data class UnAnnotated(val foo: String, val bar: String)
 
           data class Complex<T>(
               @Redacted val redactedReferenceType: String,
