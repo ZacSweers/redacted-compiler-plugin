@@ -6,3 +6,5 @@
 .classpath
 *.iml
 local.properties
+
+docs/

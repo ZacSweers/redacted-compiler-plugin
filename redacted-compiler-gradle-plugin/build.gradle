@@ -18,13 +18,15 @@ buildscript {
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlin_version}"
         classpath "com.vanniktech:gradle-maven-publish-plugin:${maven_publish_plugin_version}"
-        classpath "org.jetbrains.kotlinx:binary-compatibility-validator:0.3.0"
+        classpath "org.jetbrains.dokka:dokka-gradle-plugin:${dokka_version}"
+        classpath "org.jetbrains.kotlinx:binary-compatibility-validator:${binary_validator_version}"
     }
 }
 
 apply plugin: "java-gradle-plugin"
 apply plugin: "org.jetbrains.kotlin.jvm"
 apply plugin: "org.jetbrains.kotlin.kapt"
+apply plugin: 'org.jetbrains.dokka'
 apply plugin: "com.vanniktech.maven.publish"
 apply plugin: "binary-compatibility-validator"
 
@@ -60,6 +62,18 @@ gradlePlugin {
             id = 'dev.zacsweers.redacted.redacted-gradle-plugin'
             implementationClass = 'dev.zacsweers.redacted.gradle.RedactedGradleSubplugin'
         }
+    }
+}
+
+tasks.named("dokkaHtml") {
+    outputDirectory.set(rootDir.resolve("docs/0.x"))
+    dokkaSourceSets.configureEach {
+        skipDeprecated.set(true)
+    }
+    // Suppress a package
+    perPackageOption {
+        matchingRegex.set(/.*\.internal.*/)
+        suppress.set(true)
     }
 }
 
