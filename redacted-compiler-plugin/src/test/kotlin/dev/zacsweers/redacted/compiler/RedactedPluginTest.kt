@@ -37,9 +37,10 @@ class RedactedPluginTest(private val useIr: Boolean) {
       
       import kotlin.annotation.AnnotationRetention.BINARY
       import kotlin.annotation.AnnotationTarget.PROPERTY
+      import kotlin.annotation.AnnotationTarget.CLASS
       
       @Retention(BINARY)
-      @Target(PROPERTY)
+      @Target(PROPERTY, CLASS)
       annotation class Redacted
       """)
 
@@ -98,17 +99,123 @@ class RedactedPluginTest(private val useIr: Boolean) {
   }
 
   @Test
-  fun simpleTest() {
+  fun classAnnotated() {
     val result = compile(kotlin("source.kt",
         """
           package dev.zacsweers.redacted.compiler.test
 
           import dev.zacsweers.redacted.compiler.test.Redacted
 
-          data class Test(@Redacted val a: Int)
+          @Redacted
+          data class SensitiveData(val ssn: String, val birthday: String)
           """
     ))
     assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.OK)
+    val complex = result.classLoader.loadClass("dev.zacsweers.redacted.compiler.test.SensitiveData")
+        .kotlin
+        .constructors
+        .first()
+        .call("123-456-7890", "1/1/00")
+    assertThat(complex.toString()).isEqualTo("SensitiveData(██)")
+  }
+
+  @Test
+  fun complex() {
+    val result = compile(kotlin("source.kt",
+        """
+          package dev.zacsweers.redacted.compiler.test
+
+          import dev.zacsweers.redacted.compiler.test.Redacted
+          
+          // This should be ignored
+          data class UnAnnotated(val foo: String, val bar: String)
+
+          data class Complex<T>(
+              @Redacted val redactedReferenceType: String,
+              @Redacted val redactedNullableReferenceType: String?,
+              val referenceType: String,
+              val nullableReferenceType: String?,
+              @Redacted val redactedPrimitiveType: Int,
+              @Redacted val redactedNullablePrimitiveType: Int?,
+              val primitiveType: Int,
+              val nullablePrimitiveType: Int?,
+              @Redacted val redactedArrayReferenceType: Array<String>,
+              @Redacted val redactedNullableArrayReferenceType: Array<String>?,
+              val arrayReferenceType: Array<String>,
+              val nullableArrayReferenceType: Array<String>?,
+              @Redacted val redactedArrayPrimitiveType: IntArray,
+              @Redacted val redactedNullableArrayPrimitiveType: IntArray?,
+              val arrayPrimitiveType: IntArray,
+              val nullableArrayGenericType: IntArray?,
+              @Redacted val redactedGenericCollectionType: List<T>,
+              @Redacted val redactedNullableGenericCollectionType: List<T>?,
+              val genericCollectionType: List<T>,
+              val nullableGenericCollectionType: List<T>?,
+              @Redacted val redactedGenericType: T,
+              @Redacted val redactedNullableGenericType: T?,
+              val genericType: T,
+              val nullableGenericType: T?
+          )
+          """
+    ))
+    assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.OK)
+    val complex = result.classLoader.loadClass("dev.zacsweers.redacted.compiler.test.Complex")
+        .kotlin
+        .constructors
+        .first()
+        .call(
+            /* redactedReferenceType = */ "redactedReferenceType",
+            /* redactedNullableReferenceType = */ null,
+            /* referenceType = */ "referenceType",
+            /* nullableReferenceType = */ null,
+            /* redactedPrimitiveType = */ 1,
+            /* redactedNullablePrimitiveType = */ null,
+            /* primitiveType = */ 2,
+            /* nullablePrimitiveType = */ null,
+            /* redactedArrayReferenceType = */ arrayOf("redactedArrayReferenceType"),
+            /* redactedNullableArrayReferenceType = */ null,
+            /* arrayReferenceType = */ arrayOf("arrayReferenceType"),
+            /* nullableArrayReferenceType = */ null,
+            /* redactedArrayPrimitiveType = */ intArrayOf(3),
+            /* redactedNullableArrayPrimitiveType = */ null,
+            /* arrayPrimitiveType = */ intArrayOf(4),
+            /* nullableArrayGenericType = */ null,
+            /* redactedGenericCollectionType = */ listOf(5),
+            /* redactedNullableGenericCollectionType = */ null,
+            /* genericCollectionType = */ listOf(6),
+            /* nullableGenericCollectionType = */ null,
+            /* redactedGenericType = */ 7,
+            /* redactedNullableGenericType = */ null,
+            /* genericType = */ 8,
+            /* nullableGenericType = */ null
+        )
+    assertThat(complex.toString()).isEqualTo("Complex(" +
+        "redactedReferenceType=██, " +
+        "redactedNullableReferenceType=██, " +
+        "referenceType=referenceType, " +
+        "nullableReferenceType=null, " +
+        "redactedPrimitiveType=██, " +
+        "redactedNullablePrimitiveType=██, " +
+        "primitiveType=2, " +
+        "nullablePrimitiveType=null, " +
+        "redactedArrayReferenceType=██, " +
+        "redactedNullableArrayReferenceType=██, " +
+        "arrayReferenceType=[arrayReferenceType], " +
+        "nullableArrayReferenceType=null, " +
+        "redactedArrayPrimitiveType=██, " +
+        "redactedNullableArrayPrimitiveType=██, " +
+        "arrayPrimitiveType=[4], " +
+        "nullableArrayGenericType=null, " +
+        "redactedGenericCollectionType=██, " +
+        "redactedNullableGenericCollectionType=██, " +
+        "genericCollectionType=[6], " +
+        "nullableGenericCollectionType=null, " +
+        "redactedGenericType=██, " +
+        "redactedNullableGenericType=██, " +
+        "genericType=8, " +
+        "nullableGenericType=null" +
+        ")"
+    )
   }
 
   private fun prepareCompilation(vararg sourceFiles: SourceFile): KotlinCompilation {
