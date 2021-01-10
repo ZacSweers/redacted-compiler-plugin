@@ -9,9 +9,10 @@ buildscript {
 
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "org.jetbrains.dokka:dokka-gradle-plugin:${dokka_version}"
         classpath "com.vanniktech:gradle-maven-publish-plugin:${maven_publish_plugin_version}"
         classpath "com.android.tools.build:gradle:4.1.1"
-        classpath "org.jetbrains.kotlinx:binary-compatibility-validator:0.3.0"
+        classpath "org.jetbrains.kotlinx:binary-compatibility-validator:${binary_validator_version}"
         classpath "dev.zacsweers.redacted:redacted-compiler-plugin-gradle"
     }
 }
@@ -49,6 +50,20 @@ allprojects {
                 jvmTarget = resolvedJvmTarget
                 freeCompilerArgs += ['-progressive', '-Xjvm-default=all']
                 useIR = false
+            }
+        }
+    }
+
+    pluginManager.withPlugin("org.jetbrains.dokka") {
+        tasks.named("dokkaHtml") {
+            outputDirectory.set(rootDir.resolve("docs/0.x"))
+            dokkaSourceSets.configureEach {
+                skipDeprecated.set(true)
+            }
+            // Suppress a package
+            perPackageOption {
+                matchingRegex.set(/.*\.internal.*/)
+                suppress.set(true)
             }
         }
     }
