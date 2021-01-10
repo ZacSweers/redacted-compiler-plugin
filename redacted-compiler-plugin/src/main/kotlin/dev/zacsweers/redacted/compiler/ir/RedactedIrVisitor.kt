@@ -9,6 +9,7 @@ import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.descriptors.impl.LazyClassReceiverParameterDescriptor
 import org.jetbrains.kotlin.ir.IrStatement
 import org.jetbrains.kotlin.ir.ObsoleteDescriptorBasedAPI
+import org.jetbrains.kotlin.ir.builders.IrBlockBodyBuilder
 import org.jetbrains.kotlin.ir.builders.IrBuilderWithScope
 import org.jetbrains.kotlin.ir.builders.irBlockBody
 import org.jetbrains.kotlin.ir.builders.irCall
@@ -96,12 +97,12 @@ internal class RedactedIrVisitor(
     mutateWithNewDispatchReceiverParameterForParentClass()
 
     body = DeclarationIrBuilder(pluginContext, symbol).irBlockBody {
-      +irReturn(generateToStringMethodBody(
+      generateToStringMethodBody(
           irClass = parent,
           irFunction = this@convertToGeneratedToString,
           irProperties = properties,
           classIsRedacted = classIsRedacted
-      ))
+      )
     }
 
     reflectivelySetFakeOverride(false)
@@ -145,12 +146,12 @@ internal class RedactedIrVisitor(
    * The actual body of the toString method. Copied from
    * [org.jetbrains.kotlin.ir.util.DataClassMembersGenerator.MemberFunctionBuilder.generateToStringMethodBody].
    */
-  private fun IrBuilderWithScope.generateToStringMethodBody(
+  private fun IrBlockBodyBuilder.generateToStringMethodBody(
       irClass: IrClass,
       irFunction: IrFunction,
       irProperties: List<Property>,
       classIsRedacted: Boolean
-  ): IrExpression {
+  ) {
     val irConcat = irConcat()
     irConcat.addArgument(irString(irClass.name.asString() + "("))
     if (classIsRedacted) {
@@ -184,7 +185,7 @@ internal class RedactedIrVisitor(
       }
     }
     irConcat.addArgument(irString(")"))
-    return irConcat
+    +irReturn(irConcat)
   }
 
   private fun IrFunction.irThis(): IrExpression {
