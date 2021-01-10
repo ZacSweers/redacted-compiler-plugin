@@ -166,7 +166,7 @@ internal class RedactedIrVisitor(
         if (property.isRedacted) {
           irConcat.addArgument(irString(replacementString))
         } else {
-          val irPropertyValue = irGetField(irFunction.irThis(), property.ir.backingField!!)
+          val irPropertyValue = irGetField(receiver(irFunction), property.ir.backingField!!)
 
           val param = property.parameter
           val irPropertyStringValue =
@@ -188,14 +188,17 @@ internal class RedactedIrVisitor(
     +irReturn(irConcat)
   }
 
-  private fun IrFunction.irThis(): IrExpression {
-    val dispatchReceiverParameter = dispatchReceiverParameter!!
-    return IrGetValueImpl(
-        startOffset, endOffset,
-        dispatchReceiverParameter.type,
-        dispatchReceiverParameter.symbol
-    )
-  }
+  /**
+   * Only works properly after [mutateWithNewDispatchReceiverParameterForParentClass] has been called on [irFunction].
+   */
+  private fun IrBlockBodyBuilder.receiver(irFunction: IrFunction) =
+          IrGetValueImpl(irFunction.dispatchReceiverParameter!!)
+
+  private fun IrBlockBodyBuilder.IrGetValueImpl(irParameter: IrValueParameter) = IrGetValueImpl(
+          startOffset, endOffset,
+          irParameter.type,
+          irParameter.symbol
+  )
 
   private fun log(message: String) {
     messageCollector.report(CompilerMessageSeverity.LOGGING, "$LOG_PREFIX $message")
