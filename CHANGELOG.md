@@ -1,6 +1,13 @@
 Changelog
 =========
 
+0.6.1
+------------
+
+_2021-01-10_
+
+* Small IR fixes courtesy of [@DrewHamilton](https://github.com/DrewHamilton)
+
 0.6.0
 ------------
 
