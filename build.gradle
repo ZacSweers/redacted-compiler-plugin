@@ -56,14 +56,15 @@ allprojects {
 
     pluginManager.withPlugin("org.jetbrains.dokka") {
         tasks.named("dokkaHtml") {
-            outputDirectory.set(rootDir.resolve("docs/0.x"))
+            outputDirectory.set(rootProject.file("docs/0.x"))
             dokkaSourceSets.configureEach {
                 skipDeprecated.set(true)
-            }
-            // Suppress a package
-            perPackageOption {
-                matchingRegex.set(/.*\.internal.*/)
-                suppress.set(true)
+
+                // Suppress a package
+//                perPackageOption {
+//                    matchingRegex.set(/.*\.internal.*/)
+//                    suppress.set(true)
+//                }
             }
         }
     }
