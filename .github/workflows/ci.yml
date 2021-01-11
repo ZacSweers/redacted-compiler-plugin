@@ -24,7 +24,5 @@ jobs:
       - name: Reclaim memory
         run: ./gradlew --stop && jps|grep -E 'KotlinCompileDaemon|GradleDaemon'| awk '{print $1}'| xargs kill -9
       - name: Upload snapshot (main only)
-        run: |
-          ./gradlew -p redacted-compiler-gradle-plugin uploadArchives -PSONATYPE_NEXUS_USERNAME=${{ secrets.SonatypeUsername }} -PSONATYPE_NEXUS_PASSWORD=${{ secrets.SonatypePassword }}
-          ./gradlew uploadArchives -PSONATYPE_NEXUS_USERNAME=${{ secrets.SonatypeUsername }} -PSONATYPE_NEXUS_PASSWORD=${{ secrets.SonatypePassword }}
         if: success() && github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && matrix.ci_java_version == '1.8'
+        run: ./gradlew -p redacted-compiler-gradle-plugin uploadArchives -Dorg.gradle.parallel=false -PSONATYPE_NEXUS_USERNAME=${{ secrets.SonatypeUsername }} -PSONATYPE_NEXUS_PASSWORD=${{ secrets.SonatypePassword }} && ./gradlew uploadArchives -Dorg.gradle.parallel=false -PSONATYPE_NEXUS_USERNAME=${{ secrets.SonatypeUsername }} -PSONATYPE_NEXUS_PASSWORD=${{ secrets.SonatypePassword }}
