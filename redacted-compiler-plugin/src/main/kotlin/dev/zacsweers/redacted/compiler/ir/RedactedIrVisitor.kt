@@ -6,9 +6,11 @@ import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageLocation
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
+import org.jetbrains.kotlin.cli.common.messages.MessageUtil
 import org.jetbrains.kotlin.descriptors.impl.LazyClassReceiverParameterDescriptor
 import org.jetbrains.kotlin.ir.IrStatement
 import org.jetbrains.kotlin.ir.ObsoleteDescriptorBasedAPI
+import org.jetbrains.kotlin.ir.builders.IrBlockBodyBuilder
 import org.jetbrains.kotlin.ir.builders.IrBuilderWithScope
 import org.jetbrains.kotlin.ir.builders.irBlockBody
 import org.jetbrains.kotlin.ir.builders.irCall
@@ -31,6 +33,7 @@ import org.jetbrains.kotlin.ir.util.hasAnnotation
 import org.jetbrains.kotlin.ir.util.isPrimitiveArray
 import org.jetbrains.kotlin.ir.util.primaryConstructor
 import org.jetbrains.kotlin.ir.util.properties
+import org.jetbrains.kotlin.resolve.source.getPsi
 
 internal const val LOG_PREFIX = "*** REDACTED (IR):"
 
@@ -96,12 +99,12 @@ internal class RedactedIrVisitor(
     mutateWithNewDispatchReceiverParameterForParentClass()
 
     body = DeclarationIrBuilder(pluginContext, symbol).irBlockBody {
-      +irReturn(generateToStringMethodBody(
+      generateToStringMethodBody(
           irClass = parent,
           irFunction = this@convertToGeneratedToString,
           irProperties = properties,
           classIsRedacted = classIsRedacted
-      ))
+      )
     }
 
     reflectivelySetFakeOverride(false)
@@ -145,12 +148,12 @@ internal class RedactedIrVisitor(
    * The actual body of the toString method. Copied from
    * [org.jetbrains.kotlin.ir.util.DataClassMembersGenerator.MemberFunctionBuilder.generateToStringMethodBody].
    */
-  private fun IrBuilderWithScope.generateToStringMethodBody(
+  private fun IrBlockBodyBuilder.generateToStringMethodBody(
       irClass: IrClass,
       irFunction: IrFunction,
       irProperties: List<Property>,
       classIsRedacted: Boolean
-  ): IrExpression {
+  ) {
     val irConcat = irConcat()
     irConcat.addArgument(irString(irClass.name.asString() + "("))
     if (classIsRedacted) {
@@ -165,7 +168,7 @@ internal class RedactedIrVisitor(
         if (property.isRedacted) {
           irConcat.addArgument(irString(replacementString))
         } else {
-          val irPropertyValue = irGetField(irFunction.irThis(), property.ir.backingField!!)
+          val irPropertyValue = irGetField(receiver(irFunction), property.ir.backingField!!)
 
           val param = property.parameter
           val irPropertyStringValue =
@@ -184,24 +187,27 @@ internal class RedactedIrVisitor(
       }
     }
     irConcat.addArgument(irString(")"))
-    return irConcat
+    +irReturn(irConcat)
   }
 
-  private fun IrFunction.irThis(): IrExpression {
-    val dispatchReceiverParameter = dispatchReceiverParameter!!
-    return IrGetValueImpl(
-        startOffset, endOffset,
-        dispatchReceiverParameter.type,
-        dispatchReceiverParameter.symbol
-    )
-  }
+  /**
+   * Only works properly after [mutateWithNewDispatchReceiverParameterForParentClass] has been called on [irFunction].
+   */
+  private fun IrBlockBodyBuilder.receiver(irFunction: IrFunction) =
+          IrGetValueImpl(irFunction.dispatchReceiverParameter!!)
+
+  private fun IrBlockBodyBuilder.IrGetValueImpl(irParameter: IrValueParameter) = IrGetValueImpl(
+          startOffset, endOffset,
+          irParameter.type,
+          irParameter.symbol
+  )
 
   private fun log(message: String) {
     messageCollector.report(CompilerMessageSeverity.LOGGING, "$LOG_PREFIX $message")
   }
 
   private fun IrClass.reportError(message: String) {
-    val location = CompilerMessageLocation.create(name.asString())
+    val location = MessageUtil.psiElementToMessageLocation(descriptor.source.getPsi())
     messageCollector.report(CompilerMessageSeverity.ERROR, "$LOG_PREFIX $message", location)
   }
 }
