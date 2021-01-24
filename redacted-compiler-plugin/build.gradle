@@ -11,13 +11,12 @@ compileKotlin {
 
 dependencies {
   compileOnly "org.jetbrains.kotlin:kotlin-compiler-embeddable:$kotlin_version"
-  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
 
   compileOnly "com.google.auto.service:auto-service-annotations:$autoservice_version"
   kapt "com.google.auto.service:auto-service:$autoservice_version"
 
   testImplementation "org.jetbrains.kotlin:kotlin-compiler-embeddable:$kotlin_version"
-  testImplementation "com.github.tschuchortdev:kotlin-compile-testing:1.3.4"
+  testImplementation "com.github.tschuchortdev:kotlin-compile-testing:1.3.5"
   testImplementation "junit:junit:4.13.1"
-  testImplementation "com.google.truth:truth:1.1"
+  testImplementation "com.google.truth:truth:1.1.2"
 }

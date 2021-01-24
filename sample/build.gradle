@@ -15,8 +15,6 @@ tasks.withType(KotlinCompile).configureEach {
 }
 
 dependencies {
-  implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-  
   testImplementation "junit:junit:4.13.1"
-  testImplementation "com.google.truth:truth:1.1"
+  testImplementation "com.google.truth:truth:1.1.2"
 }
