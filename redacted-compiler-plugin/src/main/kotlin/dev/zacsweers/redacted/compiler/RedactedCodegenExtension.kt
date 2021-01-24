@@ -7,7 +7,7 @@ import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity.LOGGING
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.cli.common.messages.MessageUtil
 import org.jetbrains.kotlin.codegen.AsmUtil.correctElementType
-import org.jetbrains.kotlin.codegen.AsmUtil.genInvokeAppendMethod
+import org.jetbrains.kotlin.codegen.DescriptorAsmUtil.genInvokeAppendMethod
 import org.jetbrains.kotlin.codegen.ClassBuilder
 import org.jetbrains.kotlin.codegen.FunctionCodegen
 import org.jetbrains.kotlin.codegen.ImplementationBodyCodegen
