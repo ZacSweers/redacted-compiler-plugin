@@ -33,6 +33,14 @@ apply plugin: "binary-compatibility-validator"
 repositories {
     google()
     jcenter()
+    maven {
+        url = "https://dl.bintray.com/kotlin/kotlin-eap"
+        name = "Kotlin-eap"
+        content {
+            // this repository *only* contains Kotlin artifacts (don't try others here)
+            includeGroupByRegex("org\\.jetbrains.*")
+        }
+    }
 }
 
 //region Version.kt template for setting the project version in the build

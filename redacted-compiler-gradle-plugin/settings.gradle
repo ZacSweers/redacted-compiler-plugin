@@ -4,7 +4,12 @@ pluginManagement {
     mavenCentral()
     jcenter()
     maven {
-      url "https://dl.bintray.com/kotlin/kotlin-eap"
+      url = "https://dl.bintray.com/kotlin/kotlin-eap"
+      name = "Kotlin-eap"
+      content {
+        // this repository *only* contains Kotlin artifacts (don't try others here)
+        includeGroupByRegex("org\\.jetbrains.*")
+      }
     }
   }
 }
