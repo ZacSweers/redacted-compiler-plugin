@@ -13,11 +13,6 @@ include ':redacted-compiler-plugin'
 include ':redacted-compiler-plugin-annotations'
 include ':sample'
 
-// Only enable android project on JDK 8 until android tools catch up
-if (!JavaVersion.current().isJava9Compatible() && System.getenv("ANDROID_HOME") != null) {
-  include ':sample-android'
-}
-
 includeBuild('redacted-compiler-gradle-plugin') {
   dependencySubstitution {
     substitute module('dev.zacsweers.redacted:redacted-compiler-plugin-gradle') with project(':')

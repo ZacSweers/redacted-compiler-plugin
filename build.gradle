@@ -11,7 +11,6 @@ buildscript {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "org.jetbrains.dokka:dokka-gradle-plugin:${dokka_version}"
         classpath "com.vanniktech:gradle-maven-publish-plugin:${maven_publish_plugin_version}"
-        classpath "com.android.tools.build:gradle:4.1.1"
         classpath "org.jetbrains.kotlinx:binary-compatibility-validator:${binary_validator_version}"
         classpath "dev.zacsweers.redacted:redacted-compiler-plugin-gradle"
     }
@@ -20,9 +19,6 @@ buildscript {
 apply plugin: "binary-compatibility-validator"
 
 apiValidation {
-    if (!JavaVersion.current().isJava9Compatible() && System.getenv("ANDROID_HOME") != null) {
-        ignoredProjects += 'sample-android'
-    }
     ignoredProjects += ["sample"]
 }
 
