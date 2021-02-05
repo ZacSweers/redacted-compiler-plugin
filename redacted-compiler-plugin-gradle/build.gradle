@@ -1,0 +1,55 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
+apply plugin: "java-gradle-plugin"
+apply plugin: "org.jetbrains.kotlin.jvm"
+apply plugin: "org.jetbrains.kotlin.kapt"
+apply plugin: 'org.jetbrains.dokka'
+apply plugin: "com.vanniktech.maven.publish"
+
+//region Version.kt template for setting the project version in the build
+sourceSets {
+    main.java.srcDirs += "$buildDir/generated/sources/version-templates/kotlin/main"
+}
+
+TaskProvider copyVersionTemplatesProvider = tasks.register("copyVersionTemplates", Copy) {
+    it.inputs.property("version", VERSION_NAME)
+    from project.layout.projectDirectory.dir("version-templates")
+    into project.layout.buildDirectory.dir("generated/sources/version-templates/kotlin/main")
+    expand('projectVersion': "${VERSION_NAME}")
+    filteringCharset = 'UTF-8'
+}
+//endregion
+
+compileKotlin {
+    dependsOn copyVersionTemplatesProvider
+}
+
+gradlePlugin {
+    plugins {
+        redactedPlugin {
+            id = 'dev.zacsweers.redacted'
+            implementationClass = 'dev.zacsweers.redacted.gradle.RedactedGradleSubplugin'
+        }
+    }
+}
+
+tasks.named("dokkaHtml") {
+    outputDirectory.set(rootProject.file("../docs/0.x"))
+    dokkaSourceSets.configureEach {
+        skipDeprecated.set(true)
+
+        // Suppress a package
+//        perPackageOption {
+//            matchingRegex.set(/.*\.internal.*/)
+//            suppress.set(true)
+//        }
+    }
+}
+
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-gradle-plugin-api:$kotlin_version"
+    compileOnly "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+
+    compileOnly "com.google.auto.service:auto-service-annotations:$autoservice_version"
+    kapt "com.google.auto.service:auto-service:$autoservice_version"
+}
