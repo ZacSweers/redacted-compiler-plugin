@@ -27,7 +27,7 @@ buildscript {
 apply plugin: "binary-compatibility-validator"
 
 apiValidation {
-//    ignoredProjects += ["sample"]
+    ignoredProjects += ["sample"]
 }
 
 String resolvedJvmTarget = System.getenv().getOrDefault("ci_java_version", "1.8")
