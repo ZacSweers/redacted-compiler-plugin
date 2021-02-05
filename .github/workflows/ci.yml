@@ -25,4 +25,4 @@ jobs:
         run: ./gradlew --stop && jps|grep -E 'KotlinCompileDaemon|GradleDaemon'| awk '{print $1}'| xargs kill -9
       - name: Upload snapshot (main only)
         if: success() && github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && matrix.ci_java_version == '1.8'
-        run: ./gradlew -p redacted-compiler-gradle-plugin uploadArchives -Dorg.gradle.parallel=false -PSONATYPE_NEXUS_USERNAME=${{ secrets.SonatypeUsername }} -PSONATYPE_NEXUS_PASSWORD=${{ secrets.SonatypePassword }} && ./gradlew uploadArchives -Dorg.gradle.parallel=false -PSONATYPE_NEXUS_USERNAME=${{ secrets.SonatypeUsername }} -PSONATYPE_NEXUS_PASSWORD=${{ secrets.SonatypePassword }}
+        run: ./gradlew uploadArchives -x dokkaHtml --no-parallel -PSONATYPE_NEXUS_USERNAME=${{ secrets.SonatypeUsername }} -PSONATYPE_NEXUS_PASSWORD=${{ secrets.SonatypePassword }}
