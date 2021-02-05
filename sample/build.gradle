@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 apply plugin: 'org.jetbrains.kotlin.jvm'
-apply plugin: 'dev.zacsweers.redacted.redacted-gradle-plugin'
+apply plugin: 'dev.zacsweers.redacted'
 
 tasks.withType(KotlinCompile).configureEach {
   kotlinOptions {
