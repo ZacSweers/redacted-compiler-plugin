@@ -20,14 +20,14 @@ buildscript {
         classpath "org.jetbrains.dokka:dokka-gradle-plugin:${dokka_version}"
         classpath "com.vanniktech:gradle-maven-publish-plugin:${maven_publish_plugin_version}"
         classpath "org.jetbrains.kotlinx:binary-compatibility-validator:${binary_validator_version}"
-        classpath "dev.zacsweers.redacted:redacted-compiler-plugin-gradle"
+//        classpath "dev.zacsweers.redacted:redacted-compiler-plugin-gradle"
     }
 }
 
 apply plugin: "binary-compatibility-validator"
 
 apiValidation {
-    ignoredProjects += ["sample"]
+//    ignoredProjects += ["sample"]
 }
 
 String resolvedJvmTarget = System.getenv().getOrDefault("ci_java_version", "1.8")
@@ -77,23 +77,6 @@ allprojects {
 //                    matchingRegex.set(/.*\.internal.*/)
 //                    suppress.set(true)
 //                }
-            }
-        }
-    }
-}
-
-subprojects {
-    configurations.configureEach {
-        resolutionStrategy {
-            dependencySubstitution {
-                // The Kotlin plugin will try to add the redacted-compiler-plugin to dependencies with a version
-                // We have it local to this project, so we want it to just substitute that with the local project
-                // Not needed for external consumers
-                substitute module('dev.zacsweers.redacted:redacted-compiler-plugin') with project(':redacted-compiler-plugin')
-
-                // The Gradle plugin will add the annotations artifact to dependencies if a custom annotation isn't defined.
-                // Not needed for external consumers
-                substitute module('dev.zacsweers.redacted:redacted-compiler-plugin-annotations') with project(':redacted-compiler-plugin-annotations')
             }
         }
     }

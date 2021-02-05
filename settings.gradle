@@ -9,12 +9,14 @@ pluginManagement {
 }
 
 rootProject.name = 'redacted-compiler-plugin'
+include ':redacted-compiler-plugin-gradle'
 include ':redacted-compiler-plugin'
 include ':redacted-compiler-plugin-annotations'
-include ':sample'
+// TODO re-enable with uploaded version
+//include ':sample'
 
-includeBuild('redacted-compiler-gradle-plugin') {
-  dependencySubstitution {
-    substitute module('dev.zacsweers.redacted:redacted-compiler-plugin-gradle') with project(':')
-  }
-}
+//includeBuild('redacted-compiler-gradle-plugin') {
+//  dependencySubstitution {
+//    substitute module('dev.zacsweers.redacted:redacted-compiler-plugin-gradle') with project(':')
+//  }
+//}
