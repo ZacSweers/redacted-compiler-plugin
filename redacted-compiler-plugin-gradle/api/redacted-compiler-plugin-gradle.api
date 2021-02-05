@@ -11,16 +11,8 @@ public final class dev/zacsweers/redacted/gradle/RedactedGradleSubplugin : org/j
 
 public abstract class dev/zacsweers/redacted/gradle/RedactedPluginExtension {
 	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
-	public final fun androidVariantFilter (Lorg/gradle/api/Action;)V
 	public final fun getEnabled ()Lorg/gradle/api/provider/Property;
 	public final fun getRedactedAnnotation ()Lorg/gradle/api/provider/Property;
 	public final fun getReplacementString ()Lorg/gradle/api/provider/Property;
-}
-
-public abstract interface class dev/zacsweers/redacted/gradle/VariantFilter {
-	public abstract fun getBuildType ()Lcom/android/builder/model/BuildType;
-	public abstract fun getFlavors ()Ljava/util/List;
-	public abstract fun getName ()Ljava/lang/String;
-	public abstract fun overrideEnabled (Z)V
 }
 
