@@ -1,12 +1,15 @@
 Changelog
 =========
 
-0.7.0
+0.8.0
 ------------
 
-_2021-02-04_
+_2021-02-05_
 
+* **Change:** The gradle plugin id is now `dev.zacsweers.redacted`.
 * Support (and requires) Kotlin 1.4.30.
+
+_There may be 0.7.x versions on sonatype. Don't use them, they are broken._
 
 0.6.1
 ------------
