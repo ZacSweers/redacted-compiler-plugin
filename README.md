@@ -45,7 +45,7 @@ Apply the gradle plugin.
 
 ```gradle
 plugins {
-  id("dev.zacsweers.redacted.redacted-gradle-plugin") version <version>
+  id("dev.zacsweers.redacted") version <version>
 }
 ```
 
