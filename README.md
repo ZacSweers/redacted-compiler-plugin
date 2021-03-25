@@ -70,29 +70,6 @@ redacted {
 }
 ```
 
-### Android Per-Variant Configuration
-
-If using Android, you can optionally configure the plugin to be applied on a per-variant basis via
-`androidVariantFilter`. This is similar to the Android Gradle Plugin's native `variantFilter` API,
-except with an `overrideEnabled` function to override the enabled status and there is no
-`defaultConfig` property. If not overridden, the default is to match the `redacted` extension's value.
-Other `VariantFilter` APIs should behave as expected (buildType, flavors, name, etc).
-
-**Note:** Variants with different `enabled` values will have to be compiled separately. This is common
-in most multi-variant projects anyway, but something to be aware of.
-
-```groovy
-redacted {
-  enabled = true // Default
-  androidVariantFilter {
-    // Don't enable on debug
-    if (buildType.name == "debug") {
-      overrideEnabled(false)
-    }
-  }
-}
-```
-
 Snapshots of the development version are available in [Sonatype's `snapshots` repository][snapshots].
 
 ## Caveats
