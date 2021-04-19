@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        ci_java_version: [1.8, 11, 12, 13, 14, 15]
+        ci_java_version: [8, 11, 12, 13, 14, 15]
         ci_use_ir: [true, false]
         ci_kotlin_version: [1.4.32, 1.5.0-RC]
         exclude:
@@ -21,13 +21,14 @@ jobs:
       - name: Gradle Wrapper Validation
         uses: gradle/wrapper-validation-action@v1
       - name: Install JDK ${{ matrix.ci_java_version }}
-        uses: actions/setup-java@v1
+        uses: actions/setup-java@v2
         with:
+          distribution: 'adopt'
           java-version: ${{ matrix.ci_java_version }}
       - name: Build with Gradle
         run: ./gradlew clean check --stacktrace -PuseIR=${{ matrix.ci_use_ir }} -Pkotlin_version=${{ matrix.ci_kotlin_version }}
       - name: Reclaim memory
         run: ./gradlew --stop && jps|grep -E 'KotlinCompileDaemon|GradleDaemon'| awk '{print $1}'| xargs kill -9
       - name: Upload snapshot (main only)
-        if: success() && github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && matrix.ci_java_version == '1.8' && matrix.ci_kotlin_version == '1.4.32'
+        if: success() && github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && matrix.ci_java_version == '8' && matrix.ci_kotlin_version == '1.4.32'
         run: ./gradlew uploadArchives -x dokkaHtml --no-parallel -PSONATYPE_NEXUS_USERNAME=${{ secrets.SonatypeUsername }} -PSONATYPE_NEXUS_PASSWORD=${{ secrets.SonatypePassword }}
