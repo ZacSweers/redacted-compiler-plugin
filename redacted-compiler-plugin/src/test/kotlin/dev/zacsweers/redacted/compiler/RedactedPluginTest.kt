@@ -10,22 +10,8 @@ import org.jetbrains.kotlin.config.JvmTarget
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
-import org.junit.runner.RunWith
-import org.junit.runners.Parameterized
 
-@RunWith(Parameterized::class)
-class RedactedPluginTest(private val useIr: Boolean) {
-
-  companion object {
-    @JvmStatic
-    @Parameterized.Parameters(name = "useIr={0}")
-    fun data() : Collection<Array<Any>> {
-      return listOf(
-          arrayOf(true),
-          arrayOf(false)
-      )
-    }
-  }
+class RedactedPluginTest {
 
   @Rule
   @JvmField
@@ -238,9 +224,6 @@ class RedactedPluginTest(private val useIr: Boolean) {
         .apply {
           workingDir = temporaryFolder.root
           compilerPlugins = listOf(RedactedComponentRegistrar())
-          if (useIr) {
-            kotlincArguments = listOf("-Xuse-ir")
-          }
           val processor = RedactedCommandLineProcessor()
           commandLineProcessors = listOf(processor)
           pluginOptions = listOf(

@@ -51,7 +51,6 @@ allprojects {
             kotlinOptions {
                 jvmTarget = resolvedJvmTarget
                 freeCompilerArgs += ['-progressive', '-Xjvm-default=all']
-                useIR = false
             }
         }
     }
@@ -61,7 +60,6 @@ allprojects {
             kotlinOptions {
                 jvmTarget = resolvedJvmTarget
                 freeCompilerArgs += ['-progressive', '-Xjvm-default=all']
-                useIR = false
             }
         }
     }
