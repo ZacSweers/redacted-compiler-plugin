@@ -4,15 +4,6 @@ buildscript {
     repositories {
         google()
         mavenCentral()
-        jcenter()
-        maven {
-            url = "https://dl.bintray.com/kotlin/kotlin-eap"
-            name = "Kotlin-eap"
-            content {
-                // this repository *only* contains Kotlin artifacts (don't try others here)
-                includeGroupByRegex("org\\.jetbrains.*")
-            }
-        }
     }
 
     dependencies {
@@ -35,15 +26,6 @@ allprojects {
     repositories {
         google()
         mavenCentral()
-        jcenter()
-        maven {
-            url = "https://dl.bintray.com/kotlin/kotlin-eap"
-            name = "Kotlin-eap"
-            content {
-                // this repository *only* contains Kotlin artifacts (don't try others here)
-                includeGroupByRegex("org\\.jetbrains.*")
-            }
-        }
     }
 
     pluginManager.withPlugin("org.jetbrains.kotlin.jvm") {
