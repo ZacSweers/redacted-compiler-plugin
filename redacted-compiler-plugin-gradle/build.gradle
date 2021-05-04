@@ -1,8 +1,6 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 apply plugin: "java-gradle-plugin"
 apply plugin: "org.jetbrains.kotlin.jvm"
-apply plugin: "org.jetbrains.kotlin.kapt"
+apply plugin: 'com.google.devtools.ksp'
 apply plugin: 'org.jetbrains.dokka'
 apply plugin: "com.vanniktech.maven.publish"
 
@@ -50,6 +48,6 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-gradle-plugin-api:$kotlin_version"
     compileOnly "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
 
-    compileOnly "com.google.auto.service:auto-service-annotations:$autoservice_version"
-    kapt "com.google.auto.service:auto-service:$autoservice_version"
+    implementation "com.google.auto.service:auto-service-annotations:$autoservice_version"
+    ksp "dev.zacsweers.autoservice:auto-service-ksp:$autoservice_ksp_version"
 }

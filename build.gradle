@@ -4,15 +4,6 @@ buildscript {
     repositories {
         google()
         mavenCentral()
-        jcenter()
-        maven {
-            url = "https://dl.bintray.com/kotlin/kotlin-eap"
-            name = "Kotlin-eap"
-            content {
-                // this repository *only* contains Kotlin artifacts (don't try others here)
-                includeGroupByRegex("org\\.jetbrains.*")
-            }
-        }
     }
 
     dependencies {
@@ -21,6 +12,7 @@ buildscript {
         classpath "com.vanniktech:gradle-maven-publish-plugin:${maven_publish_plugin_version}"
         classpath "org.jetbrains.kotlinx:binary-compatibility-validator:${binary_validator_version}"
         classpath "dev.zacsweers.redacted:redacted-compiler-plugin-gradle:0.8.0"
+        classpath "com.google.devtools.ksp:symbol-processing-gradle-plugin:1.5.0-1.0.0-alpha09"
     }
 }
 
@@ -35,15 +27,6 @@ allprojects {
     repositories {
         google()
         mavenCentral()
-        jcenter()
-        maven {
-            url = "https://dl.bintray.com/kotlin/kotlin-eap"
-            name = "Kotlin-eap"
-            content {
-                // this repository *only* contains Kotlin artifacts (don't try others here)
-                includeGroupByRegex("org\\.jetbrains.*")
-            }
-        }
     }
 
     pluginManager.withPlugin("org.jetbrains.kotlin.jvm") {
@@ -51,7 +34,6 @@ allprojects {
             kotlinOptions {
                 jvmTarget = resolvedJvmTarget
                 freeCompilerArgs += ['-progressive', '-Xjvm-default=all']
-                useIR = false
             }
         }
     }
@@ -61,7 +43,6 @@ allprojects {
             kotlinOptions {
                 jvmTarget = resolvedJvmTarget
                 freeCompilerArgs += ['-progressive', '-Xjvm-default=all']
-                useIR = false
             }
         }
     }

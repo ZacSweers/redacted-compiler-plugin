@@ -5,10 +5,7 @@ apply plugin: 'dev.zacsweers.redacted'
 
 tasks.withType(KotlinCompile).configureEach {
   kotlinOptions {
-    useIR = hasProperty("useIR") && Boolean.parseBoolean(property("useIR"))
     if (JavaVersion.current().java9Compatible) {
-      println "Enabling string-concat"
-      freeCompilerArgs += "-Xstring-concat=indy-with-constants"
       jvmTarget = JavaVersion.current().toString()
     }
   }
