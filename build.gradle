@@ -12,6 +12,7 @@ buildscript {
         classpath "com.vanniktech:gradle-maven-publish-plugin:${maven_publish_plugin_version}"
         classpath "org.jetbrains.kotlinx:binary-compatibility-validator:${binary_validator_version}"
         classpath "dev.zacsweers.redacted:redacted-compiler-plugin-gradle:0.8.0"
+        classpath "com.google.devtools.ksp:symbol-processing-gradle-plugin:1.5.0-1.0.0-alpha09"
     }
 }
 
