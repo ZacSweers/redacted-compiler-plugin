@@ -44,6 +44,12 @@ SensitiveData(██)
 Apply the gradle plugin.
 
 ```gradle
+buildscript {
+    dependencies {
+        classpath "dev.zacsweers.redacted:redacted-compiler-plugin-gradle:[latest-version]"
+    }
+}
+
 plugins {
   id("dev.zacsweers.redacted") version <version>
 }
