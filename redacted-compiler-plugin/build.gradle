@@ -11,7 +11,7 @@ compileKotlin {
 }
 
 dependencies {
-  compileOnly "org.jetbrains.kotlin:kotlin-compiler-embeddable:$kotlin_version"
+  compileOnly "org.jetbrains.kotlin:kotlin-compiler-embeddable:1.5.30"
   implementation "com.google.auto.service:auto-service-annotations:$autoservice_version"
 
   testImplementation "org.jetbrains.kotlin:kotlin-compiler-embeddable:$kotlin_version"
