@@ -4,11 +4,12 @@ on: [push, pull_request]
 
 jobs:
   build:
-    name: Kotlin ${{ matrix.ci_kotlin_version }}
+    name: Kotlin ${{ matrix.ci_kotlin_version }} | StringConcat ${{ }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
         ci_kotlin_version: [1.5.30]
+        ci_string_concat: ['inline', 'indy', 'indy-with-constants']
     steps:
       - name: Checkout
         uses: actions/checkout@v1
@@ -20,9 +21,9 @@ jobs:
           distribution: 'adopt'
           java-version: '16'
       - name: Build with Gradle
-        run: ./gradlew clean check --stacktrace -Pkotlin_version=${{ matrix.ci_kotlin_version }}
+        run: ./gradlew clean check --stacktrace -Pkotlin_version=${{ matrix.ci_kotlin_version }} -Pstring_concat=${{ matrix.ci_string_concat }}
       - name: Reclaim memory
         run: ./gradlew --stop && jps|grep -E 'KotlinCompileDaemon|GradleDaemon'| awk '{print $1}'| xargs kill -9 || true
       - name: Upload snapshot (main only)
-        if: success() && github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && matrix.ci_kotlin_version == '1.5.30'
+        if: success() && github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && matrix.ci_kotlin_version == '1.5.30' && matrix.ci_string_concat == 'inline'
         run: ./gradlew publish -x dokkaHtml --no-parallel -PmavenCentralUsername=${{ secrets.SonatypeUsername }} -PmavenCentralPassword=${{ secrets.SonatypePassword }}

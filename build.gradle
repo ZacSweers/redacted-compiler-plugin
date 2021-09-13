@@ -35,16 +35,9 @@ allprojects {
     pluginManager.withPlugin("org.jetbrains.kotlin.jvm") {
         project.tasks.withType(KotlinCompile).configureEach {
             kotlinOptions {
-                jvmTarget = "1.8"
-                freeCompilerArgs += ['-progressive', '-Xjvm-default=all']
-            }
-        }
-    }
-
-    pluginManager.withPlugin("org.jetbrains.kotlin.android") {
-        project.tasks.withType(KotlinCompile).configureEach {
-            kotlinOptions {
-                jvmTarget = "1.8"
+                if (project.name != "sample") {
+                    jvmTarget = "1.8"
+                }
                 freeCompilerArgs += ['-progressive', '-Xjvm-default=all']
             }
         }
