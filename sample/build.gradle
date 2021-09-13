@@ -5,13 +5,12 @@ apply plugin: 'dev.zacsweers.redacted'
 
 tasks.withType(KotlinCompile).configureEach {
   kotlinOptions {
-    if (JavaVersion.current().java9Compatible) {
-      jvmTarget = JavaVersion.current().toString()
-    }
+    jvmTarget = "11"
+    freeCompilerArgs += "-Xstring-concat=${project.findProperty("string_concat")}"
   }
 }
 
 dependencies {
   testImplementation "junit:junit:4.13.2"
-  testImplementation "com.google.truth:truth:1.1.2"
+  testImplementation 'com.google.truth:truth:1.1.3'
 }

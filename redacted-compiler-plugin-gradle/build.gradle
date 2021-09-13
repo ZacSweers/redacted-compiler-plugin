@@ -1,8 +1,9 @@
-apply plugin: "java-gradle-plugin"
-apply plugin: "org.jetbrains.kotlin.jvm"
-apply plugin: 'com.google.devtools.ksp'
-apply plugin: 'org.jetbrains.dokka'
-apply plugin: "com.vanniktech.maven.publish"
+plugins {
+    id("java-gradle-plugin")
+    id("org.jetbrains.kotlin.jvm")
+    id("org.jetbrains.dokka")
+    id("com.vanniktech.maven.publish")
+}
 
 //region Version.kt template for setting the project version in the build
 sourceSets {
@@ -35,19 +36,11 @@ tasks.named("dokkaHtml") {
     outputDirectory.set(rootProject.file("../docs/0.x"))
     dokkaSourceSets.configureEach {
         skipDeprecated.set(true)
-
-        // Suppress a package
-//        perPackageOption {
-//            matchingRegex.set(/.*\.internal.*/)
-//            suppress.set(true)
-//        }
     }
 }
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-gradle-plugin-api:$kotlin_version"
     compileOnly "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-
     implementation "com.google.auto.service:auto-service-annotations:$autoservice_version"
-    ksp "dev.zacsweers.autoservice:auto-service-ksp:$autoservice_ksp_version"
 }

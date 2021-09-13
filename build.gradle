@@ -1,19 +1,12 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-buildscript {
-    repositories {
-        google()
-        mavenCentral()
-    }
-
-    dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath "org.jetbrains.dokka:dokka-gradle-plugin:${dokka_version}"
-        classpath "com.vanniktech:gradle-maven-publish-plugin:${maven_publish_plugin_version}"
-        classpath "org.jetbrains.kotlinx:binary-compatibility-validator:${binary_validator_version}"
-        classpath "dev.zacsweers.redacted:redacted-compiler-plugin-gradle:0.8.0"
-        classpath "com.google.devtools.ksp:symbol-processing-gradle-plugin:1.5.0-1.0.0-alpha09"
-    }
+plugins {
+    id("org.jetbrains.kotlin.jvm") version "1.5.30" apply false
+    id("org.jetbrains.dokka") version "1.5.0" apply false
+    id("org.jetbrains.kotlinx.binary-compatibility-validator") version "0.7.1" apply false
+    id("com.google.devtools.ksp") version "1.5.30-1.0.0" apply false
+    id("com.vanniktech.maven.publish") version "0.17.0" apply false
+    id("dev.zacsweers.redacted") version "0.8.0" apply false
 }
 
 apply plugin: "binary-compatibility-validator"
@@ -22,26 +15,29 @@ apiValidation {
     ignoredProjects += ["sample"]
 }
 
-String resolvedJvmTarget = System.getenv().getOrDefault("ci_java_version", "1.8")
 allprojects {
     repositories {
         google()
         mavenCentral()
     }
 
-    pluginManager.withPlugin("org.jetbrains.kotlin.jvm") {
-        project.tasks.withType(KotlinCompile).configureEach {
-            kotlinOptions {
-                jvmTarget = resolvedJvmTarget
-                freeCompilerArgs += ['-progressive', '-Xjvm-default=all']
+    pluginManager.withPlugin("java") {
+        java {
+            toolchain {
+                languageVersion.set(JavaLanguageVersion.of(11))
             }
+        }
+        tasks.withType(JavaCompile).configureEach {
+            options.release.set(8)
         }
     }
 
-    pluginManager.withPlugin("org.jetbrains.kotlin.android") {
+    pluginManager.withPlugin("org.jetbrains.kotlin.jvm") {
         project.tasks.withType(KotlinCompile).configureEach {
             kotlinOptions {
-                jvmTarget = resolvedJvmTarget
+                if (project.name != "sample") {
+                    jvmTarget = "1.8"
+                }
                 freeCompilerArgs += ['-progressive', '-Xjvm-default=all']
             }
         }
@@ -52,12 +48,6 @@ allprojects {
             outputDirectory.set(rootProject.file("docs/0.x"))
             dokkaSourceSets.configureEach {
                 skipDeprecated.set(true)
-
-                // Suppress a package
-//                perPackageOption {
-//                    matchingRegex.set(/.*\.internal.*/)
-//                    suppress.set(true)
-//                }
             }
         }
     }
