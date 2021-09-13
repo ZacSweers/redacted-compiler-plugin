@@ -14,7 +14,7 @@ dependencies {
   compileOnly "org.jetbrains.kotlin:kotlin-compiler-embeddable:1.5.30"
   implementation "com.google.auto.service:auto-service-annotations:$autoservice_version"
 
-  testImplementation "org.jetbrains.kotlin:kotlin-compiler-embeddable:$kotlin_version"
+  testImplementation "org.jetbrains.kotlin:kotlin-compiler-embeddable:1.5.30"
   testImplementation 'com.github.tschuchortdev:kotlin-compile-testing:1.4.4'
   testImplementation "junit:junit:4.13.2"
   testImplementation 'com.google.truth:truth:1.1.3'
