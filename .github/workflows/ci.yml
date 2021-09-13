@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        ci_kotlin_version: [1.5.30]
+        ci_kotlin_version: [1.6.0-M1-8]
         ci_string_concat: ['inline', 'indy', 'indy-with-constants']
     steps:
       - name: Checkout
