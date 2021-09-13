@@ -30,8 +30,10 @@ allprojects {
                 languageVersion.set(JavaLanguageVersion.of(11))
             }
         }
-        tasks.withType(JavaCompile).configureEach {
-            options.release.set(8)
+        if (project.name != "sample") {
+            tasks.withType(JavaCompile).configureEach {
+                options.release.set(8)
+            }
         }
     }
 
