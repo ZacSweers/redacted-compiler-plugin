@@ -40,7 +40,7 @@ tasks.named("dokkaHtml") {
 }
 
 dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-gradle-plugin-api:1.5.30"
-    compileOnly "org.jetbrains.kotlin:kotlin-gradle-plugin:1.5.30"
+    implementation "org.jetbrains.kotlin:kotlin-gradle-plugin-api:1.5.31"
+    compileOnly "org.jetbrains.kotlin:kotlin-gradle-plugin:1.5.31"
     implementation "com.google.auto.service:auto-service-annotations:$autoservice_version"
 }
