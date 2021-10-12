@@ -10,6 +10,13 @@ tasks.withType(KotlinCompile).configureEach {
   }
 }
 
+configurations.configureEach {
+  resolutionStrategy.dependencySubstitution {
+    substitute module("dev.zacsweers.redacted:redacted-compiler-plugin-annotations") using project(':redacted-compiler-plugin-annotations')
+    substitute module("dev.zacsweers.redacted:redacted-compiler-plugin") using project(':redacted-compiler-plugin')
+  }
+}
+
 dependencies {
   testImplementation "junit:junit:4.13.2"
   testImplementation 'com.google.truth:truth:1.1.3'
