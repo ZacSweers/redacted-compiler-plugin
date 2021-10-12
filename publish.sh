@@ -7,7 +7,7 @@ if ! [[ ${local} ]]; then
   ./gradlew -p redacted-compiler-plugin-gradle clean publish --no-daemon --no-parallel -x dokkaHtml
   ./gradlew clean publish --no-daemon --no-parallel -x dokkaHtml
   if ! [[ ${snapshot} ]]; then
-    ./gradlew -p redacted-compiler-plugin-gradle closeAndReleaseRepository
+    ./gradlew closeAndReleaseRepository
   fi
 else
   ./gradlew -p redacted-compiler-plugin-gradle clean install --no-daemon --no-parallel -x dokkaHtml
