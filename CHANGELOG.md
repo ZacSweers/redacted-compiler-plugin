@@ -1,6 +1,13 @@
 Changelog
 =========
 
+0.8.1
+------------
+
+_2021-10-12_
+
+* Support for Kotlin 1.6 (built against 1.6.0-RC). This release should only be used for testing with Kotlin 1.6 previews.
+
 0.8.0
 ------------
 
