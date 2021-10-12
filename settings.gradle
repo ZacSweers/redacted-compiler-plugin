@@ -7,7 +7,12 @@ pluginManagement {
 }
 
 rootProject.name = 'redacted-compiler-plugin'
-include ':redacted-compiler-plugin-gradle'
 include ':redacted-compiler-plugin'
 include ':redacted-compiler-plugin-annotations'
 include ':sample'
+
+includeBuild('redacted-compiler-plugin-gradle') {
+  dependencySubstitution {
+    substitute module('dev.zacsweers.redacted:redacted-compiler-plugin-gradle') using project(':')
+  }
+}
