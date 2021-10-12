@@ -86,7 +86,7 @@ class RedactedPluginTest {
 
   @Test
   fun customReplacement() {
-    val result = compile(kotlin("source.kt",
+    val result = compile("<redacted>", kotlin("source.kt",
         """
           package dev.zacsweers.redacted.compiler.test
 
@@ -97,6 +97,9 @@ class RedactedPluginTest {
     ))
     assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.OK)
     assertThat(result.messages).doesNotContain(LOG_PREFIX)
+    val testClass = result.classLoader.loadClass("dev.zacsweers.redacted.compiler.test.Test")
+    val instance = testClass.getConstructor(Int::class.javaPrimitiveType).newInstance(2)
+    assertThat(instance.toString()).isEqualTo("Test(a=<redacted>)")
   }
 
   @Test
@@ -219,7 +222,16 @@ class RedactedPluginTest {
     )
   }
 
-  private fun prepareCompilation(vararg sourceFiles: SourceFile): KotlinCompilation {
+  private fun prepareCompilation(
+    vararg sourceFiles: SourceFile
+  ): KotlinCompilation {
+    return prepareCompilation(null, *sourceFiles)
+  }
+
+  private fun prepareCompilation(
+    replacementString: String? = null,
+    vararg sourceFiles: SourceFile
+  ): KotlinCompilation {
     return KotlinCompilation()
         .apply {
           workingDir = temporaryFolder.root
@@ -228,7 +240,7 @@ class RedactedPluginTest {
           commandLineProcessors = listOf(processor)
           pluginOptions = listOf(
               processor.option(KEY_ENABLED, "true"),
-              processor.option(KEY_REPLACEMENT_STRING, "██"),
+              processor.option(KEY_REPLACEMENT_STRING, replacementString ?: "██"),
               processor.option(KEY_REDACTED_ANNOTATION, "dev.zacsweers.redacted.compiler.test.Redacted"),
           )
           inheritClassPath = true
@@ -243,8 +255,17 @@ class RedactedPluginTest {
     return PluginOption(pluginId, key.toString(), value.toString())
   }
 
-  private fun compile(vararg sourceFiles: SourceFile): KotlinCompilation.Result {
-    return prepareCompilation(*sourceFiles).compile()
+  private fun compile(
+    vararg sourceFiles: SourceFile
+  ): KotlinCompilation.Result {
+    return compile(null, *sourceFiles)
+  }
+
+  private fun compile(
+    replacementString: String? = null,
+    vararg sourceFiles: SourceFile
+  ): KotlinCompilation.Result {
+    return prepareCompilation(replacementString, *sourceFiles).compile()
   }
 
 }
