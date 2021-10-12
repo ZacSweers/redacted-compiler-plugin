@@ -25,5 +25,8 @@ jobs:
       - name: Reclaim memory
         run: ./gradlew --stop && jps|grep -E 'KotlinCompileDaemon|GradleDaemon'| awk '{print $1}'| xargs kill -9 || true
       - name: Upload snapshot (main only)
-        if: success() && github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && matrix.ci_kotlin_version == '1.5.31' && matrix.ci_string_concat == 'inline'
-        run: ./gradlew publish -x dokkaHtml --no-parallel -PmavenCentralUsername=${{ secrets.SonatypeUsername }} -PmavenCentralPassword=${{ secrets.SonatypePassword }}
+        env:
+          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.SonatypeUsername }}
+          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.SonatypePassword }}
+        if: success() && github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && matrix.ci_kotlin_version == '1.6.0-RC' && matrix.ci_string_concat == 'inline'
+        run: ./publish.sh --snapshot
