@@ -2,6 +2,7 @@ plugins {
   id("org.jetbrains.kotlin.jvm")
   id("org.jetbrains.dokka")
   id("com.vanniktech.maven.publish")
+  id("com.google.devtools.ksp")
 }
 
 compileKotlin {
@@ -13,6 +14,7 @@ compileKotlin {
 dependencies {
   compileOnly "org.jetbrains.kotlin:kotlin-compiler-embeddable:1.6.0-RC"
   implementation "com.google.auto.service:auto-service-annotations:$autoservice_version"
+  ksp "dev.zacsweers.autoservice:auto-service-ksp:1.0.0"
 
   testImplementation "org.jetbrains.kotlin:kotlin-compiler-embeddable:1.6.0-RC"
   testImplementation 'com.github.tschuchortdev:kotlin-compile-testing:1.4.5'
