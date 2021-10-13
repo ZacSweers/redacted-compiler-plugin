@@ -10,6 +10,6 @@ if ! [[ ${local} ]]; then
     ./gradlew closeAndReleaseRepository
   fi
 else
-  ./gradlew -p redacted-compiler-plugin-gradle clean install --no-daemon --no-parallel -x dokkaHtml
-  ./gradlew clean install --no-daemon --no-parallel -x dokkaHtml
+  ./gradlew -p redacted-compiler-plugin-gradle clean publishToMavenLocal --no-daemon --no-parallel -x dokkaHtml
+  ./gradlew clean publishToMavenLocal --no-daemon --no-parallel -x dokkaHtml
 fi
