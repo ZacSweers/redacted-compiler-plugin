@@ -5,9 +5,20 @@ plugins {
   id("com.google.devtools.ksp")
 }
 
+java {
+  toolchain {
+    languageVersion.set(JavaLanguageVersion.of(17))
+  }
+}
+
+tasks.withType(JavaCompile).configureEach {
+  options.release.set(8)
+}
+
 compileKotlin {
   kotlinOptions {
     freeCompilerArgs += "-Xopt-in=kotlin.RequiresOptIn"
+    jvmTarget = "1.8"
   }
 }
 
