@@ -5,6 +5,16 @@ plugins {
     id("com.vanniktech.maven.publish") version "0.18.0"
 }
 
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.release.set(8)
+}
+
 //region Version.kt template for setting the project version in the build
 sourceSets {
     main.java.srcDirs += "$buildDir/generated/sources/version-templates/kotlin/main"
@@ -21,6 +31,9 @@ TaskProvider copyVersionTemplatesProvider = tasks.register("copyVersionTemplates
 
 compileKotlin {
     dependsOn copyVersionTemplatesProvider
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
 }
 
 gradlePlugin {
