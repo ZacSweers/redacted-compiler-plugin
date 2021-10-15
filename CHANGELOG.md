@@ -1,18 +1,24 @@
 Changelog
 =========
 
+0.8.3
+------------
+
+_2021-10-15_
+
+* Support for Kotlin 1.6 (built against `1.6.0-RC`). This release should only be used for testing with Kotlin 1.6 previews.
+
 0.8.2
 ------------
 
 _2021-10-12_
 
-* Support for Kotlin 1.6 (built against `1.6.0-RC`). This release should only be used for testing with Kotlin 1.6 previews.
-
+This release was accidentally broken and should not be used! Specifically, the gradle plugin accidentally targeted Java 17.
 
 0.8.1
 ------------
 
-This release was accidentally broken and should not be used!
+This release was accidentally broken and should not be used! Specifically, the compiler plugin itself was missing a service file and would not run.
 
 0.8.0
 ------------
