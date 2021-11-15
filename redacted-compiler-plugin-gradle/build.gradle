@@ -1,5 +1,5 @@
 plugins {
-    id("org.jetbrains.kotlin.jvm") version "1.6.0-RC"
+    id("org.jetbrains.kotlin.jvm") version "1.6.0"
     id("java-gradle-plugin")
     id("org.jetbrains.dokka") version "1.5.30"
     id("com.vanniktech.maven.publish") version "0.18.0"
@@ -57,7 +57,7 @@ repositories {
 }
 
 dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-gradle-plugin-api:1.6.0-RC"
-    compileOnly "org.jetbrains.kotlin:kotlin-gradle-plugin:1.6.0-RC"
+    implementation "org.jetbrains.kotlin:kotlin-gradle-plugin-api:1.6.0"
+    compileOnly "org.jetbrains.kotlin:kotlin-gradle-plugin:1.6.0"
     implementation "com.google.auto.service:auto-service-annotations:1.0"
 }

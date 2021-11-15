@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        ci_kotlin_version: ['1.6.0-RC']
+        ci_kotlin_version: ['1.6.0']
         ci_string_concat: ['inline', 'indy', 'indy-with-constants']
     steps:
       - name: Checkout
@@ -28,5 +28,5 @@ jobs:
         env:
           ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.SonatypeUsername }}
           ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.SonatypePassword }}
-        if: success() && github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && matrix.ci_kotlin_version == '1.6.0-RC' && matrix.ci_string_concat == 'inline'
+        if: success() && github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && matrix.ci_kotlin_version == '1.6.0' && matrix.ci_string_concat == 'inline'
         run: ./publish.sh --snapshot
