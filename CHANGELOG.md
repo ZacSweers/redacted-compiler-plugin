@@ -1,6 +1,13 @@
 Changelog
 =========
 
+0.9.0
+------------
+
+_2021-11-16_
+
+* Formal support for Kotlin 1.6. This plugin requires Kotlin 1.6 now.
+
 0.8.3
 ------------
 
