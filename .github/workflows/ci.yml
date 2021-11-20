@@ -4,7 +4,7 @@ on: [ push, pull_request ]
 
 jobs:
   jvm:
-    name: Kotlin ${{ matrix.ci_kotlin_version }} | StringConcat ${{ matrix.ci_string_concat }}
+    name: jvm | Kotlin ${{ matrix.ci_kotlin_version }} | StringConcat ${{ matrix.ci_string_concat }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
