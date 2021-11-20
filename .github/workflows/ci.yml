@@ -23,8 +23,13 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew clean check -Dkjs=false -Dknative=false --stacktrace -Pkotlin_version=${{ matrix.ci_kotlin_version }} -Pstring_concat=${{ matrix.ci_string_concat }}
 
-  multiplatform:
-    runs-on: macOS-latest
+  all-platforms:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ macos-11, ubuntu-latest, windows-latest ]
 
     steps:
       - name: Checkout
@@ -40,50 +45,12 @@ jobs:
           java-version: '17'
 
       - name: Test
-        run: ./gradlew build
-
-  linux:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Validate Gradle Wrapper
-        uses: gradle/wrapper-validation-action@v1
-
-      - name: Configure JDK
-        uses: actions/setup-java@v2
-        with:
-          distribution: 'zulu'
-          java-version: '17'
-
-      - name: Test
-        run: ./gradlew build
-
-  windows:
-    runs-on: windows-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Validate Gradle Wrapper
-        uses: gradle/wrapper-validation-action@v1
-
-      - name: Configure JDK
-        uses: actions/setup-java@v2
-        with:
-          distribution: 'zulu'
-          java-version: '17'
-
-      - name: Test
-        run: ./gradlew build
+        run: ./gradlew check
 
   publish:
-    runs-on: macOS-latest
+    runs-on: macos-11
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && github.repository == 'zacsweers/redacted-compiler-plugin'
-    needs: [ jvm, multiplatform, windows ]
+    needs: [ jvm, all-platforms ]
 
     steps:
       - name: Checkout
@@ -104,7 +71,7 @@ jobs:
   publish-windows:
     runs-on: windows-latest
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && github.repository == 'zacsweers/redacted-compiler-plugin'
-    needs: [ jvm, multiplatform, windows ]
+    needs: [ jvm, all-platforms ]
 
     steps:
       - name: Checkout
