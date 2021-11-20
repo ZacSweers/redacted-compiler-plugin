@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) 2021 Zac Sweers
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.zacsweers.redacted.gradle
 
 import org.gradle.api.Project
@@ -20,11 +35,11 @@ class RedactedGradleSubplugin : KotlinCompilerPluginSupportPlugin {
       SubpluginArtifact(
           groupId = "dev.zacsweers.redacted",
           artifactId = "redacted-compiler-plugin",
-          version = VERSION
-      )
+          version = VERSION)
 
   override fun isApplicable(kotlinCompilation: KotlinCompilation<*>): Boolean {
-    return (kotlinCompilation.platformType == KotlinPlatformType.jvm || kotlinCompilation.platformType == KotlinPlatformType.androidJvm)
+    return (kotlinCompilation.platformType == KotlinPlatformType.jvm ||
+        kotlinCompilation.platformType == KotlinPlatformType.androidJvm)
   }
 
   override fun applyToCompilation(
@@ -36,8 +51,8 @@ class RedactedGradleSubplugin : KotlinCompilerPluginSupportPlugin {
 
     // Default annotation is used, so add it as a dependency
     if (annotation.get() == DEFAULT_ANNOTATION) {
-      project.dependencies.add("implementation",
-          "dev.zacsweers.redacted:redacted-compiler-plugin-annotations:$VERSION")
+      project.dependencies.add(
+          "implementation", "dev.zacsweers.redacted:redacted-compiler-plugin-annotations:$VERSION")
     }
 
     val enabled = extension.enabled.get()
@@ -46,8 +61,7 @@ class RedactedGradleSubplugin : KotlinCompilerPluginSupportPlugin {
       listOf(
           SubpluginOption(key = "enabled", value = enabled.toString()),
           SubpluginOption(key = "replacementString", value = extension.replacementString.get()),
-          SubpluginOption(key = "redactedAnnotation", value = annotation.get())
-      )
+          SubpluginOption(key = "redactedAnnotation", value = annotation.get()))
     }
   }
 }
