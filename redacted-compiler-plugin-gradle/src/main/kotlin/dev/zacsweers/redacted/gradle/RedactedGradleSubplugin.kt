@@ -19,7 +19,6 @@ import org.gradle.api.Project
 import org.gradle.api.provider.Provider
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilerPluginSupportPlugin
-import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
 import org.jetbrains.kotlin.gradle.plugin.SubpluginArtifact
 import org.jetbrains.kotlin.gradle.plugin.SubpluginOption
 
@@ -37,10 +36,7 @@ class RedactedGradleSubplugin : KotlinCompilerPluginSupportPlugin {
           artifactId = "redacted-compiler-plugin",
           version = VERSION)
 
-  override fun isApplicable(kotlinCompilation: KotlinCompilation<*>): Boolean {
-    return (kotlinCompilation.platformType == KotlinPlatformType.jvm ||
-        kotlinCompilation.platformType == KotlinPlatformType.androidJvm)
-  }
+  override fun isApplicable(kotlinCompilation: KotlinCompilation<*>): Boolean = true
 
   override fun applyToCompilation(
       kotlinCompilation: KotlinCompilation<*>
