@@ -62,8 +62,6 @@ repositories {
 }
 
 spotless {
-    ratchetFrom("origin/main")
-
     format("misc") {
         target("*.gradle", "*.md", ".gitignore")
         trimTrailingWhitespace()
