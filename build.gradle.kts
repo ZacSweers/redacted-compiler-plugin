@@ -44,7 +44,7 @@ spotless {
         trimTrailingWhitespace()
         endWithNewline()
         licenseHeaderFile("spotless/spotless.kt")
-        targetExclude ("**/spotless.kt")
+        targetExclude("**/spotless.kt", "**/build/**")
     }
 }
 
