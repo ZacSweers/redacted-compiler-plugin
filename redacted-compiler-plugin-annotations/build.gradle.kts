@@ -71,9 +71,6 @@ kotlin {
   if (kmpNativeEnabled) {
     configureOrCreateNativePlatforms()
   }
-  sourceSets {
-    val commonMain by getting { }
-  }
 }
 
 fun KotlinMultiplatformExtension.configureOrCreateNativePlatforms() {
@@ -141,27 +138,6 @@ val unixSizet64Targets = listOf(
   "watchosSimulatorArm64",
   "watchosX64"
 )
-
-//tasks {
-//  val jvmJar by getting(Jar::class) {
-//    val bndConvention = BundleTaskConvention(this)
-//    bndConvention.setBnd(
-//      """
-//      Export-Package: redacted-compiler-plugin
-//      Automatic-Module-Name: redacted-compiler-plugin
-//      Bundle-SymbolicName: dev.zacsweers.redacted
-//      """
-//    )
-//    // Call the convention when the task has finished to modify the jar to contain OSGi metadata.
-//    doLast {
-//      bndConvention.buildBundle()
-//    }
-//  }
-//}
-
-//configure<AnimalSnifferExtension> {
-//  sourceSets = listOf(project.sourceSets.getByName("main"))
-//}
 
 configure<MavenPublishBaseExtension> {
   configure(
