@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) 2021 Zac Sweers
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.zacsweers.redacted.compiler
 
 import com.google.common.truth.Truth.assertThat
@@ -13,18 +28,18 @@ import org.junit.rules.TemporaryFolder
 
 class RedactedPluginTest {
 
-  @Rule
-  @JvmField
-  var temporaryFolder: TemporaryFolder = TemporaryFolder()
+  @Rule @JvmField var temporaryFolder: TemporaryFolder = TemporaryFolder()
 
-  private val redacted = kotlin("Redacted.kt",
-      """
+  private val redacted =
+      kotlin(
+          "Redacted.kt",
+          """
       package dev.zacsweers.redacted.compiler.test
-      
+
       import kotlin.annotation.AnnotationRetention.BINARY
       import kotlin.annotation.AnnotationTarget.PROPERTY
       import kotlin.annotation.AnnotationTarget.CLASS
-      
+
       @Retention(BINARY)
       @Target(PROPERTY, CLASS)
       annotation class Redacted
@@ -32,36 +47,39 @@ class RedactedPluginTest {
 
   @Test
   fun dataIsRequired() {
-    val result = compile(kotlin("NonDataClass.kt",
-        """
+    val result =
+        compile(
+            kotlin(
+                "NonDataClass.kt",
+                """
           package dev.zacsweers.redacted.compiler.test
 
           import dev.zacsweers.redacted.compiler.test.Redacted
 
           class NonDataClass(@Redacted val a: Int)
-          """
-    ))
+          """))
     // Kotlin reports an error message from IR as an internal error for some reason, so we just
     // check "not ok"
     assertThat(result.exitCode).isNotEqualTo(KotlinCompilation.ExitCode.OK)
 
     // Full log is something like this:
     // e: /path/to/NonDataClass.kt: (5, 1): @Redacted is only supported on data classes!
-    assertThat(result.messages).contains(
-        "@Redacted is only supported on data classes!")
+    assertThat(result.messages).contains("@Redacted is only supported on data classes!")
   }
 
   @Test
   fun `verbose should show extra logging`() {
-    val compilation = prepareCompilation(kotlin("source.kt",
-        """
+    val compilation =
+        prepareCompilation(
+            kotlin(
+                "source.kt",
+                """
           package dev.zacsweers.redacted.compiler.test
 
           import dev.zacsweers.redacted.compiler.test.Redacted
 
           data class Test(@Redacted val a: Int)
-          """
-    ))
+          """))
 
     compilation.verbose = true
     val result = compilation.compile()
@@ -71,30 +89,35 @@ class RedactedPluginTest {
 
   @Test
   fun `not verbose should show no extra logging`() {
-    val result = compile(kotlin("source.kt",
-        """
+    val result =
+        compile(
+            kotlin(
+                "source.kt",
+                """
           package dev.zacsweers.redacted.compiler.test
 
           import dev.zacsweers.redacted.compiler.test.Redacted
 
           data class Test(@Redacted val a: Int)
-          """
-    ))
+          """))
     assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.OK)
     assertThat(result.messages).doesNotContain(LOG_PREFIX)
   }
 
   @Test
   fun customReplacement() {
-    val result = compile("<redacted>", kotlin("source.kt",
-        """
+    val result =
+        compile(
+            "<redacted>",
+            kotlin(
+                "source.kt",
+                """
           package dev.zacsweers.redacted.compiler.test
 
           import dev.zacsweers.redacted.compiler.test.Redacted
 
           data class Test(@Redacted val a: Int)
-          """
-    ))
+          """))
     assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.OK)
     assertThat(result.messages).doesNotContain(LOG_PREFIX)
     val testClass = result.classLoader.loadClass("dev.zacsweers.redacted.compiler.test.Test")
@@ -104,33 +127,41 @@ class RedactedPluginTest {
 
   @Test
   fun classAnnotated() {
-    val result = compile(kotlin("source.kt",
-        """
+    val result =
+        compile(
+            kotlin(
+                "source.kt",
+                """
           package dev.zacsweers.redacted.compiler.test
 
           import dev.zacsweers.redacted.compiler.test.Redacted
 
           @Redacted
           data class SensitiveData(val ssn: String, val birthday: String)
-          """
-    ))
+          """))
     assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.OK)
-    val complex = result.classLoader.loadClass("dev.zacsweers.redacted.compiler.test.SensitiveData")
-        .kotlin
-        .constructors
-        .first()
-        .call("123-456-7890", "1/1/00")
+    val complex =
+        result
+            .classLoader
+            .loadClass("dev.zacsweers.redacted.compiler.test.SensitiveData")
+            .kotlin
+            .constructors
+            .first()
+            .call("123-456-7890", "1/1/00")
     assertThat(complex.toString()).isEqualTo("SensitiveData(██)")
   }
 
   @Test
   fun complex() {
-    val result = compile(kotlin("source.kt",
-        """
+    val result =
+        compile(
+            kotlin(
+                "source.kt",
+                """
           package dev.zacsweers.redacted.compiler.test
 
           import dev.zacsweers.redacted.compiler.test.Redacted
-          
+
           // This should be ignored
           data class UnAnnotated(val foo: String, val bar: String)
 
@@ -160,112 +191,109 @@ class RedactedPluginTest {
               val genericType: T,
               val nullableGenericType: T?
           )
-          """
-    ))
+          """))
     assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.OK)
-    val complex = result.classLoader.loadClass("dev.zacsweers.redacted.compiler.test.Complex")
-        .kotlin
-        .constructors
-        .first()
-        .call(
-            /* redactedReferenceType = */ "redactedReferenceType",
-            /* redactedNullableReferenceType = */ null,
-            /* referenceType = */ "referenceType",
-            /* nullableReferenceType = */ null,
-            /* redactedPrimitiveType = */ 1,
-            /* redactedNullablePrimitiveType = */ null,
-            /* primitiveType = */ 2,
-            /* nullablePrimitiveType = */ null,
-            /* redactedArrayReferenceType = */ arrayOf("redactedArrayReferenceType"),
-            /* redactedNullableArrayReferenceType = */ null,
-            /* arrayReferenceType = */ arrayOf("arrayReferenceType"),
-            /* nullableArrayReferenceType = */ null,
-            /* redactedArrayPrimitiveType = */ intArrayOf(3),
-            /* redactedNullableArrayPrimitiveType = */ null,
-            /* arrayPrimitiveType = */ intArrayOf(4),
-            /* nullableArrayGenericType = */ null,
-            /* redactedGenericCollectionType = */ listOf(5),
-            /* redactedNullableGenericCollectionType = */ null,
-            /* genericCollectionType = */ listOf(6),
-            /* nullableGenericCollectionType = */ null,
-            /* redactedGenericType = */ 7,
-            /* redactedNullableGenericType = */ null,
-            /* genericType = */ 8,
-            /* nullableGenericType = */ null
-        )
-    assertThat(complex.toString()).isEqualTo("Complex(" +
-        "redactedReferenceType=██, " +
-        "redactedNullableReferenceType=██, " +
-        "referenceType=referenceType, " +
-        "nullableReferenceType=null, " +
-        "redactedPrimitiveType=██, " +
-        "redactedNullablePrimitiveType=██, " +
-        "primitiveType=2, " +
-        "nullablePrimitiveType=null, " +
-        "redactedArrayReferenceType=██, " +
-        "redactedNullableArrayReferenceType=██, " +
-        "arrayReferenceType=[arrayReferenceType], " +
-        "nullableArrayReferenceType=null, " +
-        "redactedArrayPrimitiveType=██, " +
-        "redactedNullableArrayPrimitiveType=██, " +
-        "arrayPrimitiveType=[4], " +
-        "nullableArrayGenericType=null, " +
-        "redactedGenericCollectionType=██, " +
-        "redactedNullableGenericCollectionType=██, " +
-        "genericCollectionType=[6], " +
-        "nullableGenericCollectionType=null, " +
-        "redactedGenericType=██, " +
-        "redactedNullableGenericType=██, " +
-        "genericType=8, " +
-        "nullableGenericType=null" +
-        ")"
-    )
+    val complex =
+        result
+            .classLoader
+            .loadClass("dev.zacsweers.redacted.compiler.test.Complex")
+            .kotlin
+            .constructors
+            .first()
+            .call(
+                /* redactedReferenceType = */ "redactedReferenceType",
+                /* redactedNullableReferenceType = */ null,
+                /* referenceType = */ "referenceType",
+                /* nullableReferenceType = */ null,
+                /* redactedPrimitiveType = */ 1,
+                /* redactedNullablePrimitiveType = */ null,
+                /* primitiveType = */ 2,
+                /* nullablePrimitiveType = */ null,
+                /* redactedArrayReferenceType = */ arrayOf("redactedArrayReferenceType"),
+                /* redactedNullableArrayReferenceType = */ null,
+                /* arrayReferenceType = */ arrayOf("arrayReferenceType"),
+                /* nullableArrayReferenceType = */ null,
+                /* redactedArrayPrimitiveType = */ intArrayOf(3),
+                /* redactedNullableArrayPrimitiveType = */ null,
+                /* arrayPrimitiveType = */ intArrayOf(4),
+                /* nullableArrayGenericType = */ null,
+                /* redactedGenericCollectionType = */ listOf(5),
+                /* redactedNullableGenericCollectionType = */ null,
+                /* genericCollectionType = */ listOf(6),
+                /* nullableGenericCollectionType = */ null,
+                /* redactedGenericType = */ 7,
+                /* redactedNullableGenericType = */ null,
+                /* genericType = */ 8,
+                /* nullableGenericType = */ null)
+    assertThat(complex.toString())
+        .isEqualTo(
+            "Complex(" +
+                "redactedReferenceType=██, " +
+                "redactedNullableReferenceType=██, " +
+                "referenceType=referenceType, " +
+                "nullableReferenceType=null, " +
+                "redactedPrimitiveType=██, " +
+                "redactedNullablePrimitiveType=██, " +
+                "primitiveType=2, " +
+                "nullablePrimitiveType=null, " +
+                "redactedArrayReferenceType=██, " +
+                "redactedNullableArrayReferenceType=██, " +
+                "arrayReferenceType=[arrayReferenceType], " +
+                "nullableArrayReferenceType=null, " +
+                "redactedArrayPrimitiveType=██, " +
+                "redactedNullableArrayPrimitiveType=██, " +
+                "arrayPrimitiveType=[4], " +
+                "nullableArrayGenericType=null, " +
+                "redactedGenericCollectionType=██, " +
+                "redactedNullableGenericCollectionType=██, " +
+                "genericCollectionType=[6], " +
+                "nullableGenericCollectionType=null, " +
+                "redactedGenericType=██, " +
+                "redactedNullableGenericType=██, " +
+                "genericType=8, " +
+                "nullableGenericType=null" +
+                ")")
   }
 
-  private fun prepareCompilation(
-    vararg sourceFiles: SourceFile
-  ): KotlinCompilation {
+  private fun prepareCompilation(vararg sourceFiles: SourceFile): KotlinCompilation {
     return prepareCompilation(null, *sourceFiles)
   }
 
   private fun prepareCompilation(
-    replacementString: String? = null,
-    vararg sourceFiles: SourceFile
+      replacementString: String? = null,
+      vararg sourceFiles: SourceFile
   ): KotlinCompilation {
-    return KotlinCompilation()
-        .apply {
-          workingDir = temporaryFolder.root
-          compilerPlugins = listOf(RedactedComponentRegistrar())
-          val processor = RedactedCommandLineProcessor()
-          commandLineProcessors = listOf(processor)
-          pluginOptions = listOf(
+    return KotlinCompilation().apply {
+      workingDir = temporaryFolder.root
+      compilerPlugins = listOf(RedactedComponentRegistrar())
+      val processor = RedactedCommandLineProcessor()
+      commandLineProcessors = listOf(processor)
+      pluginOptions =
+          listOf(
               processor.option(KEY_ENABLED, "true"),
               processor.option(KEY_REPLACEMENT_STRING, replacementString ?: "██"),
-              processor.option(KEY_REDACTED_ANNOTATION, "dev.zacsweers.redacted.compiler.test.Redacted"),
+              processor.option(
+                  KEY_REDACTED_ANNOTATION, "dev.zacsweers.redacted.compiler.test.Redacted"),
           )
-          inheritClassPath = true
-          sources = sourceFiles.asList() + redacted
-          verbose = false
-          jvmTarget = JvmTarget.fromString(
-              System.getenv()["ci_java_version"] ?: "1.8")!!.description
-        }
+      inheritClassPath = true
+      sources = sourceFiles.asList() + redacted
+      verbose = false
+      jvmTarget = JvmTarget.fromString(System.getenv()["ci_java_version"] ?: "1.8")!!.description
+    }
   }
 
   private fun CommandLineProcessor.option(key: Any, value: Any?): PluginOption {
     return PluginOption(pluginId, key.toString(), value.toString())
   }
 
-  private fun compile(
-    vararg sourceFiles: SourceFile
-  ): KotlinCompilation.Result {
+  private fun compile(vararg sourceFiles: SourceFile): KotlinCompilation.Result {
     return compile(null, *sourceFiles)
   }
 
   private fun compile(
-    replacementString: String? = null,
-    vararg sourceFiles: SourceFile
+      replacementString: String? = null,
+      vararg sourceFiles: SourceFile
   ): KotlinCompilation.Result {
     return prepareCompilation(replacementString, *sourceFiles).compile()
   }
-
 }

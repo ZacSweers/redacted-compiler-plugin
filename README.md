@@ -7,7 +7,7 @@ Inspired by the [`auto-value-redacted`](https://github.com/square/auto-value-red
 
 ## Usage
 
-Include the gradle plugin in your project, define a `@Redacted` annotation, and apply it to any 
+Include the gradle plugin in your project, define a `@Redacted` annotation, and apply it to any
 properties that you wish to redact.
 
 ```kotlin
