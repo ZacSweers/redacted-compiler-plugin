@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Zac Sweers
+ * Copyright (C) $YEAR Zac Sweers
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,3 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.zacsweers.redacted.compiler
-
-import org.jetbrains.kotlin.ir.declarations.IrDeclarationOriginImpl
-
-internal object RedactedOrigin : IrDeclarationOriginImpl("GENERATED_REDACTED_CLASS_MEMBER")
