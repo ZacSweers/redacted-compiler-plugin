@@ -45,9 +45,7 @@ plugins {
  * platforms and as a test source set on the JVM platform.
  */
 kotlin {
-  jvm {
-    withJava()
-  }
+  jvm()
   js(IR) {
     compilations.all {
       kotlinOptions {
