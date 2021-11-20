@@ -1,4 +1,4 @@
-package dev.zacsweers.redacted.compiler.ir
+package dev.zacsweers.redacted.compiler
 
 import org.jetbrains.kotlin.backend.common.extensions.IrGenerationExtension
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
