@@ -1,15 +1,15 @@
 name: CI
 
-on: [push, pull_request]
+on: [ push, pull_request ]
 
 jobs:
-  build:
+  jvm:
     name: Kotlin ${{ matrix.ci_kotlin_version }} | StringConcat ${{ matrix.ci_string_concat }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        ci_kotlin_version: ['1.6.0']
-        ci_string_concat: ['inline', 'indy', 'indy-with-constants']
+        ci_kotlin_version: [ '1.6.0' ]
+        ci_string_concat: [ 'inline', 'indy', 'indy-with-constants' ]
     steps:
       - name: Checkout
         uses: actions/checkout@v1
@@ -21,12 +21,103 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
       - name: Build with Gradle
-        run: ./gradlew clean check --stacktrace -Pkotlin_version=${{ matrix.ci_kotlin_version }} -Pstring_concat=${{ matrix.ci_string_concat }}
-      - name: Reclaim memory
-        run: ./gradlew --stop && jps|grep -E 'KotlinCompileDaemon|GradleDaemon'| awk '{print $1}'| xargs kill -9 || true
+        run: ./gradlew clean check -Dkjs=false -Dknative=false --stacktrace -Pkotlin_version=${{ matrix.ci_kotlin_version }} -Pstring_concat=${{ matrix.ci_string_concat }}
+
+  multiplatform:
+    runs-on: macOS-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Validate Gradle Wrapper
+        uses: gradle/wrapper-validation-action@v1
+
+      - name: Configure JDK
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Test
+        run: ./gradlew build
+
+  linux:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Validate Gradle Wrapper
+        uses: gradle/wrapper-validation-action@v1
+
+      - name: Configure JDK
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Test
+        run: ./gradlew build
+
+  windows:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Validate Gradle Wrapper
+        uses: gradle/wrapper-validation-action@v1
+
+      - name: Configure JDK
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Test
+        run: ./gradlew build
+
+  publish:
+    runs-on: macOS-latest
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && github.repository == 'zacsweers/redacted-compiler-plugin'
+    needs: [ jvm, multiplatform, windows ]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Configure JDK
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
       - name: Upload snapshot (main only)
         env:
           ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.SonatypeUsername }}
           ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.SonatypePassword }}
-        if: success() && github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && matrix.ci_kotlin_version == '1.6.0' && matrix.ci_string_concat == 'inline'
         run: ./publish.sh --snapshot
+
+  publish-windows:
+    runs-on: windows-latest
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && github.repository == 'zacsweers/redacted-compiler-plugin'
+    needs: [ jvm, multiplatform, windows ]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Configure JDK
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Upload snapshot (main only)
+        env:
+          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.SonatypeUsername }}
+          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.SonatypePassword }}
+        run: ./gradlew clean publishMingwX64PublicationToMavenCentralRepository --stacktrace

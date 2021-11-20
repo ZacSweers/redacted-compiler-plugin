@@ -44,27 +44,33 @@ plugins {
  * The `hashFunctions` source set builds on all platforms. It ships as a main source set on non-JVM
  * platforms and as a test source set on the JVM platform.
  */
+val kmpNativeEnabled = System.getProperty("knative", "true").toBoolean()
+val kmpJsEnabled = System.getProperty("kjs", "true").toBoolean()
 kotlin {
   jvm()
-  js(IR) {
-    compilations.all {
-      kotlinOptions {
-        moduleKind = "umd"
-        sourceMap = true
-        metaInfo = true
-      }
-    }
-    nodejs {
-      testTask {
-        useMocha {
-          timeout = "30s"
+  if (kmpJsEnabled) {
+    js(IR) {
+      compilations.all {
+        kotlinOptions {
+          moduleKind = "umd"
+          sourceMap = true
+          metaInfo = true
         }
       }
-    }
-    browser {
+      nodejs {
+        testTask {
+          useMocha {
+            timeout = "30s"
+          }
+        }
+      }
+      browser {
+      }
     }
   }
-  configureOrCreateNativePlatforms()
+  if (kmpNativeEnabled) {
+    configureOrCreateNativePlatforms()
+  }
   sourceSets {
     val commonMain by getting { }
   }
