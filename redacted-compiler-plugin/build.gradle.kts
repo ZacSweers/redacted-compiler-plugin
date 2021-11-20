@@ -19,6 +19,7 @@ dependencies {
   implementation("com.google.auto.service:auto-service-annotations:1.0.1")
   ksp("dev.zacsweers.autoservice:auto-service-ksp:1.0.0")
 
+  testImplementation("org.jetbrains.kotlin:kotlin-reflect:1.6.0")
   testImplementation("org.jetbrains.kotlin:kotlin-compiler-embeddable:1.6.0")
   testImplementation("com.github.tschuchortdev:kotlin-compile-testing:1.4.5")
   testImplementation("junit:junit:4.13.2")
