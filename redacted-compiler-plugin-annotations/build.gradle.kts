@@ -66,9 +66,7 @@ kotlin {
   }
   configureOrCreateNativePlatforms()
   sourceSets {
-    commonMain {
-
-    }
+    val commonMain by getting { }
   }
 }
 
