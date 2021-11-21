@@ -39,10 +39,9 @@ plugins {
  *  * `sizet32` for watchOS, including watchOS 64-bit architectures
  *  * `sizet64` for everything else
  */
-val kmpNativeEnabled = System.getProperty("knative", "true").toBoolean()
-val kmpJsEnabled = System.getProperty("kjs", "true").toBoolean()
-
 kotlin {
+  val kmpNativeEnabled = System.getProperty("knative", "true").toBoolean()
+  val kmpJsEnabled = System.getProperty("kjs", "true").toBoolean()
   jvm()
   if (kmpJsEnabled) {
     js(BOTH) {
@@ -54,7 +53,7 @@ kotlin {
         }
       }
       nodejs { testTask { useMocha { timeout = "30s" } } }
-      browser {}
+      browser()
     }
   }
   if (kmpNativeEnabled) {
@@ -97,7 +96,7 @@ val appleTargets =
         "watchosX64",
         "watchosSimulatorArm64")
 
-val mingwTargets = listOf("mingwX64")
+val mingwTargets = listOf("mingwX64", "mingwX86")
 
 val linuxTargets = listOf("linuxX64")
 
