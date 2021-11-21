@@ -6,20 +6,25 @@ jobs:
   jvm:
     name: jvm | Kotlin ${{ matrix.ci_kotlin_version }} | StringConcat ${{ matrix.ci_string_concat }}
     runs-on: ubuntu-latest
+
     strategy:
       matrix:
         ci_kotlin_version: [ '1.6.0' ]
         ci_string_concat: [ 'inline', 'indy', 'indy-with-constants' ]
+
     steps:
       - name: Checkout
         uses: actions/checkout@v1
+
       - name: Gradle Wrapper Validation
         uses: gradle/wrapper-validation-action@v1
+
       - name: Install JDK ${{ matrix.ci_java_version }}
         uses: actions/setup-java@v2
         with:
           distribution: 'zulu'
           java-version: '17'
+
       - name: Build with Gradle
         run: ./gradlew clean check -Dkjs=false -Dknative=false --stacktrace -Pkotlin_version=${{ matrix.ci_kotlin_version }} -Pstring_concat=${{ matrix.ci_string_concat }}
 
@@ -67,24 +72,3 @@ jobs:
           ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.SonatypeUsername }}
           ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.SonatypePassword }}
         run: ./publish.sh --snapshot
-
-  publish-windows:
-    runs-on: windows-latest
-    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && github.repository == 'zacsweers/redacted-compiler-plugin'
-    needs: [ jvm, all-platforms ]
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Configure JDK
-        uses: actions/setup-java@v2
-        with:
-          distribution: 'zulu'
-          java-version: '17'
-
-      - name: Upload snapshot (main only)
-        env:
-          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.SonatypeUsername }}
-          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.SonatypePassword }}
-        run: ./gradlew clean publishMingwX64PublicationToMavenCentralRepository --stacktrace
