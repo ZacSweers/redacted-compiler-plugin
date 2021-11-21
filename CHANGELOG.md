@@ -1,6 +1,19 @@
 Changelog
 =========
 
+0.10.0-RC1
+------------
+
+_2021-11-21_
+
+This is a release candidate with support for Kotlin multiplatform. Please test this out and report any issues.
+
+There are two parts to this:
+- The compiler plugin itself supports all compilation types, not just JVM and Android.
+- The first-party annotations artifact is now multiplatform.
+
+The legacy backend support is now removed, IR is required going forward.
+
 0.9.0
 ------------
 
