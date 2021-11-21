@@ -62,8 +62,6 @@ repositories {
 }
 
 spotless {
-    ratchetFrom("origin/main")
-
     format("misc") {
         target("*.gradle", "*.md", ".gitignore")
         trimTrailingWhitespace()
@@ -76,7 +74,7 @@ spotless {
         trimTrailingWhitespace()
         endWithNewline()
         licenseHeaderFile("../spotless/spotless.kt")
-        targetExclude ("**/spotless.kt")
+        targetExclude("**/spotless.kt", "build/**")
     }
 }
 

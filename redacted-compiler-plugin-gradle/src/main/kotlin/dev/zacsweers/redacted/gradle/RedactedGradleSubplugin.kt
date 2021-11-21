@@ -17,11 +17,12 @@ package dev.zacsweers.redacted.gradle
 
 import org.gradle.api.Project
 import org.gradle.api.provider.Provider
+import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilerPluginSupportPlugin
-import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
 import org.jetbrains.kotlin.gradle.plugin.SubpluginArtifact
 import org.jetbrains.kotlin.gradle.plugin.SubpluginOption
+import org.jetbrains.kotlin.gradle.plugin.sources.DefaultKotlinSourceSet
 
 class RedactedGradleSubplugin : KotlinCompilerPluginSupportPlugin {
 
@@ -37,10 +38,7 @@ class RedactedGradleSubplugin : KotlinCompilerPluginSupportPlugin {
           artifactId = "redacted-compiler-plugin",
           version = VERSION)
 
-  override fun isApplicable(kotlinCompilation: KotlinCompilation<*>): Boolean {
-    return (kotlinCompilation.platformType == KotlinPlatformType.jvm ||
-        kotlinCompilation.platformType == KotlinPlatformType.androidJvm)
-  }
+  override fun isApplicable(kotlinCompilation: KotlinCompilation<*>): Boolean = true
 
   override fun applyToCompilation(
       kotlinCompilation: KotlinCompilation<*>
@@ -51,8 +49,27 @@ class RedactedGradleSubplugin : KotlinCompilerPluginSupportPlugin {
 
     // Default annotation is used, so add it as a dependency
     if (annotation.get() == DEFAULT_ANNOTATION) {
-      project.dependencies.add(
-          "implementation", "dev.zacsweers.redacted:redacted-compiler-plugin-annotations:$VERSION")
+      val isMultiplatform = project.plugins.hasPlugin("org.jetbrains.kotlin.multiplatform")
+      if (isMultiplatform) {
+        val sourceSets =
+            project.extensions.getByType(KotlinMultiplatformExtension::class.java).sourceSets
+        val sourceSet = (sourceSets.getByName("commonMain") as DefaultKotlinSourceSet)
+        project
+            .configurations
+            .getByName(sourceSet.apiConfigurationName)
+            .dependencies
+            .add(
+                project.dependencies.create(
+                    "dev.zacsweers.redacted:redacted-compiler-plugin-annotations:$VERSION"))
+      } else {
+        project
+            .configurations
+            .getByName("api")
+            .dependencies
+            .add(
+                project.dependencies.create(
+                    "dev.zacsweers.redacted:redacted-compiler-plugin-annotations-jvm:$VERSION"))
+      }
     }
 
     val enabled = extension.enabled.get()

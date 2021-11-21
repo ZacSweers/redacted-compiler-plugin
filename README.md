@@ -1,13 +1,13 @@
 redacted-compiler-plugin
 ========================
 
-A Kotlin compiler plugin that generates redacted `toString()` implementations.
+A multiplatform Kotlin compiler plugin that generates redacted `toString()` implementations.
 
 Inspired by the [`auto-value-redacted`](https://github.com/square/auto-value-redacted) extension for AutoValue.
 
 ## Usage
 
-Include the gradle plugin in your project, define a `@Redacted` annotation, and apply it to any 
+Include the gradle plugin in your project, define a `@Redacted` annotation, and apply it to any
 properties that you wish to redact.
 
 ```kotlin
@@ -49,7 +49,7 @@ plugins {
 }
 ```
 
-And that's it! The default configuration will add the `-annotations` artifact (which has a
+And that's it! The default configuration will add the multiplatform `-annotations` artifact (which has a
 `@Redacted` annotation you can use) and wire it all automatically. Just annotate what you want to
 redact.
 
@@ -71,6 +71,11 @@ redacted {
 ```
 
 Snapshots of the development version are available in [Sonatype's `snapshots` repository][snapshots].
+
+## Supported platforms
+
+The compiler plugin itself supports all multiplatform project types. The first-party annotations artifact is also
+multiplatform and supports all common JVM, JS, and native targets.
 
 ## Caveats
 

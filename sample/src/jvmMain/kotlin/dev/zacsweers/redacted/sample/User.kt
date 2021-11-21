@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Zac Sweers
+ * Copyright (C) 2021 Zac Sweers
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@file:JvmName("Version")
+package dev.zacsweers.redacted.sample
 
-package dev.zacsweers.redacted.gradle
+import dev.zacsweers.redacted.annotations.Redacted
 
-internal const val VERSION = "$projectVersion"
+data class User(val name: String, @Redacted val phoneNumber: String)
