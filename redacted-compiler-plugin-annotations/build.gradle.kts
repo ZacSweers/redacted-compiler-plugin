@@ -49,7 +49,7 @@ val kmpJsEnabled = System.getProperty("kjs", "true").toBoolean()
 kotlin {
   jvm()
   if (kmpJsEnabled) {
-    js(IR) {
+    js(BOTH) {
       compilations.all {
         kotlinOptions {
           moduleKind = "umd"
