@@ -38,11 +38,6 @@ plugins {
  *
  *  * `sizet32` for watchOS, including watchOS 64-bit architectures
  *  * `sizet64` for everything else
- *
- * The `nonJvm` source set excludes that platform.
- *
- * The `hashFunctions` source set builds on all platforms. It ships as a main source set on non-JVM
- * platforms and as a test source set on the JVM platform.
  */
 val kmpNativeEnabled = System.getProperty("knative", "true").toBoolean()
 val kmpJsEnabled = System.getProperty("kjs", "true").toBoolean()
