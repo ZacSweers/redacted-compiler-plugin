@@ -14,11 +14,7 @@ kotlin {
     }
   }
   sourceSets {
-    commonMain {
-      dependencies {
-        implementation(project(":redacted-compiler-plugin-annotations"))
-      }
-    }
+    commonMain { dependencies { implementation(project(":redacted-compiler-plugin-annotations")) } }
     val jvmTest by getting {
       dependencies {
         implementation("junit:junit:4.13.2")
@@ -30,8 +26,11 @@ kotlin {
 
 configurations.configureEach {
   resolutionStrategy.dependencySubstitution {
-    substitute(module("dev.zacsweers.redacted:redacted-compiler-plugin-annotations")).using(project(":redacted-compiler-plugin-annotations"))
-    substitute(module("dev.zacsweers.redacted:redacted-compiler-plugin-annotations-jvm")).using(project(":redacted-compiler-plugin-annotations"))
-    substitute(module("dev.zacsweers.redacted:redacted-compiler-plugin")).using(project(":redacted-compiler-plugin"))
+    substitute(module("dev.zacsweers.redacted:redacted-compiler-plugin-annotations"))
+        .using(project(":redacted-compiler-plugin-annotations"))
+    substitute(module("dev.zacsweers.redacted:redacted-compiler-plugin-annotations-jvm"))
+        .using(project(":redacted-compiler-plugin-annotations"))
+    substitute(module("dev.zacsweers.redacted:redacted-compiler-plugin"))
+        .using(project(":redacted-compiler-plugin"))
   }
 }

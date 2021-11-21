@@ -41,6 +41,7 @@ plugins {
  */
 val kmpNativeEnabled = System.getProperty("knative", "true").toBoolean()
 val kmpJsEnabled = System.getProperty("kjs", "true").toBoolean()
+
 kotlin {
   jvm()
   if (kmpJsEnabled) {
@@ -52,15 +53,8 @@ kotlin {
           metaInfo = true
         }
       }
-      nodejs {
-        testTask {
-          useMocha {
-            timeout = "30s"
-          }
-        }
-      }
-      browser {
-      }
+      nodejs { testTask { useMocha { timeout = "30s" } } }
+      browser {}
     }
   }
   if (kmpNativeEnabled) {
@@ -87,57 +81,47 @@ fun KotlinMultiplatformExtension.configureOrCreateNativePlatforms() {
   mingwX64()
 }
 
-val appleTargets = listOf(
-  "iosArm64",
-  "iosX64",
-  "iosSimulatorArm64",
-  "macosX64",
-  "macosArm64",
-  "tvosArm64",
-  "tvosX64",
-  "tvosSimulatorArm64",
-  "watchosArm32",
-  "watchosArm64",
-  "watchosX86",
-  "watchosX64",
-  "watchosSimulatorArm64"
-)
+val appleTargets =
+    listOf(
+        "iosArm64",
+        "iosX64",
+        "iosSimulatorArm64",
+        "macosX64",
+        "macosArm64",
+        "tvosArm64",
+        "tvosX64",
+        "tvosSimulatorArm64",
+        "watchosArm32",
+        "watchosArm64",
+        "watchosX86",
+        "watchosX64",
+        "watchosSimulatorArm64")
 
-val mingwTargets = listOf(
-  "mingwX64"
-)
+val mingwTargets = listOf("mingwX64")
 
-val linuxTargets = listOf(
-  "linuxX64"
-)
+val linuxTargets = listOf("linuxX64")
 
 val nativeTargets = appleTargets + linuxTargets + mingwTargets
 
 /** Note that size_t is 32-bit on legacy watchOS versions (ie. pointers are always 32-bit). */
-val unixSizet32Targets = listOf(
-  "watchosArm32",
-  "watchosArm64",
-  "watchosX86"
-)
+val unixSizet32Targets = listOf("watchosArm32", "watchosArm64", "watchosX86")
 
-val unixSizet64Targets = listOf(
-  "iosArm64",
-  "iosX64",
-  "iosSimulatorArm64",
-  "linuxX64",
-  "macosX64",
-  "macosArm64",
-  "tvosArm64",
-  "tvosX64",
-  "tvosSimulatorArm64",
-  "watchosSimulatorArm64",
-  "watchosX64"
-)
+val unixSizet64Targets =
+    listOf(
+        "iosArm64",
+        "iosX64",
+        "iosSimulatorArm64",
+        "linuxX64",
+        "macosX64",
+        "macosArm64",
+        "tvosArm64",
+        "tvosX64",
+        "tvosSimulatorArm64",
+        "watchosSimulatorArm64",
+        "watchosX64")
 
 configure<MavenPublishBaseExtension> {
-  configure(
-    KotlinMultiplatform(javadocJar = JavadocJar.Dokka("dokkaGfm"))
-  )
+  configure(KotlinMultiplatform(javadocJar = JavadocJar.Dokka("dokkaGfm")))
 }
 
 // https://youtrack.jetbrains.com/issue/KT-46978

@@ -7,8 +7,11 @@ pluginManagement {
 }
 
 rootProject.name = "redacted-compiler-plugin"
+
 include(":redacted-compiler-plugin")
+
 include(":redacted-compiler-plugin-annotations")
+
 include(":sample")
 
 includeBuild("redacted-compiler-plugin-gradle") {
