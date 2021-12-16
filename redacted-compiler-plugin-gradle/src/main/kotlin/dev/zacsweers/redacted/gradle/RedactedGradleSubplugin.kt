@@ -48,27 +48,40 @@ class RedactedGradleSubplugin : KotlinCompilerPluginSupportPlugin {
     val annotation = extension.redactedAnnotation
 
     // Default annotation is used, so add it as a dependency
+    // Note only multiplatform, jvm/android, and js are supported. Anyone else is on their own.
     if (annotation.get() == DEFAULT_ANNOTATION) {
-      val isMultiplatform = project.plugins.hasPlugin("org.jetbrains.kotlin.multiplatform")
-      if (isMultiplatform) {
-        val sourceSets =
-            project.extensions.getByType(KotlinMultiplatformExtension::class.java).sourceSets
-        val sourceSet = (sourceSets.getByName("commonMain") as DefaultKotlinSourceSet)
-        project
-            .configurations
-            .getByName(sourceSet.apiConfigurationName)
-            .dependencies
-            .add(
-                project.dependencies.create(
-                    "dev.zacsweers.redacted:redacted-compiler-plugin-annotations:$VERSION"))
-      } else {
-        project
-            .configurations
-            .getByName("api")
-            .dependencies
-            .add(
-                project.dependencies.create(
-                    "dev.zacsweers.redacted:redacted-compiler-plugin-annotations-jvm:$VERSION"))
+      when {
+        project.plugins.hasPlugin("org.jetbrains.kotlin.multiplatform") -> {
+          val sourceSets =
+              project.extensions.getByType(KotlinMultiplatformExtension::class.java).sourceSets
+          val sourceSet = (sourceSets.getByName("commonMain") as DefaultKotlinSourceSet)
+          project
+              .configurations
+              .getByName(sourceSet.apiConfigurationName)
+              .dependencies
+              .add(
+                  project.dependencies.create(
+                      "dev.zacsweers.redacted:redacted-compiler-plugin-annotations:$VERSION"))
+        }
+        project.plugins.hasPlugin("org.jetbrains.kotlin.js") -> {
+          project
+              .configurations
+              .getByName("api")
+              .dependencies
+              .add(
+                  project.dependencies.create(
+                      "dev.zacsweers.redacted:redacted-compiler-plugin-annotations-js:$VERSION"))
+        }
+        project.plugins.hasPlugin("org.jetbrains.kotlin.jvm") ||
+            project.plugins.hasPlugin("org.jetbrains.kotlin.android") -> {
+          project
+              .configurations
+              .getByName("api")
+              .dependencies
+              .add(
+                  project.dependencies.create(
+                      "dev.zacsweers.redacted:redacted-compiler-plugin-annotations-jvm:$VERSION"))
+        }
       }
     }
 
