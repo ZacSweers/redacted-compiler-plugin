@@ -63,24 +63,14 @@ class RedactedGradleSubplugin : KotlinCompilerPluginSupportPlugin {
                   project.dependencies.create(
                       "dev.zacsweers.redacted:redacted-compiler-plugin-annotations:$VERSION"))
         }
-        project.plugins.hasPlugin("org.jetbrains.kotlin.js") -> {
+        else -> {
           project
               .configurations
               .getByName("api")
               .dependencies
               .add(
                   project.dependencies.create(
-                      "dev.zacsweers.redacted:redacted-compiler-plugin-annotations-js:$VERSION"))
-        }
-        project.plugins.hasPlugin("org.jetbrains.kotlin.jvm") ||
-            project.plugins.hasPlugin("org.jetbrains.kotlin.android") -> {
-          project
-              .configurations
-              .getByName("api")
-              .dependencies
-              .add(
-                  project.dependencies.create(
-                      "dev.zacsweers.redacted:redacted-compiler-plugin-annotations-jvm:$VERSION"))
+                      "dev.zacsweers.redacted:redacted-compiler-plugin-annotations:$VERSION"))
         }
       }
     }
