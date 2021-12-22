@@ -18,12 +18,12 @@ package dev.zacsweers.redacted.compiler
 import org.jetbrains.kotlin.backend.common.IrElementTransformerVoidWithContext
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
+import org.jetbrains.kotlin.cli.common.messages.CompilerMessageLocationWithRange
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
+import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSourceLocation
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
-import org.jetbrains.kotlin.cli.common.messages.MessageUtil
-import org.jetbrains.kotlin.descriptors.impl.LazyClassReceiverParameterDescriptor
+import org.jetbrains.kotlin.ir.IrElement
 import org.jetbrains.kotlin.ir.IrStatement
-import org.jetbrains.kotlin.ir.ObsoleteDescriptorBasedAPI
 import org.jetbrains.kotlin.ir.builders.IrBlockBodyBuilder
 import org.jetbrains.kotlin.ir.builders.irBlockBody
 import org.jetbrains.kotlin.ir.builders.irCall
@@ -32,24 +32,22 @@ import org.jetbrains.kotlin.ir.builders.irGetField
 import org.jetbrains.kotlin.ir.builders.irReturn
 import org.jetbrains.kotlin.ir.builders.irString
 import org.jetbrains.kotlin.ir.declarations.IrClass
+import org.jetbrains.kotlin.ir.declarations.IrFile
 import org.jetbrains.kotlin.ir.declarations.IrFunction
 import org.jetbrains.kotlin.ir.declarations.IrProperty
 import org.jetbrains.kotlin.ir.declarations.IrValueParameter
-import org.jetbrains.kotlin.ir.declarations.impl.IrValueParameterImpl
 import org.jetbrains.kotlin.ir.expressions.impl.IrGetValueImpl
 import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
-import org.jetbrains.kotlin.ir.symbols.impl.IrValueParameterSymbolImpl
-import org.jetbrains.kotlin.ir.types.createType
 import org.jetbrains.kotlin.ir.types.isArray
+import org.jetbrains.kotlin.ir.util.SYNTHETIC_OFFSET
+import org.jetbrains.kotlin.ir.util.file
 import org.jetbrains.kotlin.ir.util.hasAnnotation
 import org.jetbrains.kotlin.ir.util.isPrimitiveArray
 import org.jetbrains.kotlin.ir.util.primaryConstructor
 import org.jetbrains.kotlin.ir.util.properties
-import org.jetbrains.kotlin.resolve.source.getPsi
 
 internal const val LOG_PREFIX = "*** REDACTED (IR):"
 
-@OptIn(ObsoleteDescriptorBasedAPI::class)
 internal class RedactedIrVisitor(
     private val pluginContext: IrPluginContext,
     private val redactedAnnotation: IrClassSymbol,
@@ -110,8 +108,6 @@ internal class RedactedIrVisitor(
 
     origin = RedactedOrigin
 
-    mutateWithNewDispatchReceiverParameterForParentClass()
-
     body =
         DeclarationIrBuilder(pluginContext, symbol).irBlockBody {
           generateToStringMethodBody(
@@ -122,29 +118,6 @@ internal class RedactedIrVisitor(
         }
 
     reflectivelySetFakeOverride(false)
-  }
-
-  private fun IrFunction.mutateWithNewDispatchReceiverParameterForParentClass() {
-    val parentClass = parent
-    require(parentClass is IrClass)
-    val originalReceiver = checkNotNull(dispatchReceiverParameter)
-    dispatchReceiverParameter =
-        IrValueParameterImpl(
-                startOffset = originalReceiver.startOffset,
-                endOffset = originalReceiver.endOffset,
-                origin = originalReceiver.origin,
-                symbol =
-                    IrValueParameterSymbolImpl(
-                        LazyClassReceiverParameterDescriptor(parentClass.descriptor)),
-                name = originalReceiver.name,
-                index = originalReceiver.index,
-                type = parentClass.symbol.createType(hasQuestionMark = false, emptyList()),
-                varargElementType = originalReceiver.varargElementType,
-                isCrossinline = originalReceiver.isCrossinline,
-                isNoinline = originalReceiver.isNoinline,
-                isHidden = originalReceiver.isHidden,
-                isAssignable = originalReceiver.isAssignable)
-            .apply { parent = this@mutateWithNewDispatchReceiverParameterForParentClass }
   }
 
   private fun IrFunction.reflectivelySetFakeOverride(isFakeOverride: Boolean) {
@@ -205,10 +178,6 @@ internal class RedactedIrVisitor(
     +irReturn(irConcat)
   }
 
-  /**
-   * Only works properly after [mutateWithNewDispatchReceiverParameterForParentClass] has been
-   * called on [irFunction].
-   */
   private fun IrBlockBodyBuilder.receiver(irFunction: IrFunction) =
       IrGetValueImpl(irFunction.dispatchReceiverParameter!!)
 
@@ -220,7 +189,22 @@ internal class RedactedIrVisitor(
   }
 
   private fun IrClass.reportError(message: String) {
-    val location = MessageUtil.psiElementToMessageLocation(descriptor.source.getPsi())
+    val location = file.locationOf(this)
     messageCollector.report(CompilerMessageSeverity.ERROR, "$LOG_PREFIX $message", location)
+  }
+
+  /** Finds the line and column of [irElement] within this file. */
+  private fun IrFile.locationOf(irElement: IrElement?): CompilerMessageSourceLocation {
+    val sourceRangeInfo =
+        fileEntry.getSourceRangeInfo(
+            beginOffset = irElement?.startOffset ?: SYNTHETIC_OFFSET,
+            endOffset = irElement?.endOffset ?: SYNTHETIC_OFFSET)
+    return CompilerMessageLocationWithRange.create(
+        path = sourceRangeInfo.filePath,
+        lineStart = sourceRangeInfo.startLineNumber + 1,
+        columnStart = sourceRangeInfo.startColumnNumber + 1,
+        lineEnd = sourceRangeInfo.endLineNumber + 1,
+        columnEnd = sourceRangeInfo.endColumnNumber + 1,
+        lineContent = null)!!
   }
 }
