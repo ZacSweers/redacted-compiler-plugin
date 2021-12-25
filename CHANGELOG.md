@@ -1,6 +1,20 @@
 Changelog
 =========
 
+1.0.0
+-----
+
+_2021-12-24_
+
+Stable release!
+
+While Kotlin IR is not a stable API, the public API of redacted-compiler-plugin is. This project will use semver only 
+for its own API but intermediate versions may only work with specific versions of Kotlin (documented in the changelog).
+
+**Changes since 0.10.0**
+- Remove remaining obsolete descriptor API usages.
+- Update to Kotlin `1.6.10`.
+
 0.10.0
 ------
 
