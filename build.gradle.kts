@@ -13,12 +13,12 @@ buildscript {
 }
 
 plugins {
-  kotlin("jvm") version "1.6.0" apply false
-  id("org.jetbrains.dokka") version "1.5.31" apply false
+  kotlin("jvm") version "1.6.10" apply false
+  id("org.jetbrains.dokka") version "1.6.0" apply false
   id("org.jetbrains.kotlinx.binary-compatibility-validator") version "0.8.0"
-  id("com.google.devtools.ksp") version "1.6.0-1.0.1" apply false
+  id("com.google.devtools.ksp") version "1.6.10-1.0.2" apply false
   id("com.vanniktech.maven.publish") version "0.18.0" apply false
-  id("com.diffplug.spotless") version "6.0.0"
+  id("com.diffplug.spotless") version "6.1.0"
 }
 
 plugins.withType<NodeJsRootPlugin>().configureEach {
