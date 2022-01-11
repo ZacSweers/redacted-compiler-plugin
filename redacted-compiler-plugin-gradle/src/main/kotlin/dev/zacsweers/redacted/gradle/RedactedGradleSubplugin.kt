@@ -66,7 +66,7 @@ class RedactedGradleSubplugin : KotlinCompilerPluginSupportPlugin {
         else -> {
           project
               .configurations
-              .getByName("api")
+              .getByName("implementation")
               .dependencies
               .add(
                   project.dependencies.create(
