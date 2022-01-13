@@ -1,6 +1,15 @@
 Changelog
 =========
 
+1.0.1
+-----
+
+_2022-01-13_
+
+* Use `implementation` instead of `api` adding the `redacted-compiler-plugin-annotations` dependency. [#76](https://github.com/ZacSweers/redacted-compiler-plugin/issues/76)
+
+Thanks to [@gpeal](https://github.com/gpeal) for contributing to this release!
+
 1.0.0
 -----
 
@@ -8,7 +17,7 @@ _2021-12-24_
 
 Stable release!
 
-While Kotlin IR is not a stable API, the public API of redacted-compiler-plugin is. This project will use semver only 
+While Kotlin IR is not a stable API, the public API of redacted-compiler-plugin is. This project will use semver only
 for its own API but intermediate versions may only work with specific versions of Kotlin (documented in the changelog).
 
 **Changes since 0.10.0**

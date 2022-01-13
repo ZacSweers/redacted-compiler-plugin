@@ -3,9 +3,9 @@ import org.jetbrains.dokka.gradle.DokkaTask
 plugins {
   id("org.jetbrains.kotlin.jvm") version "1.6.10"
   id("java-gradle-plugin")
-  id("org.jetbrains.dokka") version "1.5.30"
+  id("org.jetbrains.dokka") version "1.6.10"
   id("com.vanniktech.maven.publish") version "0.18.0"
-  id("com.diffplug.spotless") version "6.0.0"
+  id("com.diffplug.spotless") version "6.1.0"
 }
 
 java { toolchain { languageVersion.set(JavaLanguageVersion.of(17)) } }
