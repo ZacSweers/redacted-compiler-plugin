@@ -44,7 +44,10 @@ tasks.named<DokkaTask>("dokkaHtml") {
   dokkaSourceSets.configureEach { skipDeprecated.set(true) }
 }
 
-repositories { mavenCentral() }
+repositories {
+  google()
+  mavenCentral()
+}
 
 spotless {
   format("misc") {
@@ -66,5 +69,6 @@ spotless {
 dependencies {
   implementation("org.jetbrains.kotlin:kotlin-gradle-plugin-api:1.6.10")
   compileOnly("org.jetbrains.kotlin:kotlin-gradle-plugin:1.6.10")
+  compileOnly("com.android.tools.build:gradle:7.1.1")
   implementation("com.google.auto.service:auto-service-annotations:1.0.1")
 }

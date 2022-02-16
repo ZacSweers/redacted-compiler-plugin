@@ -70,6 +70,25 @@ redacted {
 }
 ```
 
+### Android/JVM Per-Variant Configuration
+
+If using Android of JVM, you can optionally configure the plugin to be applied on a per-variant basis via
+`variantFilter` by setting the `ignore` variable. If no filter is set, the default is to match the `redacted`
+extension's value.
+
+```kotlin
+redacted {
+  enabled = true
+ 
+  variantFilter {
+   when (this) {
+    is AndroidVariantFilter -> ignore = androidVariant.buildType.name == "debug"
+    is JvmVariantFilter -> ignore = name == "test"
+   }
+  }
+}
+```
+
 Snapshots of the development version are available in [Sonatype's `snapshots` repository][snapshots].
 
 ## Supported platforms

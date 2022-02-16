@@ -15,16 +15,20 @@
  */
 package dev.zacsweers.redacted.gradle
 
+import dev.zacsweers.redacted.gradle.variant.Variant
 import org.gradle.api.Project
 import org.gradle.api.provider.Provider
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilerPluginSupportPlugin
+import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
 import org.jetbrains.kotlin.gradle.plugin.SubpluginArtifact
 import org.jetbrains.kotlin.gradle.plugin.SubpluginOption
 import org.jetbrains.kotlin.gradle.plugin.sources.DefaultKotlinSourceSet
+import java.util.concurrent.ConcurrentHashMap
 
 class RedactedGradleSubplugin : KotlinCompilerPluginSupportPlugin {
+  private val variantCache = ConcurrentHashMap<String, Variant>()
 
   override fun apply(target: Project) {
     target.extensions.create("redacted", RedactedPluginExtension::class.java)
@@ -38,7 +42,13 @@ class RedactedGradleSubplugin : KotlinCompilerPluginSupportPlugin {
           artifactId = "redacted-compiler-plugin",
           version = VERSION)
 
-  override fun isApplicable(kotlinCompilation: KotlinCompilation<*>): Boolean = true
+  override fun isApplicable(kotlinCompilation: KotlinCompilation<*>): Boolean {
+      return when (kotlinCompilation.platformType) {
+          // If the variant is ignored, then don't apply the compiler plugin.
+          KotlinPlatformType.androidJvm, KotlinPlatformType.jvm -> !getVariant(kotlinCompilation).variantFilter.ignore
+          else -> true
+      }
+  }
 
   override fun applyToCompilation(
       kotlinCompilation: KotlinCompilation<*>
@@ -82,6 +92,19 @@ class RedactedGradleSubplugin : KotlinCompilerPluginSupportPlugin {
           SubpluginOption(key = "enabled", value = enabled.toString()),
           SubpluginOption(key = "replacementString", value = extension.replacementString.get()),
           SubpluginOption(key = "redactedAnnotation", value = annotation.get()))
+    }
+  }
+
+  private fun getVariant(kotlinCompilation: KotlinCompilation<*>): Variant {
+    return variantCache.computeIfAbsent(kotlinCompilation.name) {
+      val variant = Variant(kotlinCompilation)
+
+      // The cache makes sure that we execute this filter action only once.
+      variant.project.extensions.getByType(RedactedPluginExtension::class.java)
+        ._variantFilter
+        ?.execute(variant.variantFilter)
+
+      variant
     }
   }
 }

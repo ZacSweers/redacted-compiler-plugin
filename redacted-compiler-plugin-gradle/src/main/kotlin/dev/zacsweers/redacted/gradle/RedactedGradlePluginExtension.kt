@@ -15,6 +15,8 @@
  */
 package dev.zacsweers.redacted.gradle
 
+import dev.zacsweers.redacted.gradle.variant.VariantFilter
+import org.gradle.api.Action
 import javax.inject.Inject
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
@@ -28,4 +30,15 @@ abstract class RedactedPluginExtension @Inject constructor(objects: ObjectFactor
   val enabled: Property<Boolean> = objects.property(Boolean::class.javaObjectType).convention(true)
 
   val replacementString: Property<String> = objects.property(String::class.java).convention("██")
+
+  @Suppress("PropertyName")
+  internal var _variantFilter: Action<VariantFilter>? = null
+
+  /**
+   * Configures each variant of this project. For Android projects these are the respective
+   * Android variants, for JVM projects these are usually the main and test variant.
+   */
+  fun variantFilter(action: Action<VariantFilter>) {
+    _variantFilter = action
+  }
 }
