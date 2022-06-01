@@ -26,7 +26,7 @@ jobs:
           java-version: '17'
 
       - name: Build with Gradle
-        run: ./gradlew clean check -Dkjs=false -Dknative=false --stacktrace -Pkotlin_version=${{ matrix.ci_kotlin_version }} -Pstring_concat=${{ matrix.ci_string_concat }}
+        run: ./gradlew clean check -Dkjs=false -Dknative=false --stacktrace -Pstring_concat=${{ matrix.ci_string_concat }}
 
   all-platforms:
     runs-on: ${{ matrix.os }}
