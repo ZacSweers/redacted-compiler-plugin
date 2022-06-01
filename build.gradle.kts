@@ -24,7 +24,7 @@ plugins {
 plugins.withType<NodeJsRootPlugin>().configureEach {
   // 16+ required for Apple Silicon support
   // https://youtrack.jetbrains.com/issue/KT-49109#focus=Comments-27-5259190.0-0
-  the<NodeJsRootExtension>().nodeVersion = "17.0.0"
+  the<NodeJsRootExtension>().nodeVersion = "18.0.0"
 }
 
 apiValidation { ignoredProjects += listOf("sample") }
