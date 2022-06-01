@@ -55,20 +55,16 @@ class RedactedGradleSubplugin : KotlinCompilerPluginSupportPlugin {
           val sourceSets =
               project.extensions.getByType(KotlinMultiplatformExtension::class.java).sourceSets
           val sourceSet = (sourceSets.getByName("commonMain") as DefaultKotlinSourceSet)
-          project
-              .configurations
+          project.configurations
               .getByName(sourceSet.apiConfigurationName)
-              .dependencies
-              .add(
+              .dependencies.add(
                   project.dependencies.create(
                       "dev.zacsweers.redacted:redacted-compiler-plugin-annotations:$VERSION"))
         }
         else -> {
-          project
-              .configurations
+          project.configurations
               .getByName("implementation")
-              .dependencies
-              .add(
+              .dependencies.add(
                   project.dependencies.create(
                       "dev.zacsweers.redacted:redacted-compiler-plugin-annotations:$VERSION"))
         }

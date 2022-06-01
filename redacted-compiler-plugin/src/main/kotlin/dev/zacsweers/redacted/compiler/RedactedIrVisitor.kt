@@ -162,8 +162,8 @@ internal class RedactedIrVisitor(
           val irPropertyStringValue =
               if (param.type.isArray() || param.type.isPrimitiveArray()) {
                 irCall(
-                    context.irBuiltIns.dataClassArrayMemberToStringSymbol,
-                    context.irBuiltIns.stringType)
+                        context.irBuiltIns.dataClassArrayMemberToStringSymbol,
+                        context.irBuiltIns.stringType)
                     .apply { putValueArgument(0, irPropertyValue) }
               } else {
                 irPropertyValue

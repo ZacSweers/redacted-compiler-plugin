@@ -126,7 +126,8 @@ configure<MavenPublishBaseExtension> {
 // https://youtrack.jetbrains.com/issue/KT-46978
 tasks.withType<ProcessResources>().all {
   when (name) {
-    "jvmTestProcessResources", "jvmProcessResources" -> {
+    "jvmTestProcessResources",
+    "jvmProcessResources" -> {
       duplicatesStrategy = DuplicatesStrategy.WARN
     }
   }

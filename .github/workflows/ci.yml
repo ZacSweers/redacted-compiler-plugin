@@ -9,7 +9,7 @@ jobs:
 
     strategy:
       matrix:
-        ci_kotlin_version: [ '1.6.10' ]
+        ci_kotlin_version: [ '1.7.0-RC2' ]
         ci_string_concat: [ 'inline', 'indy', 'indy-with-constants' ]
 
     steps:
