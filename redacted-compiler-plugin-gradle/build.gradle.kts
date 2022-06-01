@@ -64,7 +64,6 @@ spotless {
 }
 
 dependencies {
-  implementation("org.jetbrains.kotlin:kotlin-gradle-plugin-api:1.7.0-RC2")
-  compileOnly("org.jetbrains.kotlin:kotlin-gradle-plugin:1.7.0-RC2")
-  implementation("com.google.auto.service:auto-service-annotations:1.0.1")
+  compileOnly(libs.kotlin.gradlePlugin)
+  compileOnly(libs.kotlin.gradlePlugin.api)
 }
