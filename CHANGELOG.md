@@ -1,6 +1,15 @@
 Changelog
 =========
 
+1.1.0
+-----
+
+_2022-06-09_
+
+Update to Kotlin 1.7.0.
+
+Note that Kotlin 1.7.0 is now the _minimum_ for this version due to breaking API changes in Kotlin IR APIs.
+
 1.0.1
 -----
 
