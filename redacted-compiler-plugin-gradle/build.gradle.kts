@@ -1,11 +1,11 @@
 import org.jetbrains.dokka.gradle.DokkaTask
 
 plugins {
-  id("org.jetbrains.kotlin.jvm") version "1.6.10"
+  id("org.jetbrains.kotlin.jvm") version "1.7.0-RC2"
   id("java-gradle-plugin")
-  id("org.jetbrains.dokka") version "1.6.10"
-  id("com.vanniktech.maven.publish") version "0.18.0"
-  id("com.diffplug.spotless") version "6.1.0"
+  id("org.jetbrains.dokka") version "1.6.20"
+  id("com.vanniktech.maven.publish") version "0.19.0"
+  id("com.diffplug.spotless") version "6.6.1"
 }
 
 java { toolchain { languageVersion.set(JavaLanguageVersion.of(17)) } }
@@ -55,7 +55,7 @@ spotless {
   }
   kotlin {
     target("**/*.kt")
-    ktfmt("0.30")
+    ktfmt("0.37")
     trimTrailingWhitespace()
     endWithNewline()
     licenseHeaderFile("../spotless/spotless.kt")
@@ -64,7 +64,6 @@ spotless {
 }
 
 dependencies {
-  implementation("org.jetbrains.kotlin:kotlin-gradle-plugin-api:1.6.10")
-  compileOnly("org.jetbrains.kotlin:kotlin-gradle-plugin:1.6.10")
-  implementation("com.google.auto.service:auto-service-annotations:1.0.1")
+  compileOnly(libs.kotlin.gradlePlugin)
+  compileOnly(libs.kotlin.gradlePlugin.api)
 }

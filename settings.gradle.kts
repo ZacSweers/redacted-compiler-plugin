@@ -19,3 +19,5 @@ includeBuild("redacted-compiler-plugin-gradle") {
     substitute(module("dev.zacsweers.redacted:redacted-compiler-plugin-gradle")).using(project(":"))
   }
 }
+
+enableFeaturePreview("VERSION_CATALOGS")
