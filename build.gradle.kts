@@ -13,12 +13,12 @@ buildscript {
 }
 
 plugins {
-  kotlin("jvm") version "1.7.0-RC2" apply false
-  id("org.jetbrains.dokka") version "1.6.20" apply false
-  id("org.jetbrains.kotlinx.binary-compatibility-validator") version "0.10.0"
-  id("com.google.devtools.ksp") version "1.7.0-RC-1.0.5" apply false
+  kotlin("jvm") version "1.7.20" apply false
+  id("org.jetbrains.dokka") version "1.7.10" apply false
+  id("org.jetbrains.kotlinx.binary-compatibility-validator") version "0.11.1"
+  id("com.google.devtools.ksp") version "1.7.20-1.0.6" apply false
   id("com.vanniktech.maven.publish") version "0.19.0" apply false
-  id("com.diffplug.spotless") version "6.6.1"
+  id("com.diffplug.spotless") version "6.11.0"
 }
 
 plugins.withType<NodeJsRootPlugin>().configureEach {
@@ -38,7 +38,7 @@ spotless {
   }
   kotlin {
     target("**/*.kt")
-    ktfmt("0.37")
+    ktfmt("0.41")
     trimTrailingWhitespace()
     endWithNewline()
     licenseHeaderFile("spotless/spotless.kt")
@@ -46,7 +46,7 @@ spotless {
   }
   kotlinGradle {
     target("**/*.kts")
-    ktfmt("0.37")
+    ktfmt("0.41")
     trimTrailingWhitespace()
     endWithNewline()
   }

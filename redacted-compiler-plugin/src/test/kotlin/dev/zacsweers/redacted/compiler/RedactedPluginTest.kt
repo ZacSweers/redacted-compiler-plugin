@@ -143,7 +143,8 @@ class RedactedPluginTest {
     val complex =
         result.classLoader
             .loadClass("dev.zacsweers.redacted.compiler.test.SensitiveData")
-            .kotlin.constructors
+            .kotlin
+            .constructors
             .first()
             .call("123-456-7890", "1/1/00")
     assertThat(complex.toString()).isEqualTo("SensitiveData(██)")
@@ -194,7 +195,8 @@ class RedactedPluginTest {
     val complex =
         result.classLoader
             .loadClass("dev.zacsweers.redacted.compiler.test.Complex")
-            .kotlin.constructors
+            .kotlin
+            .constructors
             .first()
             .call(
                 /* redactedReferenceType = */ "redactedReferenceType",
