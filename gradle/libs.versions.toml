@@ -15,19 +15,18 @@
 [versions]
 autoService = "1.0.1"
 kotlinCompileTesting = "1.4.9"
-kotlin = "1.7.20-Beta"
+kotlin = "1.7.20"
 javaRelease = "8"
 jvmTarget = "1.8"
-ksp = "1.7.20-Beta-1.0.6"
-ktfmt = "0.39"
-moshi = "1.13.0"
+ksp = "1.7.20-1.0.6"
+ktfmt = "0.41"
+moshi = "1.14.0"
 
 [plugins]
 dokka = { id = "org.jetbrains.dokka", version = "1.7.10" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 mavenPublish = { id = "com.vanniktech.maven.publish", version = "0.21.0" }
-spotless = { id = "com.diffplug.spotless", version = "6.6.1" }
-kotlinBinaryCompatibilityValidator = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version = "0.10.0" }
+spotless = { id = "com.diffplug.spotless", version = "6.11.0" }
 
 [libraries]
 autoService = { module = "com.google.auto.service:auto-service-annotations", version.ref = "autoService" }
