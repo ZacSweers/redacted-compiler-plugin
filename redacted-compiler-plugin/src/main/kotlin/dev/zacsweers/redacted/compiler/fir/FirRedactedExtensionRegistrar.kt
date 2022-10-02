@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) 2022 Zac Sweers
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.zacsweers.redacted.compiler.fir
 
 import org.jetbrains.kotlin.descriptors.ClassKind
@@ -28,9 +43,8 @@ import org.jetbrains.kotlin.name.Name
 
 private val TO_STRING_NAME = Name.identifier("toString")
 
-class FirRedactedExtensionRegistrar(
-  private val redactedAnnotation: ClassId
-) : FirExtensionRegistrar() {
+class FirRedactedExtensionRegistrar(private val redactedAnnotation: ClassId) :
+    FirExtensionRegistrar() {
   override fun ExtensionRegistrarContext.configurePlugin() {
     +FirRedactedPredicateMatcher.getFactory(redactedAnnotation)
     +::FirRedactedCheckers
@@ -38,17 +52,18 @@ class FirRedactedExtensionRegistrar(
 }
 
 class FirRedactedCheckers(session: FirSession) : FirAdditionalCheckersExtension(session) {
-  override val declarationCheckers: DeclarationCheckers = object : DeclarationCheckers() {
-    override val regularClassCheckers: Set<FirRegularClassChecker> =
-      setOf(FirRedactedDeclarationChecker)
-  }
+  override val declarationCheckers: DeclarationCheckers =
+      object : DeclarationCheckers() {
+        override val regularClassCheckers: Set<FirRegularClassChecker> =
+            setOf(FirRedactedDeclarationChecker)
+      }
 }
 
 object FirRedactedDeclarationChecker : FirRegularClassChecker() {
   override fun check(
-    declaration: FirRegularClass,
-    context: CheckerContext,
-    reporter: DiagnosticReporter
+      declaration: FirRegularClass,
+      context: CheckerContext,
+      reporter: DiagnosticReporter
   ) {
     val matcher = context.session.redactedPredicateMatcher
     val classRedactedAnnotation = declaration.redactedAnnotation(matcher)
@@ -59,16 +74,12 @@ object FirRedactedDeclarationChecker : FirRegularClassChecker() {
 
     if (hasRedactedProperty && classRedactedAnnotation != null) {
       reporter.reportOn(
-        classRedactedAnnotation.source,
-        KtErrorsRedacted.REDACTED_ON_CLASS_AND_PROPERTY_WARNING,
-        context
-      )
+          classRedactedAnnotation.source,
+          KtErrorsRedacted.REDACTED_ON_CLASS_AND_PROPERTY_WARNING,
+          context)
       redactedProperties.forEach {
         reporter.reportOn(
-          it.source,
-          KtErrorsRedacted.REDACTED_ON_CLASS_AND_PROPERTY_WARNING,
-          context
-        )
+            it.source, KtErrorsRedacted.REDACTED_ON_CLASS_AND_PROPERTY_WARNING, context)
       }
     }
 
@@ -89,36 +100,38 @@ object FirRedactedDeclarationChecker : FirRegularClassChecker() {
       return
     }
 
-    val customToStringFunction = declaration.declarations.find {
-      it is FirFunction && it.isOverride && it.symbol.callableId.callableName == TO_STRING_NAME &&
-        it.valueParameters.isEmpty() && it.returnTypeRef.coneType.isString
-    }
+    val customToStringFunction =
+        declaration.declarations.find {
+          it is FirFunction &&
+              it.isOverride &&
+              it.symbol.callableId.callableName == TO_STRING_NAME &&
+              it.valueParameters.isEmpty() &&
+              it.returnTypeRef.coneType.isString
+        }
     if (customToStringFunction != null) {
       reporter.reportOn(
-        customToStringFunction.source,
-        KtErrorsRedacted.CUSTOM_TO_STRING_IN_REDACTED_CLASS_ERROR,
-        context
-      )
+          customToStringFunction.source,
+          KtErrorsRedacted.CUSTOM_TO_STRING_IN_REDACTED_CLASS_ERROR,
+          context)
     }
   }
 
-  private fun FirRegularClass.redactedAnnotation(
-    matcher: FirRedactedPredicateMatcher
-  ) = matcher.redactedAnnotation(this)
+  private fun FirRegularClass.redactedAnnotation(matcher: FirRedactedPredicateMatcher) =
+      matcher.redactedAnnotation(this)
 
   private fun redactedProperties(
-    declaration: FirRegularClass,
-    matcher: FirRedactedPredicateMatcher
-  ) = declaration.declarations.asSequence()
-    .filterIsInstance<FirProperty>()
-    .mapNotNull { matcher.redactedAnnotation(it) }
-    .toList()
+      declaration: FirRegularClass,
+      matcher: FirRedactedPredicateMatcher
+  ) =
+      declaration.declarations
+          .asSequence()
+          .filterIsInstance<FirProperty>()
+          .mapNotNull { matcher.redactedAnnotation(it) }
+          .toList()
 }
 
-class FirRedactedPredicateMatcher(
-  session: FirSession,
-  private val redactedAnnotation: ClassId
-) : FirExtensionSessionComponent(session) {
+class FirRedactedPredicateMatcher(session: FirSession, private val redactedAnnotation: ClassId) :
+    FirExtensionSessionComponent(session) {
   companion object {
     fun getFactory(redactedAnnotation: ClassId): Factory {
       return Factory { session -> FirRedactedPredicateMatcher(session, redactedAnnotation) }
@@ -132,4 +145,5 @@ class FirRedactedPredicateMatcher(
   }
 }
 
-val FirSession.redactedPredicateMatcher: FirRedactedPredicateMatcher by FirSession.sessionComponentAccessor()
+val FirSession.redactedPredicateMatcher: FirRedactedPredicateMatcher by
+    FirSession.sessionComponentAccessor()

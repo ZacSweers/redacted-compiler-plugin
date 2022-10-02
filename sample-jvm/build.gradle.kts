@@ -10,7 +10,8 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach 
     @Suppress("SuspiciousCollectionReassignment")
     freeCompilerArgs += "-Xstring-concat=${project.findProperty("string_concat")}"
   }
-  compilerExecutionStrategy.set(org.jetbrains.kotlin.gradle.tasks.KotlinCompilerExecutionStrategy.IN_PROCESS)
+  compilerExecutionStrategy.set(
+      org.jetbrains.kotlin.gradle.tasks.KotlinCompilerExecutionStrategy.IN_PROCESS)
 }
 
 dependencies {

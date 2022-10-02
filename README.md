@@ -59,7 +59,7 @@ You can configure custom behavior with properties on the `redacted` extension.
 redacted {
   // Define a custom annotation. The -annotations artifact won't be automatically added to
   // dependencies if you define your own!
-  // Note that this must be in the format of a string where packages are delimited by '/' and 
+  // Note that this must be in the format of a string where packages are delimited by '/' and
   // classes by '.', e.g. "kotlin/Map.Entry"
   redactedAnnotation = "dev/zacsweers/redacted/annotations/Redacted" // Default
 

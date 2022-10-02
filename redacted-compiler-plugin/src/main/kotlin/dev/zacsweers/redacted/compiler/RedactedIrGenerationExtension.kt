@@ -29,7 +29,8 @@ internal class RedactedIrGenerationExtension(
 
   override fun generate(moduleFragment: IrModuleFragment, pluginContext: IrPluginContext) {
     val redactedTransformer =
-        RedactedIrVisitor(pluginContext, redactedAnnotationName, replacementString, messageCollector)
+        RedactedIrVisitor(
+            pluginContext, redactedAnnotationName, replacementString, messageCollector)
     moduleFragment.transform(redactedTransformer, null)
   }
 }

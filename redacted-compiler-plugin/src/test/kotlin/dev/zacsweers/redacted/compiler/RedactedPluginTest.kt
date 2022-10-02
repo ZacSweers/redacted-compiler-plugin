@@ -277,7 +277,8 @@ class RedactedPluginTest {
       sources = sourceFiles.asList() + redacted
       verbose = false
       jvmTarget = JvmTarget.fromString(System.getenv()["ci_java_version"] ?: "1.8")!!.description
-      // TODO whenever this library supports it https://github.com/tschuchortdev/kotlin-compile-testing/issues/302
+      // TODO whenever this library supports it
+      // https://github.com/tschuchortdev/kotlin-compile-testing/issues/302
       kotlincArguments = listOf("-Xuse-k2")
     }
   }

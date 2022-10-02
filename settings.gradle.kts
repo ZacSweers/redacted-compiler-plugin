@@ -13,6 +13,7 @@ include(":redacted-compiler-plugin")
 include(":redacted-compiler-plugin-annotations")
 
 include(":sample")
+
 include(":sample-jvm")
 
 includeBuild("redacted-compiler-plugin-gradle") {
