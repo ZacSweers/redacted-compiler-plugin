@@ -1,17 +1,17 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
   kotlin("jvm")
   id("dev.zacsweers.redacted")
 }
 
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+tasks.withType<KotlinCompile>().configureEach {
   kotlinOptions {
-    useK2 = true
+    useK2 = project.findProperty("rcp.useK2")?.toString().toBoolean()
     jvmTarget = "11"
     @Suppress("SuspiciousCollectionReassignment")
     freeCompilerArgs += "-Xstring-concat=${project.findProperty("string_concat")}"
   }
-  compilerExecutionStrategy.set(
-      org.jetbrains.kotlin.gradle.tasks.KotlinCompilerExecutionStrategy.IN_PROCESS)
 }
 
 dependencies {
