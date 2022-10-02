@@ -27,6 +27,9 @@ import org.jetbrains.kotlin.name.FqName
 @AutoService(ComponentRegistrar::class)
 class RedactedComponentRegistrar : ComponentRegistrar {
 
+  override val supportsK2: Boolean
+    get() = true
+
   override fun registerProjectComponents(
       project: MockProject,
       configuration: CompilerConfiguration
