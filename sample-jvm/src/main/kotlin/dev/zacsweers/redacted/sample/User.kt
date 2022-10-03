@@ -17,7 +17,7 @@ package dev.zacsweers.redacted.sample
 
 import dev.zacsweers.redacted.annotations.Redacted
 
-data class User(val name: String, @Redacted val phoneNUmber: String)
+data class User(val name: String, @Redacted val phoneNumber: String)
 
 // This class has multiple issues that FIR will report
 // - Duplicate redacted annotations
