@@ -27,7 +27,7 @@ plugins.withType<NodeJsRootPlugin>().configureEach {
   the<NodeJsRootExtension>().nodeVersion = "18.0.0"
 }
 
-apiValidation { ignoredProjects += listOf("sample") }
+apiValidation { ignoredProjects += listOf("sample", "sample-jvm") }
 
 spotless {
   format("misc") {
