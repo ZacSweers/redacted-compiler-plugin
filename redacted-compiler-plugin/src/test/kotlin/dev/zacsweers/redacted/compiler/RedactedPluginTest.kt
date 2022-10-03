@@ -279,7 +279,7 @@ class RedactedPluginTest {
       jvmTarget = JvmTarget.fromString(System.getenv()["ci_java_version"] ?: "1.8")!!.description
       // TODO whenever this library supports it
       // https://github.com/tschuchortdev/kotlin-compile-testing/issues/302
-//      kotlincArguments = listOf("-Xuse-k2")
+      //      kotlincArguments = listOf("-Xuse-k2")
     }
   }
 
