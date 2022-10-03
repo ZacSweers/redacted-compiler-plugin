@@ -1,6 +1,27 @@
 Changelog
 =========
 
+1.2.0
+-----
+
+_2022-10-03_
+
+Experimental support for the new K2 compiler + FIR plugin.
+
+Note this comes with several caveats:
+- No IDE support yet
+- Errors and warnings can't have custom messages yet: [KT-53510](https://youtrack.jetbrains.com/issue/KT-53510).
+- Multiple errors and warnings result in only a single error being emitted: [KT-54287](https://youtrack.jetbrains.com/issue/KT-54287).
+- K2 compiler itself is extremely experimental.
+
+In short, this is only really to unblock anyone doing their own testing of K2 and don't want this
+plugin to disable it. If you see any issues, please file a bug here and disable K2 in your project
+in the meantime.
+
+Details on K2 and instructions for enabling it can be found here: https://kotlinlang.org/docs/whatsnew17.html#new-kotlin-k2-compiler-for-the-jvm-in-alpha
+
+Also: update to Kotlin 1.7.20.
+
 1.1.0
 -----
 
