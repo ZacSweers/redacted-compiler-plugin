@@ -19,9 +19,16 @@ import javax.inject.Inject
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
 
-internal const val DEFAULT_ANNOTATION = "dev.zacsweers.redacted.annotations.Redacted"
+internal const val DEFAULT_ANNOTATION = "dev/zacsweers/redacted/annotations/Redacted"
 
 abstract class RedactedPluginExtension @Inject constructor(objects: ObjectFactory) {
+  /**
+   * Define a custom redacted marker annotation. The -annotations artifact won't be automatically
+   * added to dependencies if you define your own!
+   *
+   * Note that this must be in the format of a string where packages are delimited by '/' and
+   * classes by '.', e.g. "kotlin/Map.Entry"
+   */
   val redactedAnnotation: Property<String> =
       objects.property(String::class.java).convention(DEFAULT_ANNOTATION)
 

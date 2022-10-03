@@ -38,7 +38,6 @@ import org.jetbrains.kotlin.ir.declarations.IrProperty
 import org.jetbrains.kotlin.ir.declarations.IrValueParameter
 import org.jetbrains.kotlin.ir.expressions.addArgument
 import org.jetbrains.kotlin.ir.expressions.impl.IrGetValueImpl
-import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
 import org.jetbrains.kotlin.ir.types.isArray
 import org.jetbrains.kotlin.ir.util.SYNTHETIC_OFFSET
 import org.jetbrains.kotlin.ir.util.file
@@ -46,12 +45,13 @@ import org.jetbrains.kotlin.ir.util.hasAnnotation
 import org.jetbrains.kotlin.ir.util.isPrimitiveArray
 import org.jetbrains.kotlin.ir.util.primaryConstructor
 import org.jetbrains.kotlin.ir.util.properties
+import org.jetbrains.kotlin.name.FqName
 
 internal const val LOG_PREFIX = "*** REDACTED (IR):"
 
 internal class RedactedIrVisitor(
     private val pluginContext: IrPluginContext,
-    private val redactedAnnotation: IrClassSymbol,
+    private val redactedAnnotation: FqName,
     private val replacementString: String,
     private val messageCollector: MessageCollector
 ) : IrElementTransformerVoidWithContext() {

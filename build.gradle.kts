@@ -17,7 +17,7 @@ plugins {
   id("org.jetbrains.dokka") version "1.7.10" apply false
   id("org.jetbrains.kotlinx.binary-compatibility-validator") version "0.11.1"
   id("com.google.devtools.ksp") version "1.7.20-1.0.6" apply false
-  id("com.vanniktech.maven.publish") version "0.19.0" apply false
+  id("com.vanniktech.maven.publish") version "0.21.0" apply false
   id("com.diffplug.spotless") version "6.11.0"
 }
 
@@ -27,7 +27,7 @@ plugins.withType<NodeJsRootPlugin>().configureEach {
   the<NodeJsRootExtension>().nodeVersion = "18.0.0"
 }
 
-apiValidation { ignoredProjects += listOf("sample") }
+apiValidation { ignoredProjects += listOf("sample", "sample-jvm") }
 
 spotless {
   format("misc") {
