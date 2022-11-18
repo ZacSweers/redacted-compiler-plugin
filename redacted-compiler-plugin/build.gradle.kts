@@ -8,10 +8,7 @@ plugins {
 }
 
 tasks.withType<KotlinCompile>().configureEach {
-  kotlinOptions {
-    @Suppress("SuspiciousCollectionReassignment")
-    freeCompilerArgs += "-opt-in=kotlin.RequiresOptIn"
-  }
+  compilerOptions { freeCompilerArgs.add("-opt-in=kotlin.RequiresOptIn") }
 }
 
 tasks.withType<Test>().configureEach {

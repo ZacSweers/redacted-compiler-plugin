@@ -19,6 +19,7 @@ import com.google.auto.service.AutoService
 import org.jetbrains.kotlin.compiler.plugin.AbstractCliOption
 import org.jetbrains.kotlin.compiler.plugin.CliOption
 import org.jetbrains.kotlin.compiler.plugin.CommandLineProcessor
+import org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi
 import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.config.CompilerConfigurationKey
 
@@ -26,6 +27,7 @@ internal val KEY_ENABLED = CompilerConfigurationKey<Boolean>("enabled")
 internal val KEY_REPLACEMENT_STRING = CompilerConfigurationKey<String>("replacementString")
 internal val KEY_REDACTED_ANNOTATION = CompilerConfigurationKey<String>("redactedAnnotation")
 
+@OptIn(ExperimentalCompilerApi::class)
 @AutoService(CommandLineProcessor::class)
 class RedactedCommandLineProcessor : CommandLineProcessor {
 

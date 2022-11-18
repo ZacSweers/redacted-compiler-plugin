@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
   kotlin("multiplatform")
   id("dev.zacsweers.redacted")
@@ -6,10 +8,9 @@ plugins {
 kotlin {
   jvm {
     compilations.configureEach {
-      kotlinOptions {
-        jvmTarget = "11"
-        @Suppress("SuspiciousCollectionReassignment")
-        freeCompilerArgs += "-Xstring-concat=${project.findProperty("string_concat")}"
+      compilerOptions.configure {
+        jvmTarget.set(JvmTarget.JVM_11)
+        freeCompilerArgs.add("-Xstring-concat=${project.findProperty("string_concat")}")
       }
     }
   }

@@ -1,3 +1,4 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -6,11 +7,11 @@ plugins {
 }
 
 tasks.withType<KotlinCompile>().configureEach {
-  kotlinOptions {
-    useK2 = project.findProperty("rcp.useK2")?.toString().toBoolean()
-    jvmTarget = "11"
+  compilerOptions {
+    useK2.set(project.findProperty("rcp.useK2")?.toString().toBoolean())
+    jvmTarget.set(JvmTarget.JVM_11)
     @Suppress("SuspiciousCollectionReassignment")
-    freeCompilerArgs += "-Xstring-concat=${project.findProperty("string_concat")}"
+    freeCompilerArgs.add("-Xstring-concat=${project.findProperty("string_concat")}")
   }
 }
 

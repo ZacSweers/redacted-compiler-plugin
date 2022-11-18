@@ -15,17 +15,17 @@
 [versions]
 autoService = "1.0.1"
 kotlinCompileTesting = "0.1.0"
-kotlin = "1.7.22"
+kotlin = "1.8.0-Beta"
 jdk = "17"
-jvmTarget = "1.8"
-ksp = "1.7.22-1.0.8"
+jvmTarget = "11"
+ksp = "1.8.0-Beta-1.0.8"
 ktfmt = "0.41"
 moshi = "1.14.0"
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 binaryCompatibilityValidator = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version = "0.11.1" }
-dokka = { id = "org.jetbrains.dokka", version = "1.7.10" }
+dokka = { id = "org.jetbrains.dokka", version = "1.7.20" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 mavenPublish = { id = "com.vanniktech.maven.publish", version = "0.21.0" }
 spotless = { id = "com.diffplug.spotless", version = "6.11.0" }
