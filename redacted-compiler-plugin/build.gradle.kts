@@ -14,6 +14,10 @@ tasks.withType<KotlinCompile>().configureEach {
   }
 }
 
+tasks.withType<Test>().configureEach {
+  systemProperty("rdt.jvmTarget", libs.versions.jvmTarget.get())
+}
+
 dependencies {
   compileOnly(libs.kotlin.compilerEmbeddable)
   implementation(libs.autoService)

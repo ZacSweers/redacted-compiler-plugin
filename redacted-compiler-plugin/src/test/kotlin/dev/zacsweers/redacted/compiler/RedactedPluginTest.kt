@@ -25,8 +25,15 @@ import org.jetbrains.kotlin.config.JvmTarget
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
+import org.junit.runner.RunWith
+import org.junit.runners.Parameterized
 
-class RedactedPluginTest {
+@RunWith(Parameterized::class)
+class RedactedPluginTest(private val useK2: Boolean) {
+
+  companion object {
+    @JvmStatic @Parameterized.Parameters(name = "useK2 = {0}") fun data() = listOf(true, false)
+  }
 
   @Rule @JvmField var temporaryFolder: TemporaryFolder = TemporaryFolder()
 
@@ -58,13 +65,93 @@ class RedactedPluginTest {
 
           class NonDataClass(@Redacted val a: Int)
           """))
-    // Kotlin reports an error message from IR as an internal error for some reason, so we just
-    // check "not ok"
-    assertThat(result.exitCode).isNotEqualTo(KotlinCompilation.ExitCode.OK)
+    assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.COMPILATION_ERROR)
 
     // Full log is something like this:
     // e: /path/to/NonDataClass.kt: (5, 1): @Redacted is only supported on data classes!
-    assertThat(result.messages).contains("@Redacted is only supported on data classes!")
+    assertThat(result.messages).contains("NonDataClass.kt: (5,")
+    // TODO K2 doesn't support custom error messages yet
+    if (!useK2) {
+      assertThat(result.messages).contains("@Redacted is only supported on data classes!")
+    }
+  }
+
+  @Test
+  fun classIsRequired() {
+    val result =
+        compile(
+            kotlin(
+                "NonClass.kt",
+                """
+          package dev.zacsweers.redacted.compiler.test
+
+          import dev.zacsweers.redacted.compiler.test.Redacted
+
+          enum class NonClass(@Redacted val a: Int)
+          """))
+    assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.COMPILATION_ERROR)
+
+    // Full log is something like this:
+    // e: /path/to/NonDataClass.kt: (5, 1): @Redacted is only supported on data classes!
+    assertThat(result.messages).contains("NonClass.kt: (5,")
+    // TODO K2 doesn't support custom error messages yet
+    if (!useK2) {
+      assertThat(result.messages).contains("@Redacted is only supported on data classes!")
+    }
+  }
+
+  @Test
+  fun customToStringIsAnError() {
+    val result =
+        compile(
+            kotlin(
+                "CustomToString.kt",
+                """
+          package dev.zacsweers.redacted.compiler.test
+
+          import dev.zacsweers.redacted.compiler.test.Redacted
+
+          data class CustomToString(@Redacted val a: Int) {
+            override fun toString(): String = "foo"
+          }
+          """))
+    assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.COMPILATION_ERROR)
+
+    // Full log is something like this:
+    // e: /path/to/NonDataClass.kt: (5, 1): @Redacted is only supported on data classes!
+    assertThat(result.messages).contains("CustomToString.kt: ")
+    // TODO K2 doesn't support custom error messages yet
+    if (!useK2) {
+      assertThat(result.messages)
+          .contains(
+              "@Redacted is only supported on data classes that do *not* have a custom toString() function")
+    }
+  }
+
+  @Test
+  fun annotatingBothClassAndPropertiesIsAnError() {
+    val result =
+        compile(
+            kotlin(
+                "DoubleAnnotation.kt",
+                """
+          package dev.zacsweers.redacted.compiler.test
+
+          import dev.zacsweers.redacted.compiler.test.Redacted
+
+          @Redacted
+          data class DoubleAnnotation(@Redacted val a: Int)
+          """))
+    assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.COMPILATION_ERROR)
+
+    // Full log is something like this:
+    // e: /path/to/NonDataClass.kt: (5, 1): @Redacted is only supported on data classes!
+    assertThat(result.messages).contains("DoubleAnnotation.kt: ")
+    // TODO K2 doesn't support custom error messages yet
+    if (!useK2) {
+      assertThat(result.messages)
+          .contains("@Redacted should only be applied to the class or its properties")
+    }
   }
 
   @Test
@@ -271,15 +358,14 @@ class RedactedPluginTest {
               processor.option(KEY_ENABLED, "true"),
               processor.option(KEY_REPLACEMENT_STRING, replacementString ?: "██"),
               processor.option(
-                  KEY_REDACTED_ANNOTATION, "dev.zacsweers.redacted.compiler.test.Redacted"),
+                  KEY_REDACTED_ANNOTATION, "dev/zacsweers/redacted/compiler/test/Redacted"),
           )
       inheritClassPath = true
       sources = sourceFiles.asList() + redacted
       verbose = false
-      jvmTarget = JvmTarget.fromString(System.getenv()["ci_java_version"] ?: "1.8")!!.description
-      // TODO whenever this library supports it
-      // https://github.com/tschuchortdev/kotlin-compile-testing/issues/302
-      //      kotlincArguments = listOf("-Xuse-k2")
+      jvmTarget = JvmTarget.fromString(System.getProperty("rdt.jvmTarget", "1.8"))!!.description
+      supportsK2 = true
+      this.useK2 = this@RedactedPluginTest.useK2
     }
   }
 
