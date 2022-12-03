@@ -21,7 +21,7 @@ import org.jetbrains.kotlin.diagnostics.error0
 import org.jetbrains.kotlin.diagnostics.warning0
 
 // TODO expose custom error messages when K2 supports it:
-// https://youtrack.jetbrains.com/issue/KT-53510
+//  https://youtrack.jetbrains.com/issue/KT-53510
 object KtErrorsRedacted {
   val REDACTED_ON_CLASS_AND_PROPERTY_WARNING by
       warning0<PsiElement>(SourceElementPositioningStrategies.NAME_IDENTIFIER)

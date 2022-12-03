@@ -25,8 +25,15 @@ import org.jetbrains.kotlin.config.JvmTarget
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
+import org.junit.runner.RunWith
+import org.junit.runners.Parameterized
 
-class RedactedPluginTest {
+@RunWith(Parameterized::class)
+class RedactedPluginTest(private val useK2: Boolean) {
+
+  companion object {
+    @JvmStatic @Parameterized.Parameters(name = "useK2 = {0}") fun data() = listOf(true, false)
+  }
 
   @Rule @JvmField var temporaryFolder: TemporaryFolder = TemporaryFolder()
 
@@ -58,13 +65,15 @@ class RedactedPluginTest {
 
           class NonDataClass(@Redacted val a: Int)
           """))
-    // Kotlin reports an error message from IR as an internal error for some reason, so we just
-    // check "not ok"
-    assertThat(result.exitCode).isNotEqualTo(KotlinCompilation.ExitCode.OK)
+    assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.COMPILATION_ERROR)
 
     // Full log is something like this:
     // e: /path/to/NonDataClass.kt: (5, 1): @Redacted is only supported on data classes!
-    assertThat(result.messages).contains("@Redacted is only supported on data classes!")
+    assertThat(result.messages).contains("NonDataClass.kt: (5,")
+    // TODO K2 doesn't support custom error messages yet
+    if (!useK2) {
+      assertThat(result.messages).contains("@Redacted is only supported on data classes!")
+    }
   }
 
   @Test
@@ -278,7 +287,7 @@ class RedactedPluginTest {
       verbose = false
       jvmTarget = JvmTarget.fromString(System.getProperty("rdt.jvmTarget", "1.8"))!!.description
       supportsK2 = true
-      kotlincArguments = listOf("-Xuse-k2")
+      this.useK2 = this@RedactedPluginTest.useK2
     }
   }
 
