@@ -77,11 +77,11 @@ object FirRedactedDeclarationChecker : FirRegularClassChecker() {
     if (hasRedactedProperty && classRedactedAnnotation != null) {
       reporter.reportOn(
           classRedactedAnnotation.source,
-          KtErrorsRedacted.REDACTED_ON_CLASS_AND_PROPERTY_WARNING,
+          KtErrorsRedacted.REDACTED_ON_CLASS_AND_PROPERTY_ERROR,
           context)
       redactedProperties.forEach {
         reporter.reportOn(
-            it.source, KtErrorsRedacted.REDACTED_ON_CLASS_AND_PROPERTY_WARNING, context)
+            it.source, KtErrorsRedacted.REDACTED_ON_CLASS_AND_PROPERTY_ERROR, context)
       }
     }
 
