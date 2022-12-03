@@ -77,6 +77,84 @@ class RedactedPluginTest(private val useK2: Boolean) {
   }
 
   @Test
+  fun classIsRequired() {
+    val result =
+        compile(
+            kotlin(
+                "NonClass.kt",
+                """
+          package dev.zacsweers.redacted.compiler.test
+
+          import dev.zacsweers.redacted.compiler.test.Redacted
+
+          enum class NonClass(@Redacted val a: Int)
+          """))
+    assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.COMPILATION_ERROR)
+
+    // Full log is something like this:
+    // e: /path/to/NonDataClass.kt: (5, 1): @Redacted is only supported on data classes!
+    assertThat(result.messages).contains("NonClass.kt: (5,")
+    // TODO K2 doesn't support custom error messages yet
+    if (!useK2) {
+      assertThat(result.messages).contains("@Redacted is only supported on data classes!")
+    }
+  }
+
+  @Test
+  fun customToStringIsAnError() {
+    val result =
+        compile(
+            kotlin(
+                "CustomToString.kt",
+                """
+          package dev.zacsweers.redacted.compiler.test
+
+          import dev.zacsweers.redacted.compiler.test.Redacted
+
+          data class CustomToString(@Redacted val a: Int) {
+            override fun toString(): String = "foo"
+          }
+          """))
+    assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.COMPILATION_ERROR)
+
+    // Full log is something like this:
+    // e: /path/to/NonDataClass.kt: (5, 1): @Redacted is only supported on data classes!
+    assertThat(result.messages).contains("CustomToString.kt: ")
+    // TODO K2 doesn't support custom error messages yet
+    if (!useK2) {
+      assertThat(result.messages)
+          .contains(
+              "@Redacted is only supported on data classes that do *not* have a custom toString() function")
+    }
+  }
+
+  @Test
+  fun annotatingBothClassAndPropertiesIsAnError() {
+    val result =
+        compile(
+            kotlin(
+                "DoubleAnnotation.kt",
+                """
+          package dev.zacsweers.redacted.compiler.test
+
+          import dev.zacsweers.redacted.compiler.test.Redacted
+
+          @Redacted
+          data class DoubleAnnotation(@Redacted val a: Int)
+          """))
+    assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.COMPILATION_ERROR)
+
+    // Full log is something like this:
+    // e: /path/to/NonDataClass.kt: (5, 1): @Redacted is only supported on data classes!
+    assertThat(result.messages).contains("DoubleAnnotation.kt: ")
+    // TODO K2 doesn't support custom error messages yet
+    if (!useK2) {
+      assertThat(result.messages)
+          .contains("@Redacted should only be applied to the class or its properties")
+    }
+  }
+
+  @Test
   fun `verbose should show extra logging`() {
     val compilation =
         prepareCompilation(
