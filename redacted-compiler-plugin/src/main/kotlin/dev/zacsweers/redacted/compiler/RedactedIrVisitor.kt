@@ -96,10 +96,12 @@ internal class RedactedIrVisitor(
     return super.visitFunctionNew(declaration)
   }
 
-  private fun IrFunction.isToString(): Boolean =
-      name.asString() == "toString" &&
-          valueParameters.isEmpty() &&
-          returnType == pluginContext.irBuiltIns.stringType
+  private fun IrFunction.isToStringFromAny(): Boolean =
+    name == OperatorNameConventions.TO_STRING &&
+      dispatchReceiverParameter != null &&
+      extensionReceiverParameter == null &&
+      valueParameters.isEmpty() &&
+      returnType.isString()
 
   private fun IrFunction.convertToGeneratedToString(
       properties: List<Property>,
