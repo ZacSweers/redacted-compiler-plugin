@@ -142,7 +142,8 @@ class FirRedactedPredicateMatcher(session: FirSession, private val redactedAnnot
 
   fun redactedAnnotation(declaration: FirDeclaration): FirAnnotation? {
     return declaration.annotations.firstOrNull { firAnnotation ->
-      firAnnotation.annotationTypeRef.coneTypeSafe<ConeClassLikeType>()?.classId == redactedAnnotation
+      firAnnotation.annotationTypeRef.coneTypeSafe<ConeClassLikeType>()?.classId ==
+          redactedAnnotation
     }
   }
 }

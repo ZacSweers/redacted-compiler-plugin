@@ -11,7 +11,9 @@ plugins {
 
 java { toolchain { languageVersion.set(JavaLanguageVersion.of(libs.versions.jdk.get().toInt())) } }
 
-tasks.withType<JavaCompile>().configureEach { options.release.set(libs.versions.jvmTarget.get().removePrefix("1.").toInt()) }
+tasks.withType<JavaCompile>().configureEach {
+  options.release.set(libs.versions.jvmTarget.get().removePrefix("1.").toInt())
+}
 
 // region Version.kt template for setting the project version in the build
 sourceSets { main { java.srcDir("$buildDir/generated/sources/version-templates/kotlin/main") } }

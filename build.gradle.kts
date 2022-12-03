@@ -53,6 +53,7 @@ spotless {
 }
 
 val javaTarget = libs.versions.jvmTarget.get().removePrefix("1.").toInt()
+
 allprojects {
   group = project.property("GROUP") as String
   version = project.property("VERSION_NAME") as String
@@ -63,7 +64,9 @@ allprojects {
   }
 
   pluginManager.withPlugin("java") {
-    configure<JavaPluginExtension> { toolchain { languageVersion.set(JavaLanguageVersion.of(libs.versions.jdk.get().toInt())) } }
+    configure<JavaPluginExtension> {
+      toolchain { languageVersion.set(JavaLanguageVersion.of(libs.versions.jdk.get().toInt())) }
+    }
     tasks.withType<JavaCompile>().configureEach { options.release.set(javaTarget) }
   }
 
