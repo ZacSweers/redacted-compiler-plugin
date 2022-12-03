@@ -1,16 +1,19 @@
 import org.jetbrains.dokka.gradle.DokkaTask
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-  id("org.jetbrains.kotlin.jvm") version "1.7.20"
-  id("java-gradle-plugin")
-  id("org.jetbrains.dokka") version "1.7.10"
-  id("com.vanniktech.maven.publish") version "0.19.0"
-  id("com.diffplug.spotless") version "6.11.0"
+  alias(libs.plugins.kotlin.jvm)
+  `java-gradle-plugin`
+  alias(libs.plugins.dokka)
+  alias(libs.plugins.mavenPublish)
+  alias(libs.plugins.spotless)
 }
 
-java { toolchain { languageVersion.set(JavaLanguageVersion.of(17)) } }
+java { toolchain { languageVersion.set(JavaLanguageVersion.of(libs.versions.jdk.get().toInt())) } }
 
-tasks.withType<JavaCompile>().configureEach { options.release.set(8) }
+tasks.withType<JavaCompile>().configureEach {
+  options.release.set(libs.versions.jvmTarget.get().removePrefix("1.").toInt())
+}
 
 // region Version.kt template for setting the project version in the build
 sourceSets { main { java.srcDir("$buildDir/generated/sources/version-templates/kotlin/main") } }
@@ -25,9 +28,9 @@ val copyVersionTemplatesProvider =
     }
 // endregion
 
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+tasks.withType<KotlinCompile>().configureEach {
   dependsOn(copyVersionTemplatesProvider)
-  kotlinOptions { jvmTarget = "1.8" }
+  kotlinOptions { jvmTarget = libs.versions.jvmTarget.get() }
 }
 
 gradlePlugin {
@@ -55,7 +58,7 @@ spotless {
   }
   kotlin {
     target("**/*.kt")
-    ktfmt("0.41")
+    ktfmt(libs.versions.ktfmt.get())
     trimTrailingWhitespace()
     endWithNewline()
     licenseHeaderFile("../spotless/spotless.kt")

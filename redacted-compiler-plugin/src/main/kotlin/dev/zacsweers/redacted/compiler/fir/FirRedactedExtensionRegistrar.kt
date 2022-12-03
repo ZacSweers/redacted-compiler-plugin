@@ -34,8 +34,10 @@ import org.jetbrains.kotlin.fir.expressions.FirAnnotation
 import org.jetbrains.kotlin.fir.extensions.FirExtensionRegistrar
 import org.jetbrains.kotlin.fir.extensions.FirExtensionSessionComponent
 import org.jetbrains.kotlin.fir.extensions.FirExtensionSessionComponent.Factory
+import org.jetbrains.kotlin.fir.types.ConeClassLikeType
 import org.jetbrains.kotlin.fir.types.classId
 import org.jetbrains.kotlin.fir.types.coneType
+import org.jetbrains.kotlin.fir.types.coneTypeSafe
 import org.jetbrains.kotlin.fir.types.isString
 import org.jetbrains.kotlin.lexer.KtTokens
 import org.jetbrains.kotlin.name.ClassId
@@ -75,11 +77,10 @@ object FirRedactedDeclarationChecker : FirRegularClassChecker() {
     if (hasRedactedProperty && classRedactedAnnotation != null) {
       reporter.reportOn(
           classRedactedAnnotation.source,
-          KtErrorsRedacted.REDACTED_ON_CLASS_AND_PROPERTY_WARNING,
+          KtErrorsRedacted.REDACTED_ON_CLASS_AND_PROPERTY_ERROR,
           context)
       redactedProperties.forEach {
-        reporter.reportOn(
-            it.source, KtErrorsRedacted.REDACTED_ON_CLASS_AND_PROPERTY_WARNING, context)
+        reporter.reportOn(it.source, KtErrorsRedacted.REDACTED_ON_CLASS_AND_PROPERTY_ERROR, context)
       }
     }
 
@@ -105,6 +106,8 @@ object FirRedactedDeclarationChecker : FirRegularClassChecker() {
           it is FirFunction &&
               it.isOverride &&
               it.symbol.callableId.callableName == TO_STRING_NAME &&
+              it.dispatchReceiverType == null &&
+              it.receiverTypeRef == null &&
               it.valueParameters.isEmpty() &&
               it.returnTypeRef.coneType.isString
         }
@@ -140,7 +143,8 @@ class FirRedactedPredicateMatcher(session: FirSession, private val redactedAnnot
 
   fun redactedAnnotation(declaration: FirDeclaration): FirAnnotation? {
     return declaration.annotations.firstOrNull { firAnnotation ->
-      firAnnotation.annotationTypeRef.coneType.classId == redactedAnnotation
+      firAnnotation.annotationTypeRef.coneTypeSafe<ConeClassLikeType>()?.classId ==
+          redactedAnnotation
     }
   }
 }

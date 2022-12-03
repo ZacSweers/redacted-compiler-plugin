@@ -4,14 +4,14 @@ on: [ push, pull_request ]
 
 jobs:
   jvm:
-    name: jvm | Kotlin ${{ matrix.ci_kotlin_version }} | StringConcat ${{ matrix.ci_string_concat }} | K2 ${{ matrix.ci_k2 }}
+    name: jvm | Kotlin ${{ matrix.kotlin }} | StringConcat ${{ matrix.stringConcat }} | K2 ${{ matrix.k2 }}
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
-        ci_kotlin_version: [ '1.7.0' ]
-        ci_string_concat: [ 'inline', 'indy', 'indy-with-constants' ]
-        ci_k2: [ 'true', 'false']
+        kotlin: [ '1.7.0' ]
+        stringConcat: [ 'inline', 'indy', 'indy-with-constants' ]
+        k2: [ 'true', 'false']
 
     steps:
       - name: Checkout
@@ -27,7 +27,7 @@ jobs:
           java-version: '17'
 
       - name: Build with Gradle
-        run: ./gradlew clean check -Dkjs=false -Dknative=false --stacktrace -Pstring_concat=${{ matrix.ci_string_concat }} -Prcp.useK2=${{ matrix.ci_k2 }}
+        run: ./gradlew clean check -Dkjs=false -Dknative=false --stacktrace -Pstring_concat=${{ matrix.stringConcat }} -Prcp.useK2=${{ matrix.k2 }}
 
   all-platforms:
     runs-on: ${{ matrix.os }}
@@ -73,4 +73,4 @@ jobs:
           ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.SonatypeUsername }}
           ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.SonatypePassword }}
         run: ./publish.sh --snapshot
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push' && matrix.ci_string_concat == 'indy' && matrix.ci_k2 == 'false'
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push' && matrix.stringConcat == 'indy' && matrix.k2 == 'false'

@@ -13,12 +13,12 @@ buildscript {
 }
 
 plugins {
-  kotlin("jvm") version "1.7.20" apply false
-  id("org.jetbrains.dokka") version "1.7.10" apply false
-  id("org.jetbrains.kotlinx.binary-compatibility-validator") version "0.11.1"
-  id("com.google.devtools.ksp") version "1.7.20-1.0.6" apply false
-  id("com.vanniktech.maven.publish") version "0.21.0" apply false
-  id("com.diffplug.spotless") version "6.11.0"
+  alias(libs.plugins.kotlin.jvm) apply false
+  alias(libs.plugins.dokka) apply false
+  alias(libs.plugins.ksp) apply false
+  alias(libs.plugins.mavenPublish) apply false
+  alias(libs.plugins.spotless)
+  alias(libs.plugins.binaryCompatibilityValidator)
 }
 
 plugins.withType<NodeJsRootPlugin>().configureEach {
@@ -38,7 +38,7 @@ spotless {
   }
   kotlin {
     target("**/*.kt")
-    ktfmt("0.41")
+    ktfmt(libs.versions.ktfmt.get())
     trimTrailingWhitespace()
     endWithNewline()
     licenseHeaderFile("spotless/spotless.kt")
@@ -46,11 +46,13 @@ spotless {
   }
   kotlinGradle {
     target("**/*.kts")
-    ktfmt("0.41")
+    ktfmt(libs.versions.ktfmt.get())
     trimTrailingWhitespace()
     endWithNewline()
   }
 }
+
+val javaTarget = libs.versions.jvmTarget.get().removePrefix("1.").toInt()
 
 allprojects {
   group = project.property("GROUP") as String
@@ -62,15 +64,17 @@ allprojects {
   }
 
   pluginManager.withPlugin("java") {
-    configure<JavaPluginExtension> { toolchain { languageVersion.set(JavaLanguageVersion.of(17)) } }
-    tasks.withType<JavaCompile>().configureEach { options.release.set(8) }
+    configure<JavaPluginExtension> {
+      toolchain { languageVersion.set(JavaLanguageVersion.of(libs.versions.jdk.get().toInt())) }
+    }
+    tasks.withType<JavaCompile>().configureEach { options.release.set(javaTarget) }
   }
 
   pluginManager.withPlugin("org.jetbrains.kotlin.jvm") {
     project.tasks.withType<KotlinCompile>().configureEach {
       kotlinOptions {
         if (project.name != "sample") {
-          jvmTarget = "1.8"
+          jvmTarget = libs.versions.jvmTarget.get()
         }
         @Suppress("SuspiciousCollectionReassignment")
         freeCompilerArgs += listOf("-progressive", "-Xjvm-default=all")

@@ -43,7 +43,7 @@ public final class dev/zacsweers/redacted/compiler/fir/FirRedactedPredicateMatch
 public final class dev/zacsweers/redacted/compiler/fir/KtErrorsRedacted {
 	public static final field INSTANCE Ldev/zacsweers/redacted/compiler/fir/KtErrorsRedacted;
 	public final fun getCUSTOM_TO_STRING_IN_REDACTED_CLASS_ERROR ()Lorg/jetbrains/kotlin/diagnostics/KtDiagnosticFactory0;
-	public final fun getREDACTED_ON_CLASS_AND_PROPERTY_WARNING ()Lorg/jetbrains/kotlin/diagnostics/KtDiagnosticFactory0;
+	public final fun getREDACTED_ON_CLASS_AND_PROPERTY_ERROR ()Lorg/jetbrains/kotlin/diagnostics/KtDiagnosticFactory0;
 	public final fun getREDACTED_ON_NON_CLASS_ERROR ()Lorg/jetbrains/kotlin/diagnostics/KtDiagnosticFactory0;
 	public final fun getREDACTED_ON_NON_DATA_CLASS_ERROR ()Lorg/jetbrains/kotlin/diagnostics/KtDiagnosticFactory0;
 }
