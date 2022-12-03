@@ -271,15 +271,14 @@ class RedactedPluginTest {
               processor.option(KEY_ENABLED, "true"),
               processor.option(KEY_REPLACEMENT_STRING, replacementString ?: "██"),
               processor.option(
-                  KEY_REDACTED_ANNOTATION, "dev.zacsweers.redacted.compiler.test.Redacted"),
+                  KEY_REDACTED_ANNOTATION, "dev/zacsweers/redacted/compiler/test/Redacted"),
           )
       inheritClassPath = true
       sources = sourceFiles.asList() + redacted
       verbose = false
-      jvmTarget = JvmTarget.fromString(System.getenv()["ci_java_version"] ?: "1.8")!!.description
-      // TODO whenever this library supports it
-      // https://github.com/tschuchortdev/kotlin-compile-testing/issues/302
-      //      kotlincArguments = listOf("-Xuse-k2")
+      jvmTarget = JvmTarget.fromString(System.getProperty("rdt.jvmTarget", "1.8"))!!.description
+      supportsK2 = true
+      kotlincArguments = listOf("-Xuse-k2")
     }
   }
 
