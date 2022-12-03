@@ -88,18 +88,18 @@ internal class RedactedIrVisitor(
         properties += Property(prop, isRedacted, parameter)
       }
       if (classIsRedacted || anyRedacted) {
-        if (!(classIsRedacted xor anyRedacted)) {
-          declarationParent.reportError(
-              "@Redacted should only be applied to the class or its properties, not both.")
+        if (declaration.origin == IrDeclarationOrigin.DEFINED) {
+          declaration.reportError(
+              "@Redacted is only supported on data classes that do *not* have a custom toString() function. Please remove the function or remove the @Redacted annotations.")
           return super.visitFunctionNew(declaration)
         }
         if (!declarationParent.isData) {
           declarationParent.reportError("@Redacted is only supported on data classes!")
           return super.visitFunctionNew(declaration)
         }
-        if (declaration.origin == IrDeclarationOrigin.DEFINED) {
-          declaration.reportError(
-              "@Redacted is only supported on data classes that do *not* have a custom toString() function. Please remove the function or remove the @Redacted annotations.")
+        if (!(classIsRedacted xor anyRedacted)) {
+          declarationParent.reportError(
+              "@Redacted should only be applied to the class or its properties, not both.")
           return super.visitFunctionNew(declaration)
         }
         declaration.convertToGeneratedToString(properties, classIsRedacted)
