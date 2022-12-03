@@ -18,7 +18,7 @@ kotlinCompileTesting = "1.4.9"
 kotlin = "1.7.20"
 javaRelease = "8"
 jvmTarget = "1.8"
-ksp = "1.7.20-1.0.6"
+ksp = "1.7.22-1.0.8"
 ktfmt = "0.41"
 moshi = "1.14.0"
 
