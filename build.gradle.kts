@@ -13,7 +13,7 @@ buildscript {
 }
 
 plugins {
-  kotlin("jvm") version "1.7.20" apply false
+  kotlin("jvm") version "1.7.22" apply false
   id("org.jetbrains.dokka") version "1.7.10" apply false
   id("org.jetbrains.kotlinx.binary-compatibility-validator") version "0.11.1"
   id("com.google.devtools.ksp") version "1.7.20-1.0.6" apply false
