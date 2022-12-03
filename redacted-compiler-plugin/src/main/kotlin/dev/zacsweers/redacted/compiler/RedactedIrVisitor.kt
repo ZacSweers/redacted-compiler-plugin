@@ -41,12 +41,10 @@ import org.jetbrains.kotlin.ir.declarations.IrValueParameter
 import org.jetbrains.kotlin.ir.expressions.addArgument
 import org.jetbrains.kotlin.ir.expressions.impl.IrGetValueImpl
 import org.jetbrains.kotlin.ir.types.isArray
-import org.jetbrains.kotlin.ir.types.isNullableAny
 import org.jetbrains.kotlin.ir.types.isString
 import org.jetbrains.kotlin.ir.util.SYNTHETIC_OFFSET
 import org.jetbrains.kotlin.ir.util.file
 import org.jetbrains.kotlin.ir.util.hasAnnotation
-import org.jetbrains.kotlin.ir.util.isFakeOverriddenFromAny
 import org.jetbrains.kotlin.ir.util.isPrimitiveArray
 import org.jetbrains.kotlin.ir.util.primaryConstructor
 import org.jetbrains.kotlin.ir.util.properties
@@ -90,13 +88,18 @@ internal class RedactedIrVisitor(
         properties += Property(prop, isRedacted, parameter)
       }
       if (classIsRedacted || anyRedacted) {
+        if (!(classIsRedacted xor anyRedacted)) {
+          declarationParent.reportError(
+              "@Redacted should only be applied to the class or its properties, not both.")
+          return super.visitFunctionNew(declaration)
+        }
         if (!declarationParent.isData) {
           declarationParent.reportError("@Redacted is only supported on data classes!")
           return super.visitFunctionNew(declaration)
         }
         if (declaration.origin == IrDeclarationOrigin.DEFINED) {
           declaration.reportError(
-            "@Redacted is only supported on data classes that do *not* have a custom toString() function. Please remove the function or remove the @Redacted annotations.")
+              "@Redacted is only supported on data classes that do *not* have a custom toString() function. Please remove the function or remove the @Redacted annotations.")
           return super.visitFunctionNew(declaration)
         }
         declaration.convertToGeneratedToString(properties, classIsRedacted)
@@ -107,11 +110,11 @@ internal class RedactedIrVisitor(
   }
 
   private fun IrFunction.isToStringFromAny(): Boolean =
-    name == OperatorNameConventions.TO_STRING &&
-      dispatchReceiverParameter != null &&
-      extensionReceiverParameter == null &&
-      valueParameters.isEmpty() &&
-      returnType.isString()
+      name == OperatorNameConventions.TO_STRING &&
+          dispatchReceiverParameter != null &&
+          extensionReceiverParameter == null &&
+          valueParameters.isEmpty() &&
+          returnType.isString()
 
   private fun IrFunction.convertToGeneratedToString(
       properties: List<Property>,
