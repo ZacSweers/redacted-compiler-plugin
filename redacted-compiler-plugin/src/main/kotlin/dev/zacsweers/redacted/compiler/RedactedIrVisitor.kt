@@ -32,6 +32,8 @@ import org.jetbrains.kotlin.ir.builders.irGetField
 import org.jetbrains.kotlin.ir.builders.irReturn
 import org.jetbrains.kotlin.ir.builders.irString
 import org.jetbrains.kotlin.ir.declarations.IrClass
+import org.jetbrains.kotlin.ir.declarations.IrDeclaration
+import org.jetbrains.kotlin.ir.declarations.IrDeclarationOrigin
 import org.jetbrains.kotlin.ir.declarations.IrFile
 import org.jetbrains.kotlin.ir.declarations.IrFunction
 import org.jetbrains.kotlin.ir.declarations.IrProperty
@@ -39,13 +41,17 @@ import org.jetbrains.kotlin.ir.declarations.IrValueParameter
 import org.jetbrains.kotlin.ir.expressions.addArgument
 import org.jetbrains.kotlin.ir.expressions.impl.IrGetValueImpl
 import org.jetbrains.kotlin.ir.types.isArray
+import org.jetbrains.kotlin.ir.types.isNullableAny
+import org.jetbrains.kotlin.ir.types.isString
 import org.jetbrains.kotlin.ir.util.SYNTHETIC_OFFSET
 import org.jetbrains.kotlin.ir.util.file
 import org.jetbrains.kotlin.ir.util.hasAnnotation
+import org.jetbrains.kotlin.ir.util.isFakeOverriddenFromAny
 import org.jetbrains.kotlin.ir.util.isPrimitiveArray
 import org.jetbrains.kotlin.ir.util.primaryConstructor
 import org.jetbrains.kotlin.ir.util.properties
 import org.jetbrains.kotlin.name.FqName
+import org.jetbrains.kotlin.util.OperatorNameConventions
 
 internal const val LOG_PREFIX = "*** REDACTED (IR):"
 
@@ -66,8 +72,7 @@ internal class RedactedIrVisitor(
     log("Reading <$declaration>")
 
     val declarationParent = declaration.parent
-    if (declarationParent is IrClass /* && declaration.isFakeOverride */ &&
-        declaration.isToString()) {
+    if (declarationParent is IrClass && declaration.isToStringFromAny()) {
       val primaryConstructor =
           declarationParent.primaryConstructor ?: return super.visitFunctionNew(declaration)
       val constructorParameters =
@@ -87,6 +92,11 @@ internal class RedactedIrVisitor(
       if (classIsRedacted || anyRedacted) {
         if (!declarationParent.isData) {
           declarationParent.reportError("@Redacted is only supported on data classes!")
+          return super.visitFunctionNew(declaration)
+        }
+        if (declaration.origin == IrDeclarationOrigin.DEFINED) {
+          declaration.reportError(
+            "@Redacted is only supported on data classes that do *not* have a custom toString() function. Please remove the function or remove the @Redacted annotations.")
           return super.visitFunctionNew(declaration)
         }
         declaration.convertToGeneratedToString(properties, classIsRedacted)
@@ -191,7 +201,7 @@ internal class RedactedIrVisitor(
     messageCollector.report(CompilerMessageSeverity.LOGGING, "$LOG_PREFIX $message")
   }
 
-  private fun IrClass.reportError(message: String) {
+  private fun IrDeclaration.reportError(message: String) {
     val location = file.locationOf(this)
     messageCollector.report(CompilerMessageSeverity.ERROR, "$LOG_PREFIX $message", location)
   }
