@@ -80,8 +80,7 @@ object FirRedactedDeclarationChecker : FirRegularClassChecker() {
           KtErrorsRedacted.REDACTED_ON_CLASS_AND_PROPERTY_ERROR,
           context)
       redactedProperties.forEach {
-        reporter.reportOn(
-            it.source, KtErrorsRedacted.REDACTED_ON_CLASS_AND_PROPERTY_ERROR, context)
+        reporter.reportOn(it.source, KtErrorsRedacted.REDACTED_ON_CLASS_AND_PROPERTY_ERROR, context)
       }
     }
 
@@ -107,6 +106,8 @@ object FirRedactedDeclarationChecker : FirRegularClassChecker() {
           it is FirFunction &&
               it.isOverride &&
               it.symbol.callableId.callableName == TO_STRING_NAME &&
+              it.dispatchReceiverType == null &&
+              it.receiverTypeRef == null &&
               it.valueParameters.isEmpty() &&
               it.returnTypeRef.coneType.isString
         }
