@@ -26,7 +26,7 @@ dependencies {
   testImplementation(libs.kotlin.reflect)
   testImplementation(libs.kotlin.compilerEmbeddable)
   // Cover for https://github.com/tschuchortdev/kotlin-compile-testing/issues/274
-  testImplementation("org.jetbrains.kotlin:kotlin-annotation-processing-embeddable:1.7.20-Beta")
+  testImplementation("org.jetbrains.kotlin:kotlin-annotation-processing-embeddable:1.7.22")
   testImplementation(libs.kotlinCompileTesting)
   testImplementation(libs.junit)
   testImplementation(libs.truth)
