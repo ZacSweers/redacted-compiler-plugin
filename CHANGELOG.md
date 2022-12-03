@@ -1,6 +1,21 @@
 Changelog
 =========
 
+1.2.1
+-----
+
+_2022-12-03_
+
+This release is primarily under-the-hood changes + extra compile-time checks.
+
+- [IR] Fail compilation if both class and any number of properties are annotated with `@Redacted`.
+- [IR] Fail compilation if `@Redacted` is used in a non-class context.
+  - Before it would only check if the class is non-data, but with Kotlin 1.8 introducing `data object` classes we need to also check that the target type is itself a class.
+- [IR] Fail compilation if a custom `toString()` function is implemented in a data class using `@Redacted`.
+- [IR] Harden `toString()` function declaration matching.
+- [FIR] Promote `REDACTED_ON_CLASS_AND_PROPERTY_WARNING` to error.
+- Update to Kotlin 1.7.22.
+
 1.2.0
 -----
 
