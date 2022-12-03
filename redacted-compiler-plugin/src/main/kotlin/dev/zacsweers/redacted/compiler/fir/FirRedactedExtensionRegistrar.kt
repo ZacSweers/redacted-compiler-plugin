@@ -34,8 +34,10 @@ import org.jetbrains.kotlin.fir.expressions.FirAnnotation
 import org.jetbrains.kotlin.fir.extensions.FirExtensionRegistrar
 import org.jetbrains.kotlin.fir.extensions.FirExtensionSessionComponent
 import org.jetbrains.kotlin.fir.extensions.FirExtensionSessionComponent.Factory
+import org.jetbrains.kotlin.fir.types.ConeClassLikeType
 import org.jetbrains.kotlin.fir.types.classId
 import org.jetbrains.kotlin.fir.types.coneType
+import org.jetbrains.kotlin.fir.types.coneTypeSafe
 import org.jetbrains.kotlin.fir.types.isString
 import org.jetbrains.kotlin.lexer.KtTokens
 import org.jetbrains.kotlin.name.ClassId
@@ -140,7 +142,7 @@ class FirRedactedPredicateMatcher(session: FirSession, private val redactedAnnot
 
   fun redactedAnnotation(declaration: FirDeclaration): FirAnnotation? {
     return declaration.annotations.firstOrNull { firAnnotation ->
-      firAnnotation.annotationTypeRef.coneType.classId == redactedAnnotation
+      firAnnotation.annotationTypeRef.coneTypeSafe<ConeClassLikeType>()?.classId == redactedAnnotation
     }
   }
 }
