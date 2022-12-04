@@ -1,6 +1,6 @@
 import org.jetbrains.dokka.gradle.DokkaTask
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
   alias(libs.plugins.kotlin.jvm)
@@ -12,7 +12,9 @@ plugins {
 
 java { toolchain { languageVersion.set(JavaLanguageVersion.of(libs.versions.jdk.get().toInt())) } }
 
-tasks.withType<JavaCompile>().configureEach { options.release.set(libs.versions.jvmTarget.get().toInt()) }
+tasks.withType<JavaCompile>().configureEach {
+  options.release.set(libs.versions.jvmTarget.get().toInt())
+}
 
 // region Version.kt template for setting the project version in the build
 sourceSets { main { java.srcDir("$buildDir/generated/sources/version-templates/kotlin/main") } }
