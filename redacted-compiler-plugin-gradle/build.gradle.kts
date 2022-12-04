@@ -1,3 +1,5 @@
+import com.vanniktech.maven.publish.MavenPublishBaseExtension
+import com.vanniktech.maven.publish.SonatypeHost
 import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
@@ -69,4 +71,10 @@ spotless {
 dependencies {
   compileOnly(libs.kotlin.gradlePlugin)
   compileOnly(libs.kotlin.gradlePlugin.api)
+}
+
+configure<MavenPublishBaseExtension> {
+  publishToMavenCentral(SonatypeHost.DEFAULT)
+  signAllPublications()
+  pomFromGradleProperties()
 }
