@@ -28,7 +28,7 @@ import org.jetbrains.kotlin.name.ClassId
 
 // TODO switch to CompilerPluginRegistrar in 1.8 https://youtrack.jetbrains.com/issue/KT-52665
 @AutoService(ComponentRegistrar::class)
-class RedactedComponentRegistrar : ComponentRegistrar {
+public class RedactedComponentRegistrar : ComponentRegistrar {
 
   override val supportsK2: Boolean
     get() = true
