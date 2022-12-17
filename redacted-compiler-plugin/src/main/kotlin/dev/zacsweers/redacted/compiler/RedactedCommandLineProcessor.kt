@@ -33,7 +33,7 @@ internal val KEY_REDACTED_ANNOTATION =
 @AutoService(CommandLineProcessor::class)
 class RedactedCommandLineProcessor : CommandLineProcessor {
 
-  companion object {
+  internal companion object {
     val OPTION_ENABLED =
         CliOption(
             optionName = "enabled",
