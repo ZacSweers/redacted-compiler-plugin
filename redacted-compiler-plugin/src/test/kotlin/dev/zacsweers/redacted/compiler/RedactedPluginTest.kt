@@ -20,6 +20,10 @@ import com.tschuchort.compiletesting.KotlinCompilation
 import com.tschuchort.compiletesting.PluginOption
 import com.tschuchort.compiletesting.SourceFile
 import com.tschuchort.compiletesting.SourceFile.Companion.kotlin
+import dev.zacsweers.redacted.compiler.RedactedCommandLineProcessor.Companion.OPTION_ENABLED
+import dev.zacsweers.redacted.compiler.RedactedCommandLineProcessor.Companion.OPTION_REDACTED_ANNOTATION
+import dev.zacsweers.redacted.compiler.RedactedCommandLineProcessor.Companion.OPTION_REPLACEMENT_STRING
+import org.jetbrains.kotlin.compiler.plugin.CliOption
 import org.jetbrains.kotlin.compiler.plugin.CommandLineProcessor
 import org.jetbrains.kotlin.config.JvmTarget
 import org.junit.Rule
@@ -355,10 +359,10 @@ class RedactedPluginTest(private val useK2: Boolean) {
       commandLineProcessors = listOf(processor)
       pluginOptions =
           listOf(
-              processor.option(KEY_ENABLED, "true"),
-              processor.option(KEY_REPLACEMENT_STRING, replacementString ?: "██"),
+              processor.option(OPTION_ENABLED, "true"),
+              processor.option(OPTION_REPLACEMENT_STRING, replacementString ?: "██"),
               processor.option(
-                  KEY_REDACTED_ANNOTATION, "dev/zacsweers/redacted/compiler/test/Redacted"),
+                  OPTION_REDACTED_ANNOTATION, "dev/zacsweers/redacted/compiler/test/Redacted"),
           )
       inheritClassPath = true
       sources = sourceFiles.asList() + redacted
@@ -369,8 +373,8 @@ class RedactedPluginTest(private val useK2: Boolean) {
     }
   }
 
-  private fun CommandLineProcessor.option(key: Any, value: Any?): PluginOption {
-    return PluginOption(pluginId, key.toString(), value.toString())
+  private fun CommandLineProcessor.option(key: CliOption, value: Any?): PluginOption {
+    return PluginOption(pluginId, key.optionName, value.toString())
   }
 
   private fun compile(vararg sourceFiles: SourceFile): KotlinCompilation.Result {
