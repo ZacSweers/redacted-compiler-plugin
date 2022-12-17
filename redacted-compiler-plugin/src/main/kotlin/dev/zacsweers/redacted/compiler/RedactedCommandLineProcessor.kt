@@ -31,7 +31,7 @@ internal val KEY_REDACTED_ANNOTATION =
         "The redacted marker annotation (i.e. com/example/Redacted) to look for when redacting")
 
 @AutoService(CommandLineProcessor::class)
-class RedactedCommandLineProcessor : CommandLineProcessor {
+public class RedactedCommandLineProcessor : CommandLineProcessor {
 
   internal companion object {
     val OPTION_ENABLED =
@@ -68,7 +68,7 @@ class RedactedCommandLineProcessor : CommandLineProcessor {
       option: AbstractCliOption,
       value: String,
       configuration: CompilerConfiguration
-  ) =
+  ): Unit =
       when (option.optionName) {
         "enabled" -> configuration.put(KEY_ENABLED, value.toBoolean())
         "replacementString" -> configuration.put(KEY_REPLACEMENT_STRING, value)

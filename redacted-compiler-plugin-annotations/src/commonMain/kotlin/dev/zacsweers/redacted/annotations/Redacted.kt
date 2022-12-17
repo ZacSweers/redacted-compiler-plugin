@@ -28,4 +28,4 @@ import kotlin.annotation.AnnotationTarget.PROPERTY
  *
  * For classes, the entire class will be redacted. Example: `SensitiveData(██)`
  */
-@Retention(BINARY) @Target(PROPERTY, CLASS) annotation class Redacted
+@Retention(BINARY) @Target(PROPERTY, CLASS) public annotation class Redacted

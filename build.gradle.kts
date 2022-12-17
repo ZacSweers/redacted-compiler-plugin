@@ -1,6 +1,7 @@
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
 import com.vanniktech.maven.publish.SonatypeHost
 import org.jetbrains.dokka.gradle.DokkaTask
+import org.jetbrains.kotlin.gradle.dsl.KotlinProjectExtension
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootExtension
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -54,14 +55,9 @@ spotless {
 
 val javaTarget = libs.versions.jvmTarget.get().removePrefix("1.").toInt()
 
-allprojects {
+subprojects {
   group = project.property("GROUP") as String
   version = project.property("VERSION_NAME") as String
-
-  repositories {
-    google()
-    mavenCentral()
-  }
 
   pluginManager.withPlugin("java") {
     configure<JavaPluginExtension> {
@@ -79,6 +75,9 @@ allprojects {
         @Suppress("SuspiciousCollectionReassignment")
         freeCompilerArgs += listOf("-progressive", "-Xjvm-default=all")
       }
+    }
+    if ("sample" !in project.path) {
+      configure<KotlinProjectExtension> { explicitApi() }
     }
   }
 

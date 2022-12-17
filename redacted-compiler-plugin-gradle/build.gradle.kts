@@ -49,7 +49,7 @@ tasks.named<DokkaTask>("dokkaHtml") {
   dokkaSourceSets.configureEach { skipDeprecated.set(true) }
 }
 
-repositories { mavenCentral() }
+kotlin { explicitApi() }
 
 spotless {
   format("misc") {
