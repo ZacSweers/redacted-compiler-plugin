@@ -30,7 +30,7 @@ public class RedactedGradleSubplugin : KotlinCompilerPluginSupportPlugin {
     target.extensions.create("redacted", RedactedPluginExtension::class.java)
   }
 
-  override fun getCompilerPluginId(): String = "redacted-compiler-plugin"
+  override fun getCompilerPluginId(): String = "dev.zacsweers.redacted.compiler"
 
   override fun getPluginArtifact(): SubpluginArtifact =
       SubpluginArtifact(
