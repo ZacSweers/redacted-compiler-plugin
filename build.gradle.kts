@@ -1,5 +1,4 @@
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
-import com.vanniktech.maven.publish.SonatypeHost
 import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootExtension
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin
@@ -91,9 +90,12 @@ allprojects {
 
   plugins.withId("com.vanniktech.maven.publish.base") {
     configure<MavenPublishBaseExtension> {
-      publishToMavenCentral(SonatypeHost.DEFAULT)
-      signAllPublications()
-      pomFromGradleProperties()
+      publishToMavenCentral()
+    }
+
+    // configuration required to produce unique META-INF/*.kotlin_module file names
+    tasks.withType<KotlinCompile>().configureEach {
+      kotlinOptions { moduleName = project.property("POM_ARTIFACT_ID") as String }
     }
   }
 }
