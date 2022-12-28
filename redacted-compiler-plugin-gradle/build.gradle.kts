@@ -1,5 +1,4 @@
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
-import com.vanniktech.maven.publish.SonatypeHost
 import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
@@ -73,8 +72,9 @@ dependencies {
   compileOnly(libs.kotlin.gradlePlugin.api)
 }
 
-configure<MavenPublishBaseExtension> {
-  publishToMavenCentral(SonatypeHost.DEFAULT)
-  signAllPublications()
-  pomFromGradleProperties()
+configure<MavenPublishBaseExtension> { publishToMavenCentral() }
+
+// configuration required to produce unique META-INF/*.kotlin_module file names
+tasks.withType<KotlinCompile>().configureEach {
+  kotlinOptions { moduleName = project.property("POM_ARTIFACT_ID") as String }
 }
