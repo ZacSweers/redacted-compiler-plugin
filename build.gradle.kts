@@ -89,9 +89,7 @@ allprojects {
   }
 
   plugins.withId("com.vanniktech.maven.publish.base") {
-    configure<MavenPublishBaseExtension> {
-      publishToMavenCentral()
-    }
+    configure<MavenPublishBaseExtension> { publishToMavenCentral() }
 
     // configuration required to produce unique META-INF/*.kotlin_module file names
     tasks.withType<KotlinCompile>().configureEach {
