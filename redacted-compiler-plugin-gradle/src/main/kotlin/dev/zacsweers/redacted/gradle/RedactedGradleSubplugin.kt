@@ -24,13 +24,13 @@ import org.jetbrains.kotlin.gradle.plugin.SubpluginArtifact
 import org.jetbrains.kotlin.gradle.plugin.SubpluginOption
 import org.jetbrains.kotlin.gradle.plugin.sources.DefaultKotlinSourceSet
 
-class RedactedGradleSubplugin : KotlinCompilerPluginSupportPlugin {
+public class RedactedGradleSubplugin : KotlinCompilerPluginSupportPlugin {
 
   override fun apply(target: Project) {
     target.extensions.create("redacted", RedactedPluginExtension::class.java)
   }
 
-  override fun getCompilerPluginId(): String = "redacted-compiler-plugin"
+  override fun getCompilerPluginId(): String = "dev.zacsweers.redacted.compiler"
 
   override fun getPluginArtifact(): SubpluginArtifact =
       SubpluginArtifact(

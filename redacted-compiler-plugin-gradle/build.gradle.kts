@@ -1,3 +1,4 @@
+import com.vanniktech.maven.publish.MavenPublishBaseExtension
 import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -48,7 +49,7 @@ tasks.named<DokkaTask>("dokkaHtml") {
   dokkaSourceSets.configureEach { skipDeprecated.set(true) }
 }
 
-repositories { mavenCentral() }
+kotlin { explicitApi() }
 
 spotless {
   format("misc") {
@@ -70,4 +71,11 @@ spotless {
 dependencies {
   compileOnly(libs.kotlin.gradlePlugin)
   compileOnly(libs.kotlin.gradlePlugin.api)
+}
+
+configure<MavenPublishBaseExtension> { publishToMavenCentral() }
+
+// configuration required to produce unique META-INF/*.kotlin_module file names
+tasks.withType<KotlinCompile>().configureEach {
+  kotlinOptions { moduleName = project.property("POM_ARTIFACT_ID") as String }
 }

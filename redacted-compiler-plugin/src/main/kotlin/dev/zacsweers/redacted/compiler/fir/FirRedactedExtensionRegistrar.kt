@@ -45,7 +45,7 @@ import org.jetbrains.kotlin.name.Name
 
 private val TO_STRING_NAME = Name.identifier("toString")
 
-class FirRedactedExtensionRegistrar(private val redactedAnnotation: ClassId) :
+internal class FirRedactedExtensionRegistrar(private val redactedAnnotation: ClassId) :
     FirExtensionRegistrar() {
   override fun ExtensionRegistrarContext.configurePlugin() {
     +FirRedactedPredicateMatcher.getFactory(redactedAnnotation)
@@ -53,7 +53,7 @@ class FirRedactedExtensionRegistrar(private val redactedAnnotation: ClassId) :
   }
 }
 
-class FirRedactedCheckers(session: FirSession) : FirAdditionalCheckersExtension(session) {
+internal class FirRedactedCheckers(session: FirSession) : FirAdditionalCheckersExtension(session) {
   override val declarationCheckers: DeclarationCheckers =
       object : DeclarationCheckers() {
         override val regularClassCheckers: Set<FirRegularClassChecker> =
@@ -61,7 +61,7 @@ class FirRedactedCheckers(session: FirSession) : FirAdditionalCheckersExtension(
       }
 }
 
-object FirRedactedDeclarationChecker : FirRegularClassChecker() {
+internal object FirRedactedDeclarationChecker : FirRegularClassChecker() {
   override fun check(
       declaration: FirRegularClass,
       context: CheckerContext,
@@ -133,8 +133,10 @@ object FirRedactedDeclarationChecker : FirRegularClassChecker() {
           .toList()
 }
 
-class FirRedactedPredicateMatcher(session: FirSession, private val redactedAnnotation: ClassId) :
-    FirExtensionSessionComponent(session) {
+internal class FirRedactedPredicateMatcher(
+    session: FirSession,
+    private val redactedAnnotation: ClassId
+) : FirExtensionSessionComponent(session) {
   companion object {
     fun getFactory(redactedAnnotation: ClassId): Factory {
       return Factory { session -> FirRedactedPredicateMatcher(session, redactedAnnotation) }
@@ -149,5 +151,5 @@ class FirRedactedPredicateMatcher(session: FirSession, private val redactedAnnot
   }
 }
 
-val FirSession.redactedPredicateMatcher: FirRedactedPredicateMatcher by
+internal val FirSession.redactedPredicateMatcher: FirRedactedPredicateMatcher by
     FirSession.sessionComponentAccessor()

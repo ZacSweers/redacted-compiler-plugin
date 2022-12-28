@@ -6,6 +6,13 @@ pluginManagement {
   }
 }
 
+dependencyResolutionManagement {
+  repositories {
+    google()
+    mavenCentral()
+  }
+}
+
 rootProject.name = "redacted-compiler-plugin"
 
 include(":redacted-compiler-plugin")

@@ -1,7 +1,7 @@
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
-import com.vanniktech.maven.publish.SonatypeHost
 import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.dsl.KotlinProjectExtension
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootExtension
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -55,14 +55,9 @@ spotless {
 
 val javaTarget = libs.versions.jvmTarget.get().toInt()
 
-allprojects {
+subprojects {
   group = project.property("GROUP") as String
   version = project.property("VERSION_NAME") as String
-
-  repositories {
-    google()
-    mavenCentral()
-  }
 
   pluginManager.withPlugin("java") {
     configure<JavaPluginExtension> {
@@ -80,6 +75,9 @@ allprojects {
         freeCompilerArgs.addAll("-progressive", "-Xjvm-default=all")
       }
     }
+    if ("sample" !in project.path) {
+      configure<KotlinProjectExtension> { explicitApi() }
+    }
   }
 
   pluginManager.withPlugin("org.jetbrains.dokka") {
@@ -90,10 +88,11 @@ allprojects {
   }
 
   plugins.withId("com.vanniktech.maven.publish.base") {
-    configure<MavenPublishBaseExtension> {
-      publishToMavenCentral(SonatypeHost.DEFAULT)
-      signAllPublications()
-      pomFromGradleProperties()
+    configure<MavenPublishBaseExtension> { publishToMavenCentral() }
+
+    // configuration required to produce unique META-INF/*.kotlin_module file names
+    tasks.withType<KotlinCompile>().configureEach {
+      kotlinOptions { moduleName = project.property("POM_ARTIFACT_ID") as String }
     }
   }
 }

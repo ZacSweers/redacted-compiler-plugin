@@ -28,7 +28,7 @@ import org.jetbrains.kotlin.name.ClassId
 
 @OptIn(ExperimentalCompilerApi::class)
 @AutoService(CompilerPluginRegistrar::class)
-class RedactedComponentRegistrar : CompilerPluginRegistrar() {
+public class RedactedComponentRegistrar : CompilerPluginRegistrar() {
 
   override val supportsK2: Boolean
     get() = true
@@ -37,16 +37,18 @@ class RedactedComponentRegistrar : CompilerPluginRegistrar() {
     if (configuration[KEY_ENABLED] == false) return
 
     val messageCollector =
-        configuration.get(CLIConfigurationKeys.MESSAGE_COLLECTOR_KEY, MessageCollector.NONE)
+      configuration.get(CLIConfigurationKeys.MESSAGE_COLLECTOR_KEY, MessageCollector.NONE)
     val replacementString = checkNotNull(configuration[KEY_REPLACEMENT_STRING])
     val redactedAnnotation = checkNotNull(configuration[KEY_REDACTED_ANNOTATION])
     val redactedAnnotationClassId = ClassId.fromString(redactedAnnotation)
     val fqRedactedAnnotation = redactedAnnotationClassId.asSingleFqName()
 
     IrGenerationExtension.registerExtension(
-        RedactedIrGenerationExtension(messageCollector, replacementString, fqRedactedAnnotation))
+      RedactedIrGenerationExtension(messageCollector, replacementString, fqRedactedAnnotation)
+    )
 
     FirExtensionRegistrarAdapter.registerExtension(
-        FirRedactedExtensionRegistrar(redactedAnnotationClassId))
+      FirRedactedExtensionRegistrar(redactedAnnotationClassId)
+    )
   }
 }
