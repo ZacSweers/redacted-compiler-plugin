@@ -1,5 +1,6 @@
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
 import org.jetbrains.dokka.gradle.DokkaTask
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinProjectExtension
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootExtension
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin
@@ -52,7 +53,7 @@ spotless {
   }
 }
 
-val javaTarget = libs.versions.jvmTarget.get().removePrefix("1.").toInt()
+val javaTarget = libs.versions.jvmTarget.get().toInt()
 
 subprojects {
   group = project.property("GROUP") as String
@@ -67,12 +68,11 @@ subprojects {
 
   pluginManager.withPlugin("org.jetbrains.kotlin.jvm") {
     project.tasks.withType<KotlinCompile>().configureEach {
-      kotlinOptions {
+      compilerOptions {
         if (project.name != "sample") {
-          jvmTarget = libs.versions.jvmTarget.get()
+          jvmTarget.set(JvmTarget.fromTarget(libs.versions.jvmTarget.get()))
         }
-        @Suppress("SuspiciousCollectionReassignment")
-        freeCompilerArgs += listOf("-progressive", "-Xjvm-default=all")
+        freeCompilerArgs.addAll("-progressive", "-Xjvm-default=all")
       }
     }
     if ("sample" !in project.path) {

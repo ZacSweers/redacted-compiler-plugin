@@ -25,6 +25,7 @@ import dev.zacsweers.redacted.compiler.RedactedCommandLineProcessor.Companion.OP
 import dev.zacsweers.redacted.compiler.RedactedCommandLineProcessor.Companion.OPTION_REPLACEMENT_STRING
 import org.jetbrains.kotlin.compiler.plugin.CliOption
 import org.jetbrains.kotlin.compiler.plugin.CommandLineProcessor
+import org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi
 import org.jetbrains.kotlin.config.JvmTarget
 import org.junit.Rule
 import org.junit.Test
@@ -32,6 +33,7 @@ import org.junit.rules.TemporaryFolder
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 
+@OptIn(ExperimentalCompilerApi::class)
 @RunWith(Parameterized::class)
 class RedactedPluginTest(private val useK2: Boolean) {
 
@@ -73,7 +75,7 @@ class RedactedPluginTest(private val useK2: Boolean) {
 
     // Full log is something like this:
     // e: /path/to/NonDataClass.kt: (5, 1): @Redacted is only supported on data classes!
-    assertThat(result.messages).contains("NonDataClass.kt: (5,")
+    assertThat(result.messages).contains("NonDataClass.kt:5")
     // TODO K2 doesn't support custom error messages yet
     if (!useK2) {
       assertThat(result.messages).contains("@Redacted is only supported on data classes!")
@@ -97,7 +99,7 @@ class RedactedPluginTest(private val useK2: Boolean) {
 
     // Full log is something like this:
     // e: /path/to/NonDataClass.kt: (5, 1): @Redacted is only supported on data classes!
-    assertThat(result.messages).contains("NonClass.kt: (5,")
+    assertThat(result.messages).contains("NonClass.kt:")
     // TODO K2 doesn't support custom error messages yet
     if (!useK2) {
       assertThat(result.messages).contains("@Redacted is only supported on data classes!")
@@ -123,7 +125,7 @@ class RedactedPluginTest(private val useK2: Boolean) {
 
     // Full log is something like this:
     // e: /path/to/NonDataClass.kt: (5, 1): @Redacted is only supported on data classes!
-    assertThat(result.messages).contains("CustomToString.kt: ")
+    assertThat(result.messages).contains("CustomToString.kt:")
     // TODO K2 doesn't support custom error messages yet
     if (!useK2) {
       assertThat(result.messages)
@@ -150,7 +152,7 @@ class RedactedPluginTest(private val useK2: Boolean) {
 
     // Full log is something like this:
     // e: /path/to/NonDataClass.kt: (5, 1): @Redacted is only supported on data classes!
-    assertThat(result.messages).contains("DoubleAnnotation.kt: ")
+    assertThat(result.messages).contains("DoubleAnnotation.kt:")
     // TODO K2 doesn't support custom error messages yet
     if (!useK2) {
       assertThat(result.messages)
@@ -354,7 +356,7 @@ class RedactedPluginTest(private val useK2: Boolean) {
   ): KotlinCompilation {
     return KotlinCompilation().apply {
       workingDir = temporaryFolder.root
-      compilerPlugins = listOf(RedactedComponentRegistrar())
+      compilerPluginRegistrars = listOf(RedactedComponentRegistrar())
       val processor = RedactedCommandLineProcessor()
       commandLineProcessors = listOf(processor)
       pluginOptions =

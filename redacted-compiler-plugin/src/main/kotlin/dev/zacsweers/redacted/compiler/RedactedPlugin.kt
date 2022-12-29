@@ -20,24 +20,20 @@ import dev.zacsweers.redacted.compiler.fir.FirRedactedExtensionRegistrar
 import org.jetbrains.kotlin.backend.common.extensions.IrGenerationExtension
 import org.jetbrains.kotlin.cli.common.CLIConfigurationKeys
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
-import org.jetbrains.kotlin.com.intellij.mock.MockProject
-import org.jetbrains.kotlin.compiler.plugin.ComponentRegistrar
+import org.jetbrains.kotlin.compiler.plugin.CompilerPluginRegistrar
+import org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi
 import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.fir.extensions.FirExtensionRegistrarAdapter
 import org.jetbrains.kotlin.name.ClassId
 
-// TODO switch to CompilerPluginRegistrar in 1.8 https://youtrack.jetbrains.com/issue/KT-52665
-@AutoService(ComponentRegistrar::class)
-public class RedactedComponentRegistrar : ComponentRegistrar {
+@OptIn(ExperimentalCompilerApi::class)
+@AutoService(CompilerPluginRegistrar::class)
+public class RedactedComponentRegistrar : CompilerPluginRegistrar() {
 
   override val supportsK2: Boolean
     get() = true
 
-  override fun registerProjectComponents(
-      project: MockProject,
-      configuration: CompilerConfiguration
-  ) {
-
+  override fun ExtensionStorage.registerExtensions(configuration: CompilerConfiguration) {
     if (configuration[KEY_ENABLED] == false) return
 
     val messageCollector =
@@ -48,10 +44,9 @@ public class RedactedComponentRegistrar : ComponentRegistrar {
     val fqRedactedAnnotation = redactedAnnotationClassId.asSingleFqName()
 
     IrGenerationExtension.registerExtension(
-        project,
         RedactedIrGenerationExtension(messageCollector, replacementString, fqRedactedAnnotation))
 
     FirExtensionRegistrarAdapter.registerExtension(
-        project, FirRedactedExtensionRegistrar(redactedAnnotationClassId))
+        FirRedactedExtensionRegistrar(redactedAnnotationClassId))
   }
 }

@@ -14,11 +14,11 @@
 
 [versions]
 autoService = "1.0.1"
-kotlinCompileTesting = "0.1.0"
-kotlin = "1.7.22"
+kotlinCompileTesting = "0.2.0"
+kotlin = "1.8.0"
 jdk = "17"
-jvmTarget = "1.8"
-ksp = "1.7.22-1.0.8"
+jvmTarget = "11"
+ksp = "1.8.0-1.0.8"
 ktfmt = "0.42"
 moshi = "1.14.0"
 

@@ -1,6 +1,7 @@
 import com.vanniktech.maven.publish.JavadocJar
 import com.vanniktech.maven.publish.KotlinMultiplatform
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
+import org.jetbrains.kotlin.gradle.dsl.JsModuleKind.MODULE_UMD
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 
 plugins {
@@ -44,12 +45,12 @@ kotlin {
   val kmpJsEnabled = System.getProperty("kjs", "true").toBoolean()
   jvm()
   if (kmpJsEnabled) {
-    js(BOTH) {
-      compilations.all {
-        kotlinOptions {
-          moduleKind = "umd"
-          sourceMap = true
-          metaInfo = true
+    js(IR) {
+      compilations.configureEach {
+        compilerOptions.configure {
+          moduleKind.set(MODULE_UMD)
+          sourceMap.set(true)
+          metaInfo.set(true)
         }
       }
       nodejs { testTask { useMocha { timeout = "30s" } } }
@@ -121,14 +122,4 @@ val unixSizet64Targets =
 
 configure<MavenPublishBaseExtension> {
   configure(KotlinMultiplatform(javadocJar = JavadocJar.Dokka("dokkaGfm")))
-}
-
-// https://youtrack.jetbrains.com/issue/KT-46978
-tasks.withType<ProcessResources>().all {
-  when (name) {
-    "jvmTestProcessResources",
-    "jvmProcessResources" -> {
-      duplicatesStrategy = DuplicatesStrategy.WARN
-    }
-  }
 }

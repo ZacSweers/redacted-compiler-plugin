@@ -1,5 +1,6 @@
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
 import org.jetbrains.dokka.gradle.DokkaTask
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -13,7 +14,7 @@ plugins {
 java { toolchain { languageVersion.set(JavaLanguageVersion.of(libs.versions.jdk.get().toInt())) } }
 
 tasks.withType<JavaCompile>().configureEach {
-  options.release.set(libs.versions.jvmTarget.get().removePrefix("1.").toInt())
+  options.release.set(libs.versions.jvmTarget.get().toInt())
 }
 
 // region Version.kt template for setting the project version in the build
@@ -31,7 +32,7 @@ val copyVersionTemplatesProvider =
 
 tasks.withType<KotlinCompile>().configureEach {
   dependsOn(copyVersionTemplatesProvider)
-  kotlinOptions { jvmTarget = libs.versions.jvmTarget.get() }
+  compilerOptions { jvmTarget.set(JvmTarget.fromTarget(libs.versions.jvmTarget.get())) }
 }
 
 gradlePlugin {
