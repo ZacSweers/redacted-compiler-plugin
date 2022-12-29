@@ -1,6 +1,16 @@
 Changelog
 =========
 
+1.3.0
+-----
+
+_2022-12-28_
+
+- Update to Kotlin `1.8.0`. This release is only compatible with Kotlin 1.8 or later.
+- Update JVM target to `11`.
+- Kotlin JS artifact now only supports IR.
+- Migrate the IR and FIR plugins to new `CompilerPluginRegistrar` entrypoint API.
+
 1.2.1
 -----
 
