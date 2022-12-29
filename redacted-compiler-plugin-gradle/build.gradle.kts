@@ -11,10 +11,10 @@ plugins {
   alias(libs.plugins.spotless)
 }
 
-java { toolchain { languageVersion.set(JavaLanguageVersion.of(libs.versions.jdk.get().toInt())) } }
+java { toolchain { languageVersion.set(libs.versions.jdk.map(JavaLanguageVersion::of)) } }
 
 tasks.withType<JavaCompile>().configureEach {
-  options.release.set(libs.versions.jvmTarget.get().toInt())
+  options.release.set(libs.versions.jvmTarget.map(String::toInt))
 }
 
 // region Version.kt template for setting the project version in the build
@@ -32,7 +32,7 @@ val copyVersionTemplatesProvider =
 
 tasks.withType<KotlinCompile>().configureEach {
   dependsOn(copyVersionTemplatesProvider)
-  compilerOptions { jvmTarget.set(JvmTarget.fromTarget(libs.versions.jvmTarget.get())) }
+  compilerOptions { jvmTarget.set(libs.versions.jvmTarget.map(JvmTarget::fromTarget)) }
 }
 
 gradlePlugin {
@@ -73,7 +73,7 @@ dependencies {
   compileOnly(libs.kotlin.gradlePlugin.api)
 }
 
-configure<MavenPublishBaseExtension> { publishToMavenCentral() }
+configure<MavenPublishBaseExtension> { publishToMavenCentral(automaticRelease = true) }
 
 // configuration required to produce unique META-INF/*.kotlin_module file names
 tasks.withType<KotlinCompile>().configureEach {

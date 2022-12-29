@@ -53,24 +53,24 @@ spotless {
   }
 }
 
-val javaTarget = libs.versions.jvmTarget.get().toInt()
-
 subprojects {
   group = project.property("GROUP") as String
   version = project.property("VERSION_NAME") as String
 
   pluginManager.withPlugin("java") {
     configure<JavaPluginExtension> {
-      toolchain { languageVersion.set(JavaLanguageVersion.of(libs.versions.jdk.get().toInt())) }
+      toolchain { languageVersion.set(libs.versions.jdk.map(JavaLanguageVersion::of)) }
     }
-    tasks.withType<JavaCompile>().configureEach { options.release.set(javaTarget) }
+    tasks.withType<JavaCompile>().configureEach {
+      options.release.set(libs.versions.jvmTarget.map(String::toInt))
+    }
   }
 
   pluginManager.withPlugin("org.jetbrains.kotlin.jvm") {
     project.tasks.withType<KotlinCompile>().configureEach {
       compilerOptions {
         if (project.name != "sample") {
-          jvmTarget.set(JvmTarget.fromTarget(libs.versions.jvmTarget.get()))
+          jvmTarget.set(libs.versions.jvmTarget.map(JvmTarget::fromTarget))
         }
         freeCompilerArgs.addAll("-progressive", "-Xjvm-default=all")
       }
@@ -87,12 +87,12 @@ subprojects {
     }
   }
 
-  plugins.withId("com.vanniktech.maven.publish.base") {
-    configure<MavenPublishBaseExtension> { publishToMavenCentral() }
+  plugins.withId("com.vanniktech.maven.publish") {
+    configure<MavenPublishBaseExtension> { publishToMavenCentral(automaticRelease = true) }
 
     // configuration required to produce unique META-INF/*.kotlin_module file names
     tasks.withType<KotlinCompile>().configureEach {
-      kotlinOptions { moduleName = project.property("POM_ARTIFACT_ID") as String }
+      compilerOptions { moduleName.set(project.property("POM_ARTIFACT_ID") as String) }
     }
   }
 }

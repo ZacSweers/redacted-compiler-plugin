@@ -9,7 +9,7 @@ jobs:
 
     strategy:
       matrix:
-        kotlin: [ '1.7.0' ]
+        kotlin: [ '1.8.0' ]
         stringConcat: [ 'inline', 'indy', 'indy-with-constants' ]
         k2: [ 'true', 'false']
 
@@ -72,5 +72,5 @@ jobs:
         env:
           ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.SonatypeUsername }}
           ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.SonatypePassword }}
-        run: ./publish.sh --snapshot
+        run: ./publish.sh
         if: github.ref == 'refs/heads/main' && github.event_name == 'push' && matrix.stringConcat == 'indy' && matrix.k2 == 'false'

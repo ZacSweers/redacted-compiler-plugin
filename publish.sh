@@ -1,15 +1,11 @@
 #!/bin/bash
 
-if [[ "$1" = "--snapshot" ]]; then snapshot=true; fi
 if [[ "$1" = "--local" ]]; then local=true; fi
 
 if ! [[ ${local} ]]; then
-  ./gradlew -p redacted-compiler-plugin-gradle clean publish --no-daemon --no-parallel -x dokkaHtml
-  ./gradlew clean publish --no-daemon --no-parallel -x dokkaHtml
-  if ! [[ ${snapshot} ]]; then
-    ./gradlew closeAndReleaseRepository
-  fi
+  ./gradlew -p redacted-compiler-plugin-gradle publish -x dokkaHtml
+  ./gradlew publish -x dokkaHtml
 else
-  ./gradlew -p redacted-compiler-plugin-gradle clean publishToMavenLocal --no-daemon --no-parallel -x dokkaHtml
-  ./gradlew clean publishToMavenLocal --no-daemon --no-parallel -x dokkaHtml
+  ./gradlew -p redacted-compiler-plugin-gradle publishToMavenLocal -x dokkaHtml
+  ./gradlew publishToMavenLocal -x dokkaHtml
 fi

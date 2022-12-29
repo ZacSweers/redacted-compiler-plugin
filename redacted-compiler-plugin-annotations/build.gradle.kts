@@ -1,13 +1,10 @@
-import com.vanniktech.maven.publish.JavadocJar
-import com.vanniktech.maven.publish.KotlinMultiplatform
-import com.vanniktech.maven.publish.MavenPublishBaseExtension
 import org.jetbrains.kotlin.gradle.dsl.JsModuleKind.MODULE_UMD
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 
 plugins {
   kotlin("multiplatform")
   id("org.jetbrains.dokka")
-  id("com.vanniktech.maven.publish.base")
+  id("com.vanniktech.maven.publish")
 }
 
 /*
@@ -119,7 +116,3 @@ val unixSizet64Targets =
         "tvosSimulatorArm64",
         "watchosSimulatorArm64",
         "watchosX64")
-
-configure<MavenPublishBaseExtension> {
-  configure(KotlinMultiplatform(javadocJar = JavadocJar.Dokka("dokkaGfm")))
-}
