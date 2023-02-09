@@ -1,5 +1,6 @@
 import org.jetbrains.kotlin.gradle.dsl.JsModuleKind.MODULE_UMD
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
+import org.jetbrains.kotlin.gradle.targets.js.dsl.ExperimentalWasmDsl
 
 plugins {
   kotlin("multiplatform")
@@ -52,7 +53,8 @@ kotlin {
     binaries.executable()
   }
 
-  @OptIn(org.jetbrains.kotlin.gradle.targets.js.dsl.ExperimentalWasmDsl::class)
+  @Suppress("OPT_IN_IS_NOT_ENABLED")
+  @OptIn(ExperimentalWasmDsl::class)
   wasm {
     binaries.executable()
     browser {
@@ -62,6 +64,7 @@ kotlin {
   configureOrCreateNativePlatforms()
 }
 
+// Sourced from https://kotlinlang.org/docs/native-target-support.html
 fun KotlinMultiplatformExtension.configureOrCreateNativePlatforms() {
   // Tier 1
   linuxX64()
@@ -89,42 +92,3 @@ fun KotlinMultiplatformExtension.configureOrCreateNativePlatforms() {
   mingwX64()
   watchosDeviceArm64()
 }
-
-val appleTargets =
-    listOf(
-        "iosArm64",
-        "iosX64",
-        "iosSimulatorArm64",
-        "macosX64",
-        "macosArm64",
-        "tvosArm64",
-        "tvosX64",
-        "tvosSimulatorArm64",
-        "watchosArm32",
-        "watchosArm64",
-        "watchosX86",
-        "watchosX64",
-        "watchosSimulatorArm64")
-
-val mingwTargets = listOf("mingwX64", "mingwX86")
-
-val linuxTargets = listOf("linuxX64")
-
-val nativeTargets = appleTargets + linuxTargets + mingwTargets
-
-/** Note that size_t is 32-bit on legacy watchOS versions (ie. pointers are always 32-bit). */
-val unixSizet32Targets = listOf("watchosArm32", "watchosArm64", "watchosX86")
-
-val unixSizet64Targets =
-    listOf(
-        "iosArm64",
-        "iosX64",
-        "iosSimulatorArm64",
-        "linuxX64",
-        "macosX64",
-        "macosArm64",
-        "tvosArm64",
-        "tvosX64",
-        "tvosSimulatorArm64",
-        "watchosSimulatorArm64",
-        "watchosX64")
