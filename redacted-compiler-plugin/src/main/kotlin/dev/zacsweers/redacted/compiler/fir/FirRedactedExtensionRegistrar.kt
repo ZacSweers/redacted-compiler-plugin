@@ -107,7 +107,7 @@ internal object FirRedactedDeclarationChecker : FirRegularClassChecker() {
               it.isOverride &&
               it.symbol.callableId.callableName == TO_STRING_NAME &&
               it.dispatchReceiverType == null &&
-              it.receiverTypeRef == null &&
+              it.receiverParameter == null &&
               it.valueParameters.isEmpty() &&
               it.returnTypeRef.coneType.isString
         }
