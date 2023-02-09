@@ -38,26 +38,20 @@ plugins {
  *  * `sizet64` for everything else
  */
 kotlin {
-  val kmpNativeEnabled = System.getProperty("knative", "true").toBoolean()
-  val kmpJsEnabled = System.getProperty("kjs", "true").toBoolean()
   jvm()
-  if (kmpJsEnabled) {
-    js(IR) {
-      compilations.configureEach {
-        compilerOptions.configure {
-          moduleKind.set(MODULE_UMD)
-          sourceMap.set(true)
-          metaInfo.set(true)
-        }
+  js(IR) {
+    compilations.configureEach {
+      compilerOptions.configure {
+        moduleKind.set(MODULE_UMD)
+        sourceMap.set(true)
+        metaInfo.set(true)
       }
-      nodejs { testTask { useMocha { timeout = "30s" } } }
-      browser()
-      binaries.executable()
     }
+    nodejs { testTask { useMocha { timeout = "30s" } } }
+    browser()
+    binaries.executable()
   }
-  if (kmpNativeEnabled) {
-    configureOrCreateNativePlatforms()
-  }
+  configureOrCreateNativePlatforms()
 }
 
 fun KotlinMultiplatformExtension.configureOrCreateNativePlatforms() {
