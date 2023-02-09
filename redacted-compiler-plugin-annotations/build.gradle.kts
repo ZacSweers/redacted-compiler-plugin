@@ -63,21 +63,31 @@ kotlin {
 }
 
 fun KotlinMultiplatformExtension.configureOrCreateNativePlatforms() {
-  iosX64()
-  iosArm64()
-  iosSimulatorArm64()
-  tvosX64()
-  tvosArm64()
-  tvosSimulatorArm64()
-  watchosArm32()
-  watchosArm64()
-  watchosX64()
-  watchosSimulatorArm64()
-  // Required to generate tests tasks: https://youtrack.jetbrains.com/issue/KT-26547
+  // Tier 1
   linuxX64()
   macosX64()
   macosArm64()
+  iosSimulatorArm64()
+  iosX64()
+
+  // Tier 2
+  linuxArm64()
+  watchosSimulatorArm64()
+  watchosX64()
+  watchosArm32()
+  watchosArm64()
+  tvosSimulatorArm64()
+  tvosX64()
+  tvosArm64()
+  iosArm64()
+
+  // Tier 3
+  androidNativeArm32()
+  androidNativeArm64()
+  androidNativeX86()
+  androidNativeX64()
   mingwX64()
+  watchosDeviceArm64()
 }
 
 val appleTargets =
