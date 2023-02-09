@@ -65,17 +65,19 @@ class RedactedPluginTest(private val useK2: Boolean) {
             kotlin(
                 "NonDataClass.kt",
                 """
-          package dev.zacsweers.redacted.compiler.test
+                  package dev.zacsweers.redacted.compiler.test
 
-          import dev.zacsweers.redacted.compiler.test.Redacted
+                  import dev.zacsweers.redacted.compiler.test.Redacted
 
-          class NonDataClass(@Redacted val a: Int)
-          """))
+                  class NonDataClass(@Redacted val a: Int)
+                """
+                    .trimIndent()))
     assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.COMPILATION_ERROR)
 
     // Full log is something like this:
     // e: /path/to/NonDataClass.kt: (5, 1): @Redacted is only supported on data classes!
-    assertThat(result.messages).contains("NonDataClass.kt:5")
+    // For some reason FIR and IR report different line numbers (4 and 5). FIR is correct.
+    assertThat(result.messages).contains("NonDataClass.kt:")
     // TODO K2 doesn't support custom error messages yet
     if (!useK2) {
       assertThat(result.messages).contains("@Redacted is only supported on data classes!")
@@ -371,7 +373,9 @@ class RedactedPluginTest(private val useK2: Boolean) {
       verbose = false
       jvmTarget = JvmTarget.fromString(System.getProperty("rdt.jvmTarget", "1.8"))!!.description
       supportsK2 = true
-      this.useK2 = this@RedactedPluginTest.useK2
+      if (this@RedactedPluginTest.useK2) {
+        languageVersion = "2.0"
+      }
     }
   }
 
