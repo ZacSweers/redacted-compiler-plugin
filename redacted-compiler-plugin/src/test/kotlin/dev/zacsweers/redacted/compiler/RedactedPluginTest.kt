@@ -76,7 +76,7 @@ class RedactedPluginTest(private val useK2: Boolean) {
 
     // Full log is something like this:
     // e: /path/to/NonDataClass.kt: (5, 1): @Redacted is only supported on data classes!
-    // For some reason FIR and IR report different line numbers (4 and 5). FIR is correct.
+    // TODO FIR reports diff line number: https://youtrack.jetbrains.com/issue/KT-56649
     assertThat(result.messages).contains("NonDataClass.kt:")
     // TODO K2 doesn't support custom error messages yet
     if (!useK2) {
