@@ -2,6 +2,7 @@ import com.vanniktech.maven.publish.MavenPublishBaseExtension
 import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinProjectExtension
+import org.jetbrains.kotlin.gradle.plugin.KotlinBasePlugin
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootExtension
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -66,7 +67,7 @@ subprojects {
     }
   }
 
-  pluginManager.withPlugin("org.jetbrains.kotlin.jvm") {
+  plugins.withType<KotlinBasePlugin> {
     project.tasks.withType<KotlinCompile>().configureEach {
       compilerOptions {
         if (project.name != "sample") {
