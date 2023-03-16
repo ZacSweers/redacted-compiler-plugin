@@ -35,6 +35,10 @@ tasks.withType<KotlinCompile>().configureEach {
   compilerOptions { jvmTarget.set(libs.versions.jvmTarget.map(JvmTarget::fromTarget)) }
 }
 
+tasks.matching { it.name == "sourcesJar" || it.name == "dokkaHtml" }.configureEach {
+  dependsOn(copyVersionTemplatesProvider)
+}
+
 gradlePlugin {
   plugins {
     create("redactedPlugin") {

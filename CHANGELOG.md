@@ -1,6 +1,14 @@
 Changelog
 =========
 
+1.3.1
+-----
+
+_2023-03-16_
+
+- **Fix**: Missing jvmTarget in the annotations artifact. Target is now properly set to Java 11.
+- Update to Kotlin `1.8.10`.
+
 1.3.0
 -----
 
