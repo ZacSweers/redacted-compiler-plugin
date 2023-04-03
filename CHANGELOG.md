@@ -1,6 +1,17 @@
 Changelog
 =========
 
+1.4.0
+-----
+
+_2023-04-03_
+
+- Update to Kotlin `1.8.20`. This plugin now requires `1.8.20`.
+- [annotations] Mark JS binaries as executable.
+- [annotations] Remove deprecated `watchosX86()`.
+- [annotations] Add `wasm` target. Note this is experimental and not stable.
+- [annotations] Add `androidNativeArm32`, `androidNativeArm64`, `androidNativeX86`, `androidNativeX64`, and `watchosDeviceArm64` targets.
+
 1.3.1
 -----
 
