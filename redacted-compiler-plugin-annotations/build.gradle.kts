@@ -1,5 +1,6 @@
 import org.jetbrains.kotlin.gradle.dsl.JsModuleKind.MODULE_UMD
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
+import org.jetbrains.kotlin.gradle.targets.js.dsl.ExperimentalWasmDsl
 
 plugins {
   kotlin("multiplatform")
@@ -38,81 +39,54 @@ plugins {
  *  * `sizet64` for everything else
  */
 kotlin {
-  val kmpNativeEnabled = System.getProperty("knative", "true").toBoolean()
-  val kmpJsEnabled = System.getProperty("kjs", "true").toBoolean()
   jvm()
-  if (kmpJsEnabled) {
-    js(IR) {
-      compilations.configureEach {
-        compilerOptions.configure {
-          moduleKind.set(MODULE_UMD)
-          sourceMap.set(true)
-          metaInfo.set(true)
-        }
+  js(IR) {
+    compilations.configureEach {
+      compilerOptions.configure {
+        moduleKind.set(MODULE_UMD)
+        sourceMap.set(true)
+        metaInfo.set(true)
       }
-      nodejs { testTask { useMocha { timeout = "30s" } } }
-      browser()
     }
+    nodejs { testTask { useMocha { timeout = "30s" } } }
+    browser()
+    binaries.executable()
   }
-  if (kmpNativeEnabled) {
-    configureOrCreateNativePlatforms()
+
+  @Suppress("OPT_IN_IS_NOT_ENABLED") @OptIn(ExperimentalWasmDsl::class)
+  wasm {
+    binaries.executable()
+    browser {}
   }
+
+  configureOrCreateNativePlatforms()
 }
 
+// Sourced from https://kotlinlang.org/docs/native-target-support.html
 fun KotlinMultiplatformExtension.configureOrCreateNativePlatforms() {
-  iosX64()
-  iosArm64()
-  iosSimulatorArm64()
-  tvosX64()
-  tvosArm64()
-  tvosSimulatorArm64()
-  watchosArm32()
-  watchosArm64()
-  watchosX86()
-  watchosX64()
-  watchosSimulatorArm64()
-  // Required to generate tests tasks: https://youtrack.jetbrains.com/issue/KT-26547
+  // Tier 1
   linuxX64()
   macosX64()
   macosArm64()
+  iosSimulatorArm64()
+  iosX64()
+
+  // Tier 2
+  linuxArm64()
+  watchosSimulatorArm64()
+  watchosX64()
+  watchosArm32()
+  watchosArm64()
+  tvosSimulatorArm64()
+  tvosX64()
+  tvosArm64()
+  iosArm64()
+
+  // Tier 3
+  androidNativeArm32()
+  androidNativeArm64()
+  androidNativeX86()
+  androidNativeX64()
   mingwX64()
+  watchosDeviceArm64()
 }
-
-val appleTargets =
-    listOf(
-        "iosArm64",
-        "iosX64",
-        "iosSimulatorArm64",
-        "macosX64",
-        "macosArm64",
-        "tvosArm64",
-        "tvosX64",
-        "tvosSimulatorArm64",
-        "watchosArm32",
-        "watchosArm64",
-        "watchosX86",
-        "watchosX64",
-        "watchosSimulatorArm64")
-
-val mingwTargets = listOf("mingwX64", "mingwX86")
-
-val linuxTargets = listOf("linuxX64")
-
-val nativeTargets = appleTargets + linuxTargets + mingwTargets
-
-/** Note that size_t is 32-bit on legacy watchOS versions (ie. pointers are always 32-bit). */
-val unixSizet32Targets = listOf("watchosArm32", "watchosArm64", "watchosX86")
-
-val unixSizet64Targets =
-    listOf(
-        "iosArm64",
-        "iosX64",
-        "iosSimulatorArm64",
-        "linuxX64",
-        "macosX64",
-        "macosArm64",
-        "tvosArm64",
-        "tvosX64",
-        "tvosSimulatorArm64",
-        "watchosSimulatorArm64",
-        "watchosX64")

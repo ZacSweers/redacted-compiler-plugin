@@ -6,5 +6,6 @@
 .classpath
 *.iml
 local.properties
+.DS_Store
 
 docs/

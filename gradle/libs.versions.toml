@@ -15,10 +15,10 @@
 [versions]
 autoService = "1.0.1"
 kotlinCompileTesting = "0.2.1"
-kotlin = "1.8.10"
-jdk = "17"
+kotlin = "1.8.20"
+jdk = "19"
 jvmTarget = "11"
-ksp = "1.8.10-1.0.9"
+ksp = "1.8.20-1.0.10"
 ktfmt = "0.43"
 moshi = "1.14.0"
 
