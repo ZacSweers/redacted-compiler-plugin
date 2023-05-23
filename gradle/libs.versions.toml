@@ -13,7 +13,7 @@
 # limitations under the License.
 
 [versions]
-autoService = "1.0.1"
+autoService = "1.1.0"
 kotlinCompileTesting = "0.2.1"
 kotlin = "1.8.21"
 jdk = "19"
