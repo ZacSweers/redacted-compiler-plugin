@@ -9,7 +9,6 @@ plugins {
 tasks.withType<KotlinCompile>().configureEach {
   compilerOptions {
     jvmTarget.set(JvmTarget.JVM_11)
-    @Suppress("SuspiciousCollectionReassignment")
     freeCompilerArgs.add("-Xstring-concat=${project.findProperty("string_concat")}")
   }
 }
