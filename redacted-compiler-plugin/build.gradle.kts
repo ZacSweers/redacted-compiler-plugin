@@ -1,14 +1,8 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
   kotlin("jvm")
   id("org.jetbrains.dokka")
   id("com.vanniktech.maven.publish")
   id("com.google.devtools.ksp")
-}
-
-tasks.withType<KotlinCompile>().configureEach {
-  compilerOptions { freeCompilerArgs.add("-opt-in=kotlin.RequiresOptIn") }
 }
 
 tasks.withType<Test>().configureEach {
