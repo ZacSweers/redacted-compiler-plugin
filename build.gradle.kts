@@ -1,10 +1,7 @@
-import com.google.devtools.ksp.gradle.KspTaskJvm
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
 import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmCompilerOptions
-import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinProjectExtension
 import org.jetbrains.kotlin.gradle.plugin.KotlinBasePlugin
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootExtension
@@ -72,30 +69,20 @@ subprojects {
     }
   }
 
-  val compilerOptions: KotlinJvmCompilerOptions.() -> Unit = {
-    if (project.name != "sample") {
-      jvmTarget.set(libs.versions.jvmTarget.map(JvmTarget::fromTarget))
-    }
-    freeCompilerArgs.addAll("-Xjvm-default=all")
-  }
-
-  pluginManager.withPlugin("com.google.devtools.ksp") {
-    tasks.withType<KspTaskJvm>().configureEach { compilerOptions(compilerOptions) }
-  }
-
   plugins.withType<KotlinBasePlugin> {
     project.tasks.withType<KotlinCompilationTask<*>>().configureEach {
-      compilerOptions { progressiveMode.set(true) }
+      compilerOptions {
+        progressiveMode.set(true)
+        if (this is KotlinJvmCompilerOptions) {
+          if (project.name != "sample") {
+            jvmTarget.set(libs.versions.jvmTarget.map(JvmTarget::fromTarget))
+          }
+          freeCompilerArgs.addAll("-Xjvm-default=all")
+        }
+      }
     }
-    configure<KotlinProjectExtension> {
-      if ("sample" !in project.path) {
-        explicitApi()
-      }
-      if (this is KotlinJvmProjectExtension) {
-        compilerOptions(compilerOptions)
-      } else if (this is KotlinAndroidProjectExtension) {
-        compilerOptions(compilerOptions)
-      }
+    if ("sample" !in project.path) {
+      configure<KotlinProjectExtension> { explicitApi() }
     }
   }
 

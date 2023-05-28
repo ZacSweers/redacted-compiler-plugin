@@ -53,7 +53,7 @@ kotlin {
     binaries.executable()
   }
 
-  @Suppress("OPT_IN_IS_NOT_ENABLED") @OptIn(ExperimentalWasmDsl::class)
+  @OptIn(ExperimentalWasmDsl::class)
   wasm {
     binaries.executable()
     browser {}
