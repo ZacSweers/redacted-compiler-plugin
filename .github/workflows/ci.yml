@@ -8,6 +8,7 @@ jobs:
     runs-on: ubuntu-latest
 
     strategy:
+      fail-fast: false
       matrix:
         kotlin: [ '1.9.0-Beta' ]
         stringConcat: [ 'inline', 'indy', 'indy-with-constants' ]
