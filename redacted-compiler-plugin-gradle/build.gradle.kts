@@ -1,6 +1,7 @@
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
 import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -32,7 +33,13 @@ val copyVersionTemplatesProvider =
 
 tasks.withType<KotlinCompile>().configureEach {
   dependsOn(copyVersionTemplatesProvider)
-  compilerOptions { jvmTarget.set(libs.versions.jvmTarget.map(JvmTarget::fromTarget)) }
+  compilerOptions {
+    jvmTarget.set(libs.versions.jvmTarget.map(JvmTarget::fromTarget))
+
+    // Lower version for Gradle compat
+    languageVersion.set(KotlinVersion.KOTLIN_1_8)
+    apiVersion.set(KotlinVersion.KOTLIN_1_8)
+  }
 }
 
 tasks
