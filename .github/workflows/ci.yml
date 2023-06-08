@@ -9,7 +9,7 @@ jobs:
 
     strategy:
       matrix:
-        kotlin: [ '1.8.20' ]
+        kotlin: [ '1.8.22' ]
         stringConcat: [ 'inline', 'indy', 'indy-with-constants' ]
         k2: [ 'true', 'false']
 
