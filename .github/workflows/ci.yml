@@ -10,7 +10,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        kotlin: [ '1.9.0-Beta' ]
+        kotlin: [ '1.9.0-RC' ]
         stringConcat: [ 'inline', 'indy', 'indy-with-constants' ]
         k2: [ 'true', 'false']
 
@@ -25,7 +25,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           distribution: 'zulu'
-          java-version: '19'
+          java-version: '20'
 
       - name: Build with Gradle
         run: ./gradlew clean check -Dkjs=false -Dknative=false --stacktrace -Pstring_concat=${{ matrix.stringConcat }} -Pkotlin.experimental.tryK2=${{ matrix.k2 }}
@@ -49,7 +49,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           distribution: 'zulu'
-          java-version: '19'
+          java-version: '20'
 
       - name: Test
         run: ./gradlew check
@@ -67,7 +67,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           distribution: 'zulu'
-          java-version: '19'
+          java-version: '20'
 
       - name: Upload snapshot (main only)
         env:
