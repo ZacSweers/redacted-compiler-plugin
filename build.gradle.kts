@@ -31,11 +31,7 @@ plugins.withType<NodeJsRootPlugin>().configureEach {
   the<NodeJsRootExtension>().nodeVersion = "18.0.0"
 }
 
-apiValidation {
-  // https://github.com/Kotlin/binary-compatibility-validator/issues/139
-  validationDisabled = findProperty("kotlin.experimental.tryK2") == "true"
-  ignoredProjects += listOf("sample", "sample-jvm")
-}
+apiValidation { ignoredProjects += listOf("sample", "sample-jvm") }
 
 spotless {
   format("misc") {
