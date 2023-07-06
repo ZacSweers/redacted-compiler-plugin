@@ -4,12 +4,12 @@ on: [ push, pull_request ]
 
 jobs:
   jvm:
-    name: jvm | Kotlin ${{ matrix.kotlin }} | StringConcat ${{ matrix.stringConcat }} | K2 ${{ matrix.k2 }}
+    name: jvm | StringConcat ${{ matrix.stringConcat }} | K2 ${{ matrix.k2 }}
     runs-on: ubuntu-latest
 
     strategy:
+      fail-fast: false
       matrix:
-        kotlin: [ '1.8.22' ]
         stringConcat: [ 'inline', 'indy', 'indy-with-constants' ]
         k2: [ 'true', 'false']
 
@@ -24,10 +24,10 @@ jobs:
         uses: actions/setup-java@v3
         with:
           distribution: 'zulu'
-          java-version: '19'
+          java-version: '20'
 
       - name: Build with Gradle
-        run: ./gradlew clean check -Dkjs=false -Dknative=false --stacktrace -Pstring_concat=${{ matrix.stringConcat }} -Prcp.useK2=${{ matrix.k2 }}
+        run: ./gradlew clean check -Dkjs=false -Dknative=false --stacktrace -Pstring_concat=${{ matrix.stringConcat }} -Pkotlin.experimental.tryK2=${{ matrix.k2 }}
 
   all-platforms:
     runs-on: ${{ matrix.os }}
@@ -48,7 +48,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           distribution: 'zulu'
-          java-version: '19'
+          java-version: '20'
 
       - name: Test
         run: ./gradlew check
@@ -66,7 +66,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           distribution: 'zulu'
-          java-version: '19'
+          java-version: '20'
 
       - name: Upload snapshot (main only)
         env:

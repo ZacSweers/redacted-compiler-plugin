@@ -1,10 +1,12 @@
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
 import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.dsl.KotlinJvmCompilerOptions
 import org.jetbrains.kotlin.gradle.dsl.KotlinProjectExtension
 import org.jetbrains.kotlin.gradle.plugin.KotlinBasePlugin
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootExtension
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 buildscript {
@@ -68,12 +70,15 @@ subprojects {
   }
 
   plugins.withType<KotlinBasePlugin> {
-    project.tasks.withType<KotlinCompile>().configureEach {
+    project.tasks.withType<KotlinCompilationTask<*>>().configureEach {
       compilerOptions {
-        if (project.name != "sample") {
-          jvmTarget.set(libs.versions.jvmTarget.map(JvmTarget::fromTarget))
+        progressiveMode.set(true)
+        if (this is KotlinJvmCompilerOptions) {
+          if (project.name != "sample") {
+            jvmTarget.set(libs.versions.jvmTarget.map(JvmTarget::fromTarget))
+          }
+          freeCompilerArgs.addAll("-Xjvm-default=all")
         }
-        freeCompilerArgs.addAll("-progressive", "-Xjvm-default=all")
       }
     }
     if ("sample" !in project.path) {

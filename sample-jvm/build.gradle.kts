@@ -8,9 +8,7 @@ plugins {
 
 tasks.withType<KotlinCompile>().configureEach {
   compilerOptions {
-    useK2.set(project.findProperty("rcp.useK2")?.toString().toBoolean())
     jvmTarget.set(JvmTarget.JVM_11)
-    @Suppress("SuspiciousCollectionReassignment")
     freeCompilerArgs.add("-Xstring-concat=${project.findProperty("string_concat")}")
   }
 }

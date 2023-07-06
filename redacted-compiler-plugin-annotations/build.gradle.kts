@@ -48,12 +48,12 @@ kotlin {
         metaInfo.set(true)
       }
     }
-    nodejs { testTask { useMocha { timeout = "30s" } } }
+    nodejs { testTask(Action { useMocha { timeout = "30s" } }) }
     browser()
     binaries.executable()
   }
 
-  @Suppress("OPT_IN_IS_NOT_ENABLED") @OptIn(ExperimentalWasmDsl::class)
+  @OptIn(ExperimentalWasmDsl::class)
   wasm {
     binaries.executable()
     browser {}
