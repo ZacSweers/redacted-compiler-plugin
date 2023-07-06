@@ -1,6 +1,13 @@
 Changelog
 =========
 
+1.5.0
+-----
+
+_2023-07-06_
+
+- Update to Kotlin `1.9.0`. This plugin now requires `1.9.0`.
+
 1.4.0
 -----
 
