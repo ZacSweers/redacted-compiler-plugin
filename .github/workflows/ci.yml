@@ -4,13 +4,12 @@ on: [ push, pull_request ]
 
 jobs:
   jvm:
-    name: jvm | Kotlin ${{ matrix.kotlin }} | StringConcat ${{ matrix.stringConcat }} | K2 ${{ matrix.k2 }}
+    name: jvm | StringConcat ${{ matrix.stringConcat }} | K2 ${{ matrix.k2 }}
     runs-on: ubuntu-latest
 
     strategy:
       fail-fast: false
       matrix:
-        kotlin: [ '1.9.0-RC' ]
         stringConcat: [ 'inline', 'indy', 'indy-with-constants' ]
         k2: [ 'true', 'false']
 
