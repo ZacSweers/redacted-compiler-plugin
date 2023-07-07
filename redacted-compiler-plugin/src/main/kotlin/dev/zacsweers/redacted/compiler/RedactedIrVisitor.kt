@@ -45,6 +45,7 @@ import org.jetbrains.kotlin.ir.types.isString
 import org.jetbrains.kotlin.ir.util.SYNTHETIC_OFFSET
 import org.jetbrains.kotlin.ir.util.file
 import org.jetbrains.kotlin.ir.util.hasAnnotation
+import org.jetbrains.kotlin.ir.util.isObject
 import org.jetbrains.kotlin.ir.util.isPrimitiveArray
 import org.jetbrains.kotlin.ir.util.primaryConstructor
 import org.jetbrains.kotlin.ir.util.properties
@@ -90,11 +91,20 @@ internal class RedactedIrVisitor(
       if (classIsRedacted || anyRedacted) {
         if (declaration.origin == IrDeclarationOrigin.DEFINED) {
           declaration.reportError(
-              "@Redacted is only supported on data classes that do *not* have a custom toString() function. Please remove the function or remove the @Redacted annotations.")
+              "@Redacted is only supported on data or value classes that do *not* have a custom toString() function. Please remove the function or remove the @Redacted annotations.")
           return super.visitFunctionNew(declaration)
         }
-        if (!declarationParent.isData) {
-          declarationParent.reportError("@Redacted is only supported on data classes!")
+        if (!declarationParent.isData && !declarationParent.isValue) {
+          declarationParent.reportError("@Redacted is only supported on data or value classes!")
+          return super.visitFunctionNew(declaration)
+        }
+        if (declarationParent.isValue && !classIsRedacted) {
+          declarationParent.reportError(
+              "@Redacted is redundant on value class properties, just annotate the class instead.")
+          return super.visitFunctionNew(declaration)
+        }
+        if (declarationParent.isObject) {
+          declarationParent.reportError("@Redacted is useless on object classes.")
           return super.visitFunctionNew(declaration)
         }
         if (!(classIsRedacted xor anyRedacted)) {

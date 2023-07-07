@@ -96,8 +96,14 @@ internal object FirRedactedDeclarationChecker : FirRegularClassChecker() {
       return
     }
 
-    if (!declaration.hasModifier(KtTokens.DATA_KEYWORD)) {
-      report(KtErrorsRedacted.REDACTED_ON_NON_DATA_CLASS_ERROR)
+    if (!declaration.hasModifier(KtTokens.DATA_KEYWORD) &&
+        !declaration.hasModifier(KtTokens.VALUE_KEYWORD)) {
+      report(KtErrorsRedacted.REDACTED_ON_NON_DATA_OR_VALUE_CLASS_ERROR)
+      return
+    }
+
+    if (declaration.hasModifier(KtTokens.VALUE_KEYWORD) && hasRedactedProperty) {
+      report(KtErrorsRedacted.REDACTED_ON_VALUE_CLASS_PROPERTY_ERROR)
       return
     }
 

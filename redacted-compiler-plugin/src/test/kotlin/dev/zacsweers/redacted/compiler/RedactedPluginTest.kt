@@ -80,7 +80,7 @@ class RedactedPluginTest(private val useK2: Boolean) {
     assertThat(result.messages).contains("NonDataClass.kt:")
     // TODO K2 doesn't support custom error messages yet
     if (!useK2) {
-      assertThat(result.messages).contains("@Redacted is only supported on data classes!")
+      assertThat(result.messages).contains("@Redacted is only supported on data or value classes!")
     }
   }
 
@@ -104,7 +104,7 @@ class RedactedPluginTest(private val useK2: Boolean) {
     assertThat(result.messages).contains("NonClass.kt:")
     // TODO K2 doesn't support custom error messages yet
     if (!useK2) {
-      assertThat(result.messages).contains("@Redacted is only supported on data classes!")
+      assertThat(result.messages).contains("@Redacted is only supported on data or value classes!")
     }
   }
 
@@ -132,7 +132,58 @@ class RedactedPluginTest(private val useK2: Boolean) {
     if (!useK2) {
       assertThat(result.messages)
           .contains(
-              "@Redacted is only supported on data classes that do *not* have a custom toString() function")
+              "@Redacted is only supported on data or value classes that do *not* have a custom toString() function")
+    }
+  }
+
+  @Test
+  fun valueClassWithAnnotatedProperty() {
+    val result =
+        compile(
+            kotlin(
+                "AnnotatedValueProp.kt",
+                """
+          package dev.zacsweers.redacted.compiler.test
+
+          import dev.zacsweers.redacted.compiler.test.Redacted
+          import kotlin.jvm.JvmInline
+
+          @JvmInline
+          value class AnnotatedValueProp(@Redacted val a: Int)
+          """))
+    assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.COMPILATION_ERROR)
+
+    // Full log is something like this:
+    // e: /path/to/AnnotatedValueProp.kt: (5, 1): @Redacted is redundant on value class properties
+    assertThat(result.messages).contains("AnnotatedValueProp.kt:")
+    // TODO K2 doesn't support custom error messages yet
+    if (!useK2) {
+      assertThat(result.messages).contains("@Redacted is redundant on value class properties")
+    }
+  }
+
+  @Test
+  fun dataObject() {
+    val result =
+        compile(
+            kotlin(
+                "DataObject.kt",
+                """
+          package dev.zacsweers.redacted.compiler.test
+
+          import dev.zacsweers.redacted.compiler.test.Redacted
+
+          @Redacted
+          data object CustomToString
+          """))
+    assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.COMPILATION_ERROR)
+
+    // Full log is something like this:
+    // e: /path/to/NonDataClass.kt: (5, 1): @Redacted is useless on object classes
+    assertThat(result.messages).contains("DataObject.kt:")
+    // TODO K2 doesn't support custom error messages yet
+    if (!useK2) {
+      assertThat(result.messages).contains("@Redacted is useless on object classes")
     }
   }
 
@@ -243,6 +294,33 @@ class RedactedPluginTest(private val useK2: Boolean) {
             .first()
             .call("123-456-7890", "1/1/00")
     assertThat(complex.toString()).isEqualTo("SensitiveData(██)")
+  }
+
+  @Test
+  fun valueClass() {
+    val result =
+        compile(
+            kotlin(
+                "source.kt",
+                """
+          package dev.zacsweers.redacted.compiler.test
+
+          import kotlin.jvm.JvmInline
+          import dev.zacsweers.redacted.compiler.test.Redacted
+
+          @Redacted
+          @JvmInline
+          value class ValueClass(val ssn: String)
+          """))
+    assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.OK)
+    val complex =
+        result.classLoader
+            .loadClass("dev.zacsweers.redacted.compiler.test.ValueClass")
+            .kotlin
+            .constructors
+            .first()
+            .call("123-456-7890")
+    assertThat(complex.toString()).isEqualTo("ValueClass(██)")
   }
 
   @Test

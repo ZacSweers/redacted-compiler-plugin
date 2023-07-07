@@ -35,6 +35,14 @@ class SmokeTest {
   @Redacted data class SensitiveData(val ssn: String, val birthday: String)
 
   @Test
+  fun valueExample() {
+    val sensitiveData = ValueClass("123-456-7890")
+    assertThat(sensitiveData.toString()).isEqualTo("ValueClass(██)")
+  }
+
+  @Redacted @JvmInline value class ValueClass(val ssn: String)
+
+  @Test
   fun complex() {
     val complex =
         Complex(
