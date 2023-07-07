@@ -246,6 +246,33 @@ class RedactedPluginTest(private val useK2: Boolean) {
   }
 
   @Test
+  fun valueClass() {
+    val result =
+        compile(
+            kotlin(
+                "source.kt",
+                """
+          package dev.zacsweers.redacted.compiler.test
+
+          import kotlin.jvm.JvmInline
+          import dev.zacsweers.redacted.compiler.test.Redacted
+
+          @Redacted
+          @JvmInline
+          value class ValueClass(val ssn: String)
+          """))
+    assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.OK)
+    val complex =
+        result.classLoader
+            .loadClass("dev.zacsweers.redacted.compiler.test.ValueClass")
+            .kotlin
+            .constructors
+            .first()
+            .call("123-456-7890")
+    assertThat(complex.toString()).isEqualTo("ValueClass(██)")
+  }
+
+  @Test
   fun complex() {
     val result =
         compile(
