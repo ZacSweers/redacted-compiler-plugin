@@ -37,11 +37,12 @@ increment_version() {
     echo "${incremented_version}"
 }
 
-# Gets the latest version from the CHANGELOG.md file
+# Gets the latest version from the CHANGELOG.md file. Note this assumes the changelog is updated with the
+# new version as the latest, so it gets the *2nd* match.
 # usage: get_latest_version $changelog_file
 get_latest_version() {
     local changelog_file=$1
-    grep -m 1 -o '^[0-9]\+\.[0-9]\+\.[0-9]\+' "$changelog_file"
+    grep -m 2 -o '^[0-9]\+\.[0-9]\+\.[0-9]\+' "$changelog_file" | tail -n 1
 }
 
 # Updates the VERSION_NAME prop in all gradle.properties files to a new value
