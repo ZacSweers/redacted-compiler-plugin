@@ -47,7 +47,7 @@ get_latest_version() {
 }
 
 # Updates the VERSION_NAME prop in all gradle.properties files to a new value
-# usage: update_gradle_properties $prev_version $new_version
+# usage: update_gradle_properties $new_version
 update_gradle_properties() {
     local new_version=$1
 
