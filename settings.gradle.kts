@@ -16,10 +16,10 @@ dependencyResolutionManagement {
 rootProject.name = "redacted-compiler-plugin"
 
 include(
-  ":redacted-compiler-plugin",
-  ":redacted-compiler-plugin-annotations",
-  ":sample",
-  ":sample-jvm",
+    ":redacted-compiler-plugin",
+    ":redacted-compiler-plugin-annotations",
+    ":sample",
+    ":sample-jvm",
 )
 
 includeBuild("redacted-compiler-plugin-gradle") {
