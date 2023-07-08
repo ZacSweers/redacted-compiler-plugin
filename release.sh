@@ -82,6 +82,3 @@ git commit -am "Prepare next development version."
 
 # Push it all up
 git push && git push --tags
-
-# Deploy docs
-./deploy_website.sh
