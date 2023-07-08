@@ -12,7 +12,8 @@ function getProperty() {
 # usage: increment_version $version $version_type
 increment_version() {
     local delimiter=.
-    local array=($(echo "$1" | tr $delimiter '\n'))
+    local array=()
+    while IFS='' read -r line; do array+=("$line"); done < <(echo "$1" | tr $delimiter '\n')
     local version_type=$2
     local major=${array[0]}
     local minor=${array[1]}
