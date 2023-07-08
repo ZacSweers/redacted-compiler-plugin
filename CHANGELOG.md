@@ -1,6 +1,13 @@
 Changelog
 =========
 
+1.6.0
+-----
+
+_2023-07-08_
+
+- **New**: Support `value class` types. Note that only annotating the class is supported, as annotating the property would be redundant.
+
 1.5.0
 -----
 
