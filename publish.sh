@@ -3,9 +3,13 @@
 if [[ "$1" = "--local" ]]; then local=true; fi
 
 if ! [[ ${local} ]]; then
-  ./gradlew -p redacted-compiler-plugin-gradle publish -x dokkaHtml
+  cd redacted-compiler-plugin-gradle || exit
+  ./gradlew publish -x dokkaHtml
+  cd ..
   ./gradlew publish -x dokkaHtml
 else
-  ./gradlew -p redacted-compiler-plugin-gradle publishToMavenLocal -x dokkaHtml
+  cd redacted-compiler-plugin-gradle || exit
+  ./gradlew publishToMavenLocal -x dokkaHtml
+  cd ..
   ./gradlew publishToMavenLocal -x dokkaHtml
 fi
