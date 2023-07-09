@@ -73,4 +73,3 @@ jobs:
           ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.SonatypeUsername }}
           ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.SonatypePassword }}
         run: ./publish.sh
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
