@@ -42,15 +42,15 @@ spotless {
   }
   kotlin {
     target("**/*.kt")
-    ktfmt(libs.versions.ktfmt.get())
+    ktfmt(libs.versions.ktfmt.get()).googleStyle()
     trimTrailingWhitespace()
     endWithNewline()
     licenseHeaderFile("spotless/spotless.kt")
     targetExclude("**/spotless.kt", "**/build/**")
   }
   kotlinGradle {
-    target("**/*.kts")
-    ktfmt(libs.versions.ktfmt.get())
+    target("**/*.kts", "*.kts")
+    ktfmt(libs.versions.ktfmt.get()).googleStyle()
     trimTrailingWhitespace()
     endWithNewline()
   }

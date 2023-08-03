@@ -46,7 +46,7 @@ import org.jetbrains.kotlin.name.Name
 private val TO_STRING_NAME = Name.identifier("toString")
 
 internal class FirRedactedExtensionRegistrar(private val redactedAnnotation: ClassId) :
-    FirExtensionRegistrar() {
+  FirExtensionRegistrar() {
   override fun ExtensionRegistrarContext.configurePlugin() {
     +FirRedactedPredicateMatcher.getFactory(redactedAnnotation)
     +::FirRedactedCheckers
@@ -55,17 +55,17 @@ internal class FirRedactedExtensionRegistrar(private val redactedAnnotation: Cla
 
 internal class FirRedactedCheckers(session: FirSession) : FirAdditionalCheckersExtension(session) {
   override val declarationCheckers: DeclarationCheckers =
-      object : DeclarationCheckers() {
-        override val regularClassCheckers: Set<FirRegularClassChecker> =
-            setOf(FirRedactedDeclarationChecker)
-      }
+    object : DeclarationCheckers() {
+      override val regularClassCheckers: Set<FirRegularClassChecker> =
+        setOf(FirRedactedDeclarationChecker)
+    }
 }
 
 internal object FirRedactedDeclarationChecker : FirRegularClassChecker() {
   override fun check(
-      declaration: FirRegularClass,
-      context: CheckerContext,
-      reporter: DiagnosticReporter
+    declaration: FirRegularClass,
+    context: CheckerContext,
+    reporter: DiagnosticReporter
   ) {
     val matcher = context.session.redactedPredicateMatcher
     val classRedactedAnnotation = declaration.redactedAnnotation(matcher)
@@ -76,9 +76,10 @@ internal object FirRedactedDeclarationChecker : FirRegularClassChecker() {
 
     if (hasRedactedProperty && classRedactedAnnotation != null) {
       reporter.reportOn(
-          classRedactedAnnotation.source,
-          KtErrorsRedacted.REDACTED_ON_CLASS_AND_PROPERTY_ERROR,
-          context)
+        classRedactedAnnotation.source,
+        KtErrorsRedacted.REDACTED_ON_CLASS_AND_PROPERTY_ERROR,
+        context
+      )
       redactedProperties.forEach {
         reporter.reportOn(it.source, KtErrorsRedacted.REDACTED_ON_CLASS_AND_PROPERTY_ERROR, context)
       }
@@ -96,8 +97,10 @@ internal object FirRedactedDeclarationChecker : FirRegularClassChecker() {
       return
     }
 
-    if (!declaration.hasModifier(KtTokens.DATA_KEYWORD) &&
-        !declaration.hasModifier(KtTokens.VALUE_KEYWORD)) {
+    if (
+      !declaration.hasModifier(KtTokens.DATA_KEYWORD) &&
+        !declaration.hasModifier(KtTokens.VALUE_KEYWORD)
+    ) {
       report(KtErrorsRedacted.REDACTED_ON_NON_DATA_OR_VALUE_CLASS_ERROR)
       return
     }
@@ -108,40 +111,41 @@ internal object FirRedactedDeclarationChecker : FirRegularClassChecker() {
     }
 
     val customToStringFunction =
-        declaration.declarations.find {
-          it is FirFunction &&
-              it.isOverride &&
-              it.symbol.callableId.callableName == TO_STRING_NAME &&
-              it.dispatchReceiverType == null &&
-              it.receiverParameter == null &&
-              it.valueParameters.isEmpty() &&
-              it.returnTypeRef.coneType.isString
-        }
+      declaration.declarations.find {
+        it is FirFunction &&
+          it.isOverride &&
+          it.symbol.callableId.callableName == TO_STRING_NAME &&
+          it.dispatchReceiverType == null &&
+          it.receiverParameter == null &&
+          it.valueParameters.isEmpty() &&
+          it.returnTypeRef.coneType.isString
+      }
     if (customToStringFunction != null) {
       reporter.reportOn(
-          customToStringFunction.source,
-          KtErrorsRedacted.CUSTOM_TO_STRING_IN_REDACTED_CLASS_ERROR,
-          context)
+        customToStringFunction.source,
+        KtErrorsRedacted.CUSTOM_TO_STRING_IN_REDACTED_CLASS_ERROR,
+        context
+      )
     }
   }
 
   private fun FirRegularClass.redactedAnnotation(matcher: FirRedactedPredicateMatcher) =
-      matcher.redactedAnnotation(this)
+    matcher.redactedAnnotation(this)
 
   private fun redactedProperties(
-      declaration: FirRegularClass,
-      matcher: FirRedactedPredicateMatcher
+    declaration: FirRegularClass,
+    matcher: FirRedactedPredicateMatcher
   ) =
-      declaration.declarations
-          .asSequence()
-          .filterIsInstance<FirProperty>()
-          .mapNotNull { matcher.redactedAnnotation(it) }
-          .toList()
+    declaration.declarations
+      .asSequence()
+      .filterIsInstance<FirProperty>()
+      .mapNotNull { matcher.redactedAnnotation(it) }
+      .toList()
 }
 
 internal class FirRedactedPredicateMatcher(
-    session: FirSession,
-    private val redactedAnnotation: ClassId
+  session: FirSession,
+  private val redactedAnnotation: ClassId
 ) : FirExtensionSessionComponent(session) {
   companion object {
     fun getFactory(redactedAnnotation: ClassId): Factory {
@@ -152,10 +156,10 @@ internal class FirRedactedPredicateMatcher(
   fun redactedAnnotation(declaration: FirDeclaration): FirAnnotation? {
     return declaration.annotations.firstOrNull { firAnnotation ->
       firAnnotation.annotationTypeRef.coneTypeSafe<ConeClassLikeType>()?.classId ==
-          redactedAnnotation
+        redactedAnnotation
     }
   }
 }
 
 internal val FirSession.redactedPredicateMatcher: FirRedactedPredicateMatcher by
-    FirSession.sessionComponentAccessor()
+  FirSession.sessionComponentAccessor()

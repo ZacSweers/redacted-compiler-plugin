@@ -22,10 +22,10 @@ dependencies {
 configurations.configureEach {
   resolutionStrategy.dependencySubstitution {
     substitute(module("dev.zacsweers.redacted:redacted-compiler-plugin-annotations"))
-        .using(project(":redacted-compiler-plugin-annotations"))
+      .using(project(":redacted-compiler-plugin-annotations"))
     substitute(module("dev.zacsweers.redacted:redacted-compiler-plugin-annotations-jvm"))
-        .using(project(":redacted-compiler-plugin-annotations"))
+      .using(project(":redacted-compiler-plugin-annotations"))
     substitute(module("dev.zacsweers.redacted:redacted-compiler-plugin"))
-        .using(project(":redacted-compiler-plugin"))
+      .using(project(":redacted-compiler-plugin"))
   }
 }

@@ -16,6 +16,8 @@
 package dev.zacsweers.redacted.compiler
 
 import com.google.common.truth.Truth.assertThat
+import com.tschuchort.compiletesting.CompilationResult
+import com.tschuchort.compiletesting.JvmCompilationResult
 import com.tschuchort.compiletesting.KotlinCompilation
 import com.tschuchort.compiletesting.PluginOption
 import com.tschuchort.compiletesting.SourceFile
@@ -44,9 +46,9 @@ class RedactedPluginTest(private val useK2: Boolean) {
   @Rule @JvmField var temporaryFolder: TemporaryFolder = TemporaryFolder()
 
   private val redacted =
-      kotlin(
-          "Redacted.kt",
-          """
+    kotlin(
+      "Redacted.kt",
+      """
       package dev.zacsweers.redacted.compiler.test
 
       import kotlin.annotation.AnnotationRetention.BINARY
@@ -56,22 +58,25 @@ class RedactedPluginTest(private val useK2: Boolean) {
       @Retention(BINARY)
       @Target(PROPERTY, CLASS)
       annotation class Redacted
-      """)
+      """
+    )
 
   @Test
   fun dataIsRequired() {
     val result =
-        compile(
-            kotlin(
-                "NonDataClass.kt",
-                """
+      compile(
+        kotlin(
+          "NonDataClass.kt",
+          """
                   package dev.zacsweers.redacted.compiler.test
 
                   import dev.zacsweers.redacted.compiler.test.Redacted
 
                   class NonDataClass(@Redacted val a: Int)
                 """
-                    .trimIndent()))
+            .trimIndent()
+        )
+      )
     assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.COMPILATION_ERROR)
 
     // Full log is something like this:
@@ -87,16 +92,18 @@ class RedactedPluginTest(private val useK2: Boolean) {
   @Test
   fun classIsRequired() {
     val result =
-        compile(
-            kotlin(
-                "NonClass.kt",
-                """
+      compile(
+        kotlin(
+          "NonClass.kt",
+          """
           package dev.zacsweers.redacted.compiler.test
 
           import dev.zacsweers.redacted.compiler.test.Redacted
 
           enum class NonClass(@Redacted val a: Int)
-          """))
+          """
+        )
+      )
     assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.COMPILATION_ERROR)
 
     // Full log is something like this:
@@ -111,10 +118,10 @@ class RedactedPluginTest(private val useK2: Boolean) {
   @Test
   fun customToStringIsAnError() {
     val result =
-        compile(
-            kotlin(
-                "CustomToString.kt",
-                """
+      compile(
+        kotlin(
+          "CustomToString.kt",
+          """
           package dev.zacsweers.redacted.compiler.test
 
           import dev.zacsweers.redacted.compiler.test.Redacted
@@ -122,7 +129,9 @@ class RedactedPluginTest(private val useK2: Boolean) {
           data class CustomToString(@Redacted val a: Int) {
             override fun toString(): String = "foo"
           }
-          """))
+          """
+        )
+      )
     assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.COMPILATION_ERROR)
 
     // Full log is something like this:
@@ -131,18 +140,19 @@ class RedactedPluginTest(private val useK2: Boolean) {
     // TODO K2 doesn't support custom error messages yet
     if (!useK2) {
       assertThat(result.messages)
-          .contains(
-              "@Redacted is only supported on data or value classes that do *not* have a custom toString() function")
+        .contains(
+          "@Redacted is only supported on data or value classes that do *not* have a custom toString() function"
+        )
     }
   }
 
   @Test
   fun valueClassWithAnnotatedProperty() {
     val result =
-        compile(
-            kotlin(
-                "AnnotatedValueProp.kt",
-                """
+      compile(
+        kotlin(
+          "AnnotatedValueProp.kt",
+          """
           package dev.zacsweers.redacted.compiler.test
 
           import dev.zacsweers.redacted.compiler.test.Redacted
@@ -150,7 +160,9 @@ class RedactedPluginTest(private val useK2: Boolean) {
 
           @JvmInline
           value class AnnotatedValueProp(@Redacted val a: Int)
-          """))
+          """
+        )
+      )
     assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.COMPILATION_ERROR)
 
     // Full log is something like this:
@@ -165,17 +177,19 @@ class RedactedPluginTest(private val useK2: Boolean) {
   @Test
   fun dataObject() {
     val result =
-        compile(
-            kotlin(
-                "DataObject.kt",
-                """
+      compile(
+        kotlin(
+          "DataObject.kt",
+          """
           package dev.zacsweers.redacted.compiler.test
 
           import dev.zacsweers.redacted.compiler.test.Redacted
 
           @Redacted
           data object CustomToString
-          """))
+          """
+        )
+      )
     assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.COMPILATION_ERROR)
 
     // Full log is something like this:
@@ -190,17 +204,19 @@ class RedactedPluginTest(private val useK2: Boolean) {
   @Test
   fun annotatingBothClassAndPropertiesIsAnError() {
     val result =
-        compile(
-            kotlin(
-                "DoubleAnnotation.kt",
-                """
+      compile(
+        kotlin(
+          "DoubleAnnotation.kt",
+          """
           package dev.zacsweers.redacted.compiler.test
 
           import dev.zacsweers.redacted.compiler.test.Redacted
 
           @Redacted
           data class DoubleAnnotation(@Redacted val a: Int)
-          """))
+          """
+        )
+      )
     assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.COMPILATION_ERROR)
 
     // Full log is something like this:
@@ -209,23 +225,25 @@ class RedactedPluginTest(private val useK2: Boolean) {
     // TODO K2 doesn't support custom error messages yet
     if (!useK2) {
       assertThat(result.messages)
-          .contains("@Redacted should only be applied to the class or its properties")
+        .contains("@Redacted should only be applied to the class or its properties")
     }
   }
 
   @Test
   fun `verbose should show extra logging`() {
     val compilation =
-        prepareCompilation(
-            kotlin(
-                "source.kt",
-                """
+      prepareCompilation(
+        kotlin(
+          "source.kt",
+          """
           package dev.zacsweers.redacted.compiler.test
 
           import dev.zacsweers.redacted.compiler.test.Redacted
 
           data class Test(@Redacted val a: Int)
-          """))
+          """
+        )
+      )
 
     compilation.verbose = true
     val result = compilation.compile()
@@ -236,16 +254,18 @@ class RedactedPluginTest(private val useK2: Boolean) {
   @Test
   fun `not verbose should show no extra logging`() {
     val result =
-        compile(
-            kotlin(
-                "source.kt",
-                """
+      compile(
+        kotlin(
+          "source.kt",
+          """
           package dev.zacsweers.redacted.compiler.test
 
           import dev.zacsweers.redacted.compiler.test.Redacted
 
           data class Test(@Redacted val a: Int)
-          """))
+          """
+        )
+      )
     assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.OK)
     assertThat(result.messages).doesNotContain(LOG_PREFIX)
   }
@@ -253,19 +273,22 @@ class RedactedPluginTest(private val useK2: Boolean) {
   @Test
   fun customReplacement() {
     val result =
-        compile(
-            "<redacted>",
-            kotlin(
-                "source.kt",
-                """
+      compile(
+        "<redacted>",
+        kotlin(
+          "source.kt",
+          """
           package dev.zacsweers.redacted.compiler.test
 
           import dev.zacsweers.redacted.compiler.test.Redacted
 
           data class Test(@Redacted val a: Int)
-          """))
+          """
+        )
+      )
     assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.OK)
     assertThat(result.messages).doesNotContain(LOG_PREFIX)
+    check(result is JvmCompilationResult)
     val testClass = result.classLoader.loadClass("dev.zacsweers.redacted.compiler.test.Test")
     val instance = testClass.getConstructor(Int::class.javaPrimitiveType).newInstance(2)
     assertThat(instance.toString()).isEqualTo("Test(a=<redacted>)")
@@ -274,35 +297,38 @@ class RedactedPluginTest(private val useK2: Boolean) {
   @Test
   fun classAnnotated() {
     val result =
-        compile(
-            kotlin(
-                "source.kt",
-                """
+      compile(
+        kotlin(
+          "source.kt",
+          """
           package dev.zacsweers.redacted.compiler.test
 
           import dev.zacsweers.redacted.compiler.test.Redacted
 
           @Redacted
           data class SensitiveData(val ssn: String, val birthday: String)
-          """))
+          """
+        )
+      )
     assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.OK)
+    check(result is JvmCompilationResult)
     val complex =
-        result.classLoader
-            .loadClass("dev.zacsweers.redacted.compiler.test.SensitiveData")
-            .kotlin
-            .constructors
-            .first()
-            .call("123-456-7890", "1/1/00")
+      result.classLoader
+        .loadClass("dev.zacsweers.redacted.compiler.test.SensitiveData")
+        .kotlin
+        .constructors
+        .first()
+        .call("123-456-7890", "1/1/00")
     assertThat(complex.toString()).isEqualTo("SensitiveData(██)")
   }
 
   @Test
   fun valueClass() {
     val result =
-        compile(
-            kotlin(
-                "source.kt",
-                """
+      compile(
+        kotlin(
+          "source.kt",
+          """
           package dev.zacsweers.redacted.compiler.test
 
           import kotlin.jvm.JvmInline
@@ -311,25 +337,28 @@ class RedactedPluginTest(private val useK2: Boolean) {
           @Redacted
           @JvmInline
           value class ValueClass(val ssn: String)
-          """))
+          """
+        )
+      )
     assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.OK)
+    check(result is JvmCompilationResult)
     val complex =
-        result.classLoader
-            .loadClass("dev.zacsweers.redacted.compiler.test.ValueClass")
-            .kotlin
-            .constructors
-            .first()
-            .call("123-456-7890")
+      result.classLoader
+        .loadClass("dev.zacsweers.redacted.compiler.test.ValueClass")
+        .kotlin
+        .constructors
+        .first()
+        .call("123-456-7890")
     assertThat(complex.toString()).isEqualTo("ValueClass(██)")
   }
 
   @Test
   fun complex() {
     val result =
-        compile(
-            kotlin(
-                "source.kt",
-                """
+      compile(
+        kotlin(
+          "source.kt",
+          """
           package dev.zacsweers.redacted.compiler.test
 
           import dev.zacsweers.redacted.compiler.test.Redacted
@@ -363,67 +392,72 @@ class RedactedPluginTest(private val useK2: Boolean) {
               val genericType: T,
               val nullableGenericType: T?
           )
-          """))
+          """
+        )
+      )
     assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.OK)
+    check(result is JvmCompilationResult)
     val complex =
-        result.classLoader
-            .loadClass("dev.zacsweers.redacted.compiler.test.Complex")
-            .kotlin
-            .constructors
-            .first()
-            .call(
-                /* redactedReferenceType = */ "redactedReferenceType",
-                /* redactedNullableReferenceType = */ null,
-                /* referenceType = */ "referenceType",
-                /* nullableReferenceType = */ null,
-                /* redactedPrimitiveType = */ 1,
-                /* redactedNullablePrimitiveType = */ null,
-                /* primitiveType = */ 2,
-                /* nullablePrimitiveType = */ null,
-                /* redactedArrayReferenceType = */ arrayOf("redactedArrayReferenceType"),
-                /* redactedNullableArrayReferenceType = */ null,
-                /* arrayReferenceType = */ arrayOf("arrayReferenceType"),
-                /* nullableArrayReferenceType = */ null,
-                /* redactedArrayPrimitiveType = */ intArrayOf(3),
-                /* redactedNullableArrayPrimitiveType = */ null,
-                /* arrayPrimitiveType = */ intArrayOf(4),
-                /* nullableArrayGenericType = */ null,
-                /* redactedGenericCollectionType = */ listOf(5),
-                /* redactedNullableGenericCollectionType = */ null,
-                /* genericCollectionType = */ listOf(6),
-                /* nullableGenericCollectionType = */ null,
-                /* redactedGenericType = */ 7,
-                /* redactedNullableGenericType = */ null,
-                /* genericType = */ 8,
-                /* nullableGenericType = */ null)
+      result.classLoader
+        .loadClass("dev.zacsweers.redacted.compiler.test.Complex")
+        .kotlin
+        .constructors
+        .first()
+        .call(
+          /* redactedReferenceType = */ "redactedReferenceType",
+          /* redactedNullableReferenceType = */ null,
+          /* referenceType = */ "referenceType",
+          /* nullableReferenceType = */ null,
+          /* redactedPrimitiveType = */ 1,
+          /* redactedNullablePrimitiveType = */ null,
+          /* primitiveType = */ 2,
+          /* nullablePrimitiveType = */ null,
+          /* redactedArrayReferenceType = */ arrayOf("redactedArrayReferenceType"),
+          /* redactedNullableArrayReferenceType = */ null,
+          /* arrayReferenceType = */ arrayOf("arrayReferenceType"),
+          /* nullableArrayReferenceType = */ null,
+          /* redactedArrayPrimitiveType = */ intArrayOf(3),
+          /* redactedNullableArrayPrimitiveType = */ null,
+          /* arrayPrimitiveType = */ intArrayOf(4),
+          /* nullableArrayGenericType = */ null,
+          /* redactedGenericCollectionType = */ listOf(5),
+          /* redactedNullableGenericCollectionType = */ null,
+          /* genericCollectionType = */ listOf(6),
+          /* nullableGenericCollectionType = */ null,
+          /* redactedGenericType = */ 7,
+          /* redactedNullableGenericType = */ null,
+          /* genericType = */ 8,
+          /* nullableGenericType = */ null
+        )
     assertThat(complex.toString())
-        .isEqualTo(
-            "Complex(" +
-                "redactedReferenceType=██, " +
-                "redactedNullableReferenceType=██, " +
-                "referenceType=referenceType, " +
-                "nullableReferenceType=null, " +
-                "redactedPrimitiveType=██, " +
-                "redactedNullablePrimitiveType=██, " +
-                "primitiveType=2, " +
-                "nullablePrimitiveType=null, " +
-                "redactedArrayReferenceType=██, " +
-                "redactedNullableArrayReferenceType=██, " +
-                "arrayReferenceType=[arrayReferenceType], " +
-                "nullableArrayReferenceType=null, " +
-                "redactedArrayPrimitiveType=██, " +
-                "redactedNullableArrayPrimitiveType=██, " +
-                "arrayPrimitiveType=[4], " +
-                "nullableArrayGenericType=null, " +
-                "redactedGenericCollectionType=██, " +
-                "redactedNullableGenericCollectionType=██, " +
-                "genericCollectionType=[6], " +
-                "nullableGenericCollectionType=null, " +
-                "redactedGenericType=██, " +
-                "redactedNullableGenericType=██, " +
-                "genericType=8, " +
-                "nullableGenericType=null" +
-                ")")
+      .isEqualTo(
+        "Complex(" +
+          "redactedReferenceType=██, " +
+          "redactedNullableReferenceType=██, " +
+          "referenceType=referenceType, " +
+          "nullableReferenceType=null, " +
+          "redactedPrimitiveType=██, " +
+          "redactedNullablePrimitiveType=██, " +
+          "primitiveType=2, " +
+          "nullablePrimitiveType=null, " +
+          "redactedArrayReferenceType=██, " +
+          "redactedNullableArrayReferenceType=██, " +
+          "arrayReferenceType=[arrayReferenceType], " +
+          "nullableArrayReferenceType=null, " +
+          "redactedArrayPrimitiveType=██, " +
+          "redactedNullableArrayPrimitiveType=██, " +
+          "arrayPrimitiveType=[4], " +
+          "nullableArrayGenericType=null, " +
+          "redactedGenericCollectionType=██, " +
+          "redactedNullableGenericCollectionType=██, " +
+          "genericCollectionType=[6], " +
+          "nullableGenericCollectionType=null, " +
+          "redactedGenericType=██, " +
+          "redactedNullableGenericType=██, " +
+          "genericType=8, " +
+          "nullableGenericType=null" +
+          ")"
+      )
   }
 
   private fun prepareCompilation(vararg sourceFiles: SourceFile): KotlinCompilation {
@@ -431,8 +465,8 @@ class RedactedPluginTest(private val useK2: Boolean) {
   }
 
   private fun prepareCompilation(
-      replacementString: String? = null,
-      vararg sourceFiles: SourceFile
+    replacementString: String? = null,
+    vararg sourceFiles: SourceFile
   ): KotlinCompilation {
     return KotlinCompilation().apply {
       workingDir = temporaryFolder.root
@@ -440,12 +474,14 @@ class RedactedPluginTest(private val useK2: Boolean) {
       val processor = RedactedCommandLineProcessor()
       commandLineProcessors = listOf(processor)
       pluginOptions =
-          listOf(
-              processor.option(OPTION_ENABLED, "true"),
-              processor.option(OPTION_REPLACEMENT_STRING, replacementString ?: "██"),
-              processor.option(
-                  OPTION_REDACTED_ANNOTATION, "dev/zacsweers/redacted/compiler/test/Redacted"),
-          )
+        listOf(
+          processor.option(OPTION_ENABLED, "true"),
+          processor.option(OPTION_REPLACEMENT_STRING, replacementString ?: "██"),
+          processor.option(
+            OPTION_REDACTED_ANNOTATION,
+            "dev/zacsweers/redacted/compiler/test/Redacted"
+          ),
+        )
       inheritClassPath = true
       sources = sourceFiles.asList() + redacted
       verbose = false
@@ -461,14 +497,14 @@ class RedactedPluginTest(private val useK2: Boolean) {
     return PluginOption(pluginId, key.optionName, value.toString())
   }
 
-  private fun compile(vararg sourceFiles: SourceFile): KotlinCompilation.Result {
+  private fun compile(vararg sourceFiles: SourceFile): CompilationResult {
     return compile(null, *sourceFiles)
   }
 
   private fun compile(
-      replacementString: String? = null,
-      vararg sourceFiles: SourceFile
-  ): KotlinCompilation.Result {
+    replacementString: String? = null,
+    vararg sourceFiles: SourceFile
+  ): CompilationResult {
     return prepareCompilation(replacementString, *sourceFiles).compile()
   }
 }
