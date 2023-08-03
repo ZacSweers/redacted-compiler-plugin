@@ -30,11 +30,11 @@ public abstract class RedactedPluginExtension @Inject constructor(objects: Objec
    * classes by '.', e.g. "kotlin/Map.Entry"
    */
   public val redactedAnnotation: Property<String> =
-      objects.property(String::class.java).convention(DEFAULT_ANNOTATION)
+    objects.property(String::class.java).convention(DEFAULT_ANNOTATION)
 
   public val enabled: Property<Boolean> =
-      objects.property(Boolean::class.javaObjectType).convention(true)
+    objects.property(Boolean::class.javaObjectType).convention(true)
 
   public val replacementString: Property<String> =
-      objects.property(String::class.java).convention("██")
+    objects.property(String::class.java).convention("██")
 }

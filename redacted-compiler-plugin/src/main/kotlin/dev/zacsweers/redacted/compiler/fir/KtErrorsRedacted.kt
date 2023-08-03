@@ -23,13 +23,13 @@ import org.jetbrains.kotlin.diagnostics.error0
 //  https://youtrack.jetbrains.com/issue/KT-53510
 internal object KtErrorsRedacted {
   val REDACTED_ON_CLASS_AND_PROPERTY_ERROR by
-      error0<PsiElement>(SourceElementPositioningStrategies.NAME_IDENTIFIER)
+    error0<PsiElement>(SourceElementPositioningStrategies.NAME_IDENTIFIER)
   val REDACTED_ON_NON_CLASS_ERROR by
-      error0<PsiElement>(SourceElementPositioningStrategies.NAME_IDENTIFIER)
+    error0<PsiElement>(SourceElementPositioningStrategies.NAME_IDENTIFIER)
   val REDACTED_ON_NON_DATA_OR_VALUE_CLASS_ERROR by
-      error0<PsiElement>(SourceElementPositioningStrategies.NAME_IDENTIFIER)
+    error0<PsiElement>(SourceElementPositioningStrategies.NAME_IDENTIFIER)
   val REDACTED_ON_VALUE_CLASS_PROPERTY_ERROR by
-      error0<PsiElement>(SourceElementPositioningStrategies.NAME_IDENTIFIER)
+    error0<PsiElement>(SourceElementPositioningStrategies.NAME_IDENTIFIER)
   val CUSTOM_TO_STRING_IN_REDACTED_CLASS_ERROR by
-      error0<PsiElement>(SourceElementPositioningStrategies.NAME_IDENTIFIER)
+    error0<PsiElement>(SourceElementPositioningStrategies.NAME_IDENTIFIER)
 }

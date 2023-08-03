@@ -33,15 +33,16 @@ public class RedactedGradleSubplugin : KotlinCompilerPluginSupportPlugin {
   override fun getCompilerPluginId(): String = "dev.zacsweers.redacted.compiler"
 
   override fun getPluginArtifact(): SubpluginArtifact =
-      SubpluginArtifact(
-          groupId = "dev.zacsweers.redacted",
-          artifactId = "redacted-compiler-plugin",
-          version = VERSION)
+    SubpluginArtifact(
+      groupId = "dev.zacsweers.redacted",
+      artifactId = "redacted-compiler-plugin",
+      version = VERSION
+    )
 
   override fun isApplicable(kotlinCompilation: KotlinCompilation<*>): Boolean = true
 
   override fun applyToCompilation(
-      kotlinCompilation: KotlinCompilation<*>
+    kotlinCompilation: KotlinCompilation<*>
   ): Provider<List<SubpluginOption>> {
     val project = kotlinCompilation.target.project
     val extension = project.extensions.getByType(RedactedPluginExtension::class.java)
@@ -53,22 +54,26 @@ public class RedactedGradleSubplugin : KotlinCompilerPluginSupportPlugin {
       when {
         project.plugins.hasPlugin("org.jetbrains.kotlin.multiplatform") -> {
           val sourceSets =
-              project.extensions.getByType(KotlinMultiplatformExtension::class.java).sourceSets
+            project.extensions.getByType(KotlinMultiplatformExtension::class.java).sourceSets
           val sourceSet = (sourceSets.getByName("commonMain") as DefaultKotlinSourceSet)
           project.configurations
-              .getByName(sourceSet.apiConfigurationName)
-              .dependencies
-              .add(
-                  project.dependencies.create(
-                      "dev.zacsweers.redacted:redacted-compiler-plugin-annotations:$VERSION"))
+            .getByName(sourceSet.apiConfigurationName)
+            .dependencies
+            .add(
+              project.dependencies.create(
+                "dev.zacsweers.redacted:redacted-compiler-plugin-annotations:$VERSION"
+              )
+            )
         }
         else -> {
           project.configurations
-              .getByName("implementation")
-              .dependencies
-              .add(
-                  project.dependencies.create(
-                      "dev.zacsweers.redacted:redacted-compiler-plugin-annotations:$VERSION"))
+            .getByName("implementation")
+            .dependencies
+            .add(
+              project.dependencies.create(
+                "dev.zacsweers.redacted:redacted-compiler-plugin-annotations:$VERSION"
+              )
+            )
         }
       }
     }
@@ -77,9 +82,10 @@ public class RedactedGradleSubplugin : KotlinCompilerPluginSupportPlugin {
 
     return project.provider {
       listOf(
-          SubpluginOption(key = "enabled", value = enabled.toString()),
-          SubpluginOption(key = "replacementString", value = extension.replacementString.get()),
-          SubpluginOption(key = "redactedAnnotation", value = annotation.get()))
+        SubpluginOption(key = "enabled", value = enabled.toString()),
+        SubpluginOption(key = "replacementString", value = extension.replacementString.get()),
+        SubpluginOption(key = "redactedAnnotation", value = annotation.get())
+      )
     }
   }
 }

@@ -55,16 +55,16 @@ import org.jetbrains.kotlin.util.OperatorNameConventions
 internal const val LOG_PREFIX = "*** REDACTED (IR):"
 
 internal class RedactedIrVisitor(
-    private val pluginContext: IrPluginContext,
-    private val redactedAnnotation: FqName,
-    private val replacementString: String,
-    private val messageCollector: MessageCollector
+  private val pluginContext: IrPluginContext,
+  private val redactedAnnotation: FqName,
+  private val replacementString: String,
+  private val messageCollector: MessageCollector
 ) : IrElementTransformerVoidWithContext() {
 
   private class Property(
-      val ir: IrProperty,
-      val isRedacted: Boolean,
-      val parameter: IrValueParameter
+    val ir: IrProperty,
+    val isRedacted: Boolean,
+    val parameter: IrValueParameter
   )
 
   override fun visitFunctionNew(declaration: IrFunction): IrStatement {
@@ -73,9 +73,9 @@ internal class RedactedIrVisitor(
     val declarationParent = declaration.parent
     if (declarationParent is IrClass && declaration.isToStringFromAny()) {
       val primaryConstructor =
-          declarationParent.primaryConstructor ?: return super.visitFunctionNew(declaration)
+        declarationParent.primaryConstructor ?: return super.visitFunctionNew(declaration)
       val constructorParameters =
-          primaryConstructor.valueParameters.associateBy { it.name.asString() }
+        primaryConstructor.valueParameters.associateBy { it.name.asString() }
 
       val properties = mutableListOf<Property>()
       val classIsRedacted = declarationParent.hasAnnotation(redactedAnnotation)
@@ -91,7 +91,8 @@ internal class RedactedIrVisitor(
       if (classIsRedacted || anyRedacted) {
         if (declaration.origin == IrDeclarationOrigin.DEFINED) {
           declaration.reportError(
-              "@Redacted is only supported on data or value classes that do *not* have a custom toString() function. Please remove the function or remove the @Redacted annotations.")
+            "@Redacted is only supported on data or value classes that do *not* have a custom toString() function. Please remove the function or remove the @Redacted annotations."
+          )
           return super.visitFunctionNew(declaration)
         }
         if (!declarationParent.isData && !declarationParent.isValue) {
@@ -100,7 +101,8 @@ internal class RedactedIrVisitor(
         }
         if (declarationParent.isValue && !classIsRedacted) {
           declarationParent.reportError(
-              "@Redacted is redundant on value class properties, just annotate the class instead.")
+            "@Redacted is redundant on value class properties, just annotate the class instead."
+          )
           return super.visitFunctionNew(declaration)
         }
         if (declarationParent.isObject) {
@@ -109,7 +111,8 @@ internal class RedactedIrVisitor(
         }
         if (!(classIsRedacted xor anyRedacted)) {
           declarationParent.reportError(
-              "@Redacted should only be applied to the class or its properties, not both.")
+            "@Redacted should only be applied to the class or its properties, not both."
+          )
           return super.visitFunctionNew(declaration)
         }
         declaration.convertToGeneratedToString(properties, classIsRedacted)
@@ -120,28 +123,29 @@ internal class RedactedIrVisitor(
   }
 
   private fun IrFunction.isToStringFromAny(): Boolean =
-      name == OperatorNameConventions.TO_STRING &&
-          dispatchReceiverParameter != null &&
-          extensionReceiverParameter == null &&
-          valueParameters.isEmpty() &&
-          returnType.isString()
+    name == OperatorNameConventions.TO_STRING &&
+      dispatchReceiverParameter != null &&
+      extensionReceiverParameter == null &&
+      valueParameters.isEmpty() &&
+      returnType.isString()
 
   private fun IrFunction.convertToGeneratedToString(
-      properties: List<Property>,
-      classIsRedacted: Boolean
+    properties: List<Property>,
+    classIsRedacted: Boolean
   ) {
     val parent = parent as IrClass
 
     origin = RedactedOrigin
 
     body =
-        DeclarationIrBuilder(pluginContext, symbol).irBlockBody {
-          generateToStringMethodBody(
-              irClass = parent,
-              irFunction = this@convertToGeneratedToString,
-              irProperties = properties,
-              classIsRedacted = classIsRedacted)
-        }
+      DeclarationIrBuilder(pluginContext, symbol).irBlockBody {
+        generateToStringMethodBody(
+          irClass = parent,
+          irFunction = this@convertToGeneratedToString,
+          irProperties = properties,
+          classIsRedacted = classIsRedacted
+        )
+      }
 
     reflectivelySetFakeOverride(false)
   }
@@ -163,10 +167,10 @@ internal class RedactedIrVisitor(
    * .
    */
   private fun IrBlockBodyBuilder.generateToStringMethodBody(
-      irClass: IrClass,
-      irFunction: IrFunction,
-      irProperties: List<Property>,
-      classIsRedacted: Boolean
+    irClass: IrClass,
+    irFunction: IrFunction,
+    irProperties: List<Property>,
+    classIsRedacted: Boolean
   ) {
     val irConcat = irConcat()
     irConcat.addArgument(irString(irClass.name.asString() + "("))
@@ -186,14 +190,15 @@ internal class RedactedIrVisitor(
 
           val param = property.parameter
           val irPropertyStringValue =
-              if (param.type.isArray() || param.type.isPrimitiveArray()) {
-                irCall(
-                        context.irBuiltIns.dataClassArrayMemberToStringSymbol,
-                        context.irBuiltIns.stringType)
-                    .apply { putValueArgument(0, irPropertyValue) }
-              } else {
-                irPropertyValue
-              }
+            if (param.type.isArray() || param.type.isPrimitiveArray()) {
+              irCall(
+                  context.irBuiltIns.dataClassArrayMemberToStringSymbol,
+                  context.irBuiltIns.stringType
+                )
+                .apply { putValueArgument(0, irPropertyValue) }
+            } else {
+              irPropertyValue
+            }
 
           irConcat.addArgument(irPropertyStringValue)
         }
@@ -205,10 +210,10 @@ internal class RedactedIrVisitor(
   }
 
   private fun IrBlockBodyBuilder.receiver(irFunction: IrFunction) =
-      IrGetValueImpl(irFunction.dispatchReceiverParameter!!)
+    IrGetValueImpl(irFunction.dispatchReceiverParameter!!)
 
   private fun IrBlockBodyBuilder.IrGetValueImpl(irParameter: IrValueParameter) =
-      IrGetValueImpl(startOffset, endOffset, irParameter.type, irParameter.symbol)
+    IrGetValueImpl(startOffset, endOffset, irParameter.type, irParameter.symbol)
 
   private fun log(message: String) {
     messageCollector.report(CompilerMessageSeverity.LOGGING, "$LOG_PREFIX $message")
@@ -222,15 +227,17 @@ internal class RedactedIrVisitor(
   /** Finds the line and column of [irElement] within this file. */
   private fun IrFile.locationOf(irElement: IrElement?): CompilerMessageSourceLocation {
     val sourceRangeInfo =
-        fileEntry.getSourceRangeInfo(
-            beginOffset = irElement?.startOffset ?: SYNTHETIC_OFFSET,
-            endOffset = irElement?.endOffset ?: SYNTHETIC_OFFSET)
+      fileEntry.getSourceRangeInfo(
+        beginOffset = irElement?.startOffset ?: SYNTHETIC_OFFSET,
+        endOffset = irElement?.endOffset ?: SYNTHETIC_OFFSET
+      )
     return CompilerMessageLocationWithRange.create(
-        path = sourceRangeInfo.filePath,
-        lineStart = sourceRangeInfo.startLineNumber + 1,
-        columnStart = sourceRangeInfo.startColumnNumber + 1,
-        lineEnd = sourceRangeInfo.endLineNumber + 1,
-        columnEnd = sourceRangeInfo.endColumnNumber + 1,
-        lineContent = null)!!
+      path = sourceRangeInfo.filePath,
+      lineStart = sourceRangeInfo.startLineNumber + 1,
+      columnStart = sourceRangeInfo.startColumnNumber + 1,
+      lineEnd = sourceRangeInfo.endLineNumber + 1,
+      columnEnd = sourceRangeInfo.endColumnNumber + 1,
+      lineContent = null
+    )!!
   }
 }

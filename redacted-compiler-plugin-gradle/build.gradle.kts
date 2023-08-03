@@ -22,13 +22,13 @@ tasks.withType<JavaCompile>().configureEach {
 sourceSets { main { java.srcDir("$buildDir/generated/sources/version-templates/kotlin/main") } }
 
 val copyVersionTemplatesProvider =
-    tasks.register<Copy>("copyVersionTemplates") {
-      inputs.property("version", project.property("VERSION_NAME"))
-      from(project.layout.projectDirectory.dir("version-templates"))
-      into(project.layout.buildDirectory.dir("generated/sources/version-templates/kotlin/main"))
-      expand(mapOf("projectVersion" to "${project.property("VERSION_NAME")}"))
-      filteringCharset = "UTF-8"
-    }
+  tasks.register<Copy>("copyVersionTemplates") {
+    inputs.property("version", project.property("VERSION_NAME"))
+    from(project.layout.projectDirectory.dir("version-templates"))
+    into(project.layout.buildDirectory.dir("generated/sources/version-templates/kotlin/main"))
+    expand(mapOf("projectVersion" to "${project.property("VERSION_NAME")}"))
+    filteringCharset = "UTF-8"
+  }
 // endregion
 
 tasks.withType<KotlinCompile>().configureEach {
@@ -43,8 +43,8 @@ tasks.withType<KotlinCompile>().configureEach {
 }
 
 tasks
-    .matching { it.name == "sourcesJar" || it.name == "dokkaHtml" }
-    .configureEach { dependsOn(copyVersionTemplatesProvider) }
+  .matching { it.name == "sourcesJar" || it.name == "dokkaHtml" }
+  .configureEach { dependsOn(copyVersionTemplatesProvider) }
 
 gradlePlugin {
   plugins {

@@ -22,15 +22,14 @@ import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
 import org.jetbrains.kotlin.name.FqName
 
 internal class RedactedIrGenerationExtension(
-    private val messageCollector: MessageCollector,
-    private val replacementString: String,
-    private val redactedAnnotationName: FqName
+  private val messageCollector: MessageCollector,
+  private val replacementString: String,
+  private val redactedAnnotationName: FqName
 ) : IrGenerationExtension {
 
   override fun generate(moduleFragment: IrModuleFragment, pluginContext: IrPluginContext) {
     val redactedTransformer =
-        RedactedIrVisitor(
-            pluginContext, redactedAnnotationName, replacementString, messageCollector)
+      RedactedIrVisitor(pluginContext, redactedAnnotationName, replacementString, messageCollector)
     moduleFragment.transform(redactedTransformer, null)
   }
 }
