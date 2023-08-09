@@ -54,7 +54,7 @@ jobs:
         run: ./gradlew check
 
   publish:
-    runs-on: macos-11
+    runs-on: macos-13
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && github.repository == 'zacsweers/redacted-compiler-plugin'
     needs: [ jvm, all-platforms ]
 
