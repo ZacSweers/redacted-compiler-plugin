@@ -15,7 +15,7 @@
 [versions]
 autoService = "1.1.1"
 kotlinCompileTesting = "0.3.2"
-kotlin = "1.9.0"
+kotlin = "1.9.10"
 jdk = "20"
 jvmTarget = "11"
 ksp = "1.9.0-1.0.13"
