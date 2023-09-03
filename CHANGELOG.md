@@ -1,6 +1,15 @@
 Changelog
 =========
 
+1.6.1
+-----
+
+_2023-09-02_
+
+- **Enhancement**: Simplify lookup of `KotlinCompilation`'s `implementation` configuration name in the Gradle plugin when using the default annotation.
+- Update to Kotlin `1.9.0`.
+- Build against Gradle `8.3`.
+
 1.6.0
 -----
 
