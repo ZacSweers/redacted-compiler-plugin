@@ -17,12 +17,10 @@ package dev.zacsweers.redacted.gradle
 
 import org.gradle.api.Project
 import org.gradle.api.provider.Provider
-import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilerPluginSupportPlugin
 import org.jetbrains.kotlin.gradle.plugin.SubpluginArtifact
 import org.jetbrains.kotlin.gradle.plugin.SubpluginOption
-import org.jetbrains.kotlin.gradle.plugin.sources.DefaultKotlinSourceSet
 
 public class RedactedGradleSubplugin : KotlinCompilerPluginSupportPlugin {
 
@@ -51,31 +49,10 @@ public class RedactedGradleSubplugin : KotlinCompilerPluginSupportPlugin {
     // Default annotation is used, so add it as a dependency
     // Note only multiplatform, jvm/android, and js are supported. Anyone else is on their own.
     if (annotation.get() == DEFAULT_ANNOTATION) {
-      when {
-        project.plugins.hasPlugin("org.jetbrains.kotlin.multiplatform") -> {
-          val sourceSets =
-            project.extensions.getByType(KotlinMultiplatformExtension::class.java).sourceSets
-          val sourceSet = (sourceSets.getByName("commonMain") as DefaultKotlinSourceSet)
-          project.configurations
-            .getByName(sourceSet.apiConfigurationName)
-            .dependencies
-            .add(
-              project.dependencies.create(
-                "dev.zacsweers.redacted:redacted-compiler-plugin-annotations:$VERSION"
-              )
-            )
-        }
-        else -> {
-          project.configurations
-            .getByName("implementation")
-            .dependencies
-            .add(
-              project.dependencies.create(
-                "dev.zacsweers.redacted:redacted-compiler-plugin-annotations:$VERSION"
-              )
-            )
-        }
-      }
+      project.dependencies.add(
+        kotlinCompilation.implementationConfigurationName,
+        "dev.zacsweers.redacted:redacted-compiler-plugin-annotations:$VERSION"
+      )
     }
 
     val enabled = extension.enabled.get()
