@@ -7,6 +7,7 @@ Changelog
 _2023-10-31_
 
 - Update to Kotlin `1.9.20`.  This plugin now requires `1.9.20`.
+- Update wasm target to `wasmJs`.
 
 1.6.1
 -----
