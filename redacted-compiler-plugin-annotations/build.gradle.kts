@@ -54,7 +54,7 @@ kotlin {
   }
 
   @OptIn(ExperimentalWasmDsl::class)
-  wasm {
+  wasmJs {
     binaries.executable()
     browser {}
   }
