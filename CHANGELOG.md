@@ -1,13 +1,20 @@
 Changelog
 =========
 
+1.7.0
+-----
+
+_2023-10-31_
+
+- Update to Kotlin `1.9.20`.  This plugin now requires `1.9.20`.
+
 1.6.1
 -----
 
 _2023-09-02_
 
 - **Enhancement**: Simplify lookup of `KotlinCompilation`'s `implementation` configuration name in the Gradle plugin when using the default annotation.
-- Update to Kotlin `1.9.0`.
+- Update to Kotlin `1.9.10`.
 - Build against Gradle `8.3`.
 
 1.6.0
