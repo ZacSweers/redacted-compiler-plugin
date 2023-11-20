@@ -44,13 +44,15 @@ class RedactedPluginTest(
 ) {
 
   companion object {
-    @JvmStatic @Parameterized.Parameters(name = "useK2 = {0}, useFir = {1}")
-    fun data() = listOf(
-      arrayOf(false, false),
-      arrayOf(true, false),
-      // TODO enable when FIR errors actually fail the compilation? Seems they don't in
-//      arrayOf(true, true),
-    )
+    @JvmStatic
+    @Parameterized.Parameters(name = "useK2 = {0}, useFir = {1}")
+    fun data() =
+      listOf(
+        arrayOf(false, false),
+        arrayOf(true, false),
+        // TODO enable when FIR errors actually fail the compilation? Seems they don't in
+        //      arrayOf(true, true),
+      )
   }
 
   @Rule @JvmField var temporaryFolder: TemporaryFolder = TemporaryFolder()
@@ -497,11 +499,12 @@ class RedactedPluginTest(
       sources = sourceFiles.asList() + redacted
       verbose = false
       jvmTarget = JvmTarget.fromString(System.getProperty("rdt.jvmTarget", "1.8"))!!.description
-      languageVersion = if (this@RedactedPluginTest.useK2) {
-        "2.0"
-      } else {
-        "1.9"
-      }
+      languageVersion =
+        if (this@RedactedPluginTest.useK2) {
+          "2.0"
+        } else {
+          "1.9"
+        }
     }
   }
 
