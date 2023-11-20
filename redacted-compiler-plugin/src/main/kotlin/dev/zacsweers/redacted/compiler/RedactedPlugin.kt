@@ -43,12 +43,14 @@ public class RedactedComponentRegistrar : CompilerPluginRegistrar() {
     val redactedAnnotationClassId = ClassId.fromString(redactedAnnotation)
     val fqRedactedAnnotation = redactedAnnotationClassId.asSingleFqName()
 
-    IrGenerationExtension.registerExtension(
-      RedactedIrGenerationExtension(messageCollector, replacementString, fqRedactedAnnotation)
-    )
-
-    FirExtensionRegistrarAdapter.registerExtension(
-      FirRedactedExtensionRegistrar(redactedAnnotationClassId)
-    )
+    if (configuration[KEY_USE_FIR] == true) {
+      FirExtensionRegistrarAdapter.registerExtension(
+        FirRedactedExtensionRegistrar(redactedAnnotationClassId)
+      )
+    } else {
+      IrGenerationExtension.registerExtension(
+        RedactedIrGenerationExtension(messageCollector, replacementString, fqRedactedAnnotation)
+      )
+    }
   }
 }

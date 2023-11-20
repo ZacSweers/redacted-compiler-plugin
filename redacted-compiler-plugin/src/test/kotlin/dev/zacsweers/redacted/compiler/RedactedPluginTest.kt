@@ -25,6 +25,7 @@ import com.tschuchort.compiletesting.SourceFile.Companion.kotlin
 import dev.zacsweers.redacted.compiler.RedactedCommandLineProcessor.Companion.OPTION_ENABLED
 import dev.zacsweers.redacted.compiler.RedactedCommandLineProcessor.Companion.OPTION_REDACTED_ANNOTATION
 import dev.zacsweers.redacted.compiler.RedactedCommandLineProcessor.Companion.OPTION_REPLACEMENT_STRING
+import dev.zacsweers.redacted.compiler.RedactedCommandLineProcessor.Companion.OPTION_USE_FIR
 import org.jetbrains.kotlin.compiler.plugin.CliOption
 import org.jetbrains.kotlin.compiler.plugin.CommandLineProcessor
 import org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi
@@ -37,10 +38,19 @@ import org.junit.runners.Parameterized
 
 @OptIn(ExperimentalCompilerApi::class)
 @RunWith(Parameterized::class)
-class RedactedPluginTest(private val useK2: Boolean) {
+class RedactedPluginTest(
+  private val useK2: Boolean,
+  private val useFir: Boolean,
+) {
 
   companion object {
-    @JvmStatic @Parameterized.Parameters(name = "useK2 = {0}") fun data() = listOf(true, false)
+    @JvmStatic @Parameterized.Parameters(name = "useK2 = {0}, useFir = {1}")
+    fun data() = listOf(
+      arrayOf(false, false),
+      arrayOf(true, false),
+      // TODO enable when FIR errors actually fail the compilation? Seems they don't in
+//      arrayOf(true, true),
+    )
   }
 
   @Rule @JvmField var temporaryFolder: TemporaryFolder = TemporaryFolder()
@@ -83,8 +93,8 @@ class RedactedPluginTest(private val useK2: Boolean) {
     // e: /path/to/NonDataClass.kt: (5, 1): @Redacted is only supported on data classes!
     // TODO FIR reports diff line number: https://youtrack.jetbrains.com/issue/KT-56649
     assertThat(result.messages).contains("NonDataClass.kt:")
-    // TODO K2 doesn't support custom error messages yet
-    if (!useK2) {
+    // TODO FIR doesn't support custom error messages yet
+    if (!useFir) {
       assertThat(result.messages).contains("@Redacted is only supported on data or value classes!")
     }
   }
@@ -109,8 +119,8 @@ class RedactedPluginTest(private val useK2: Boolean) {
     // Full log is something like this:
     // e: /path/to/NonDataClass.kt: (5, 1): @Redacted is only supported on data classes!
     assertThat(result.messages).contains("NonClass.kt:")
-    // TODO K2 doesn't support custom error messages yet
-    if (!useK2) {
+    // TODO FIR doesn't support custom error messages yet
+    if (!useFir) {
       assertThat(result.messages).contains("@Redacted is only supported on data or value classes!")
     }
   }
@@ -137,8 +147,8 @@ class RedactedPluginTest(private val useK2: Boolean) {
     // Full log is something like this:
     // e: /path/to/NonDataClass.kt: (5, 1): @Redacted is only supported on data classes!
     assertThat(result.messages).contains("CustomToString.kt:")
-    // TODO K2 doesn't support custom error messages yet
-    if (!useK2) {
+    // TODO FIR doesn't support custom error messages yet
+    if (!useFir) {
       assertThat(result.messages)
         .contains(
           "@Redacted is only supported on data or value classes that do *not* have a custom toString() function"
@@ -168,8 +178,8 @@ class RedactedPluginTest(private val useK2: Boolean) {
     // Full log is something like this:
     // e: /path/to/AnnotatedValueProp.kt: (5, 1): @Redacted is redundant on value class properties
     assertThat(result.messages).contains("AnnotatedValueProp.kt:")
-    // TODO K2 doesn't support custom error messages yet
-    if (!useK2) {
+    // TODO FIR doesn't support custom error messages yet
+    if (!useFir) {
       assertThat(result.messages).contains("@Redacted is redundant on value class properties")
     }
   }
@@ -195,8 +205,8 @@ class RedactedPluginTest(private val useK2: Boolean) {
     // Full log is something like this:
     // e: /path/to/NonDataClass.kt: (5, 1): @Redacted is useless on object classes
     assertThat(result.messages).contains("DataObject.kt:")
-    // TODO K2 doesn't support custom error messages yet
-    if (!useK2) {
+    // TODO FIR doesn't support custom error messages yet
+    if (!useFir) {
       assertThat(result.messages).contains("@Redacted is useless on object classes")
     }
   }
@@ -222,8 +232,8 @@ class RedactedPluginTest(private val useK2: Boolean) {
     // Full log is something like this:
     // e: /path/to/NonDataClass.kt: (5, 1): @Redacted is only supported on data classes!
     assertThat(result.messages).contains("DoubleAnnotation.kt:")
-    // TODO K2 doesn't support custom error messages yet
-    if (!useK2) {
+    // TODO FIR doesn't support custom error messages yet
+    if (!useFir) {
       assertThat(result.messages)
         .contains("@Redacted should only be applied to the class or its properties")
     }
@@ -476,6 +486,7 @@ class RedactedPluginTest(private val useK2: Boolean) {
       pluginOptions =
         listOf(
           processor.option(OPTION_ENABLED, "true"),
+          processor.option(OPTION_USE_FIR, useFir.toString()),
           processor.option(OPTION_REPLACEMENT_STRING, replacementString ?: "██"),
           processor.option(
             OPTION_REDACTED_ANNOTATION,
@@ -486,9 +497,10 @@ class RedactedPluginTest(private val useK2: Boolean) {
       sources = sourceFiles.asList() + redacted
       verbose = false
       jvmTarget = JvmTarget.fromString(System.getProperty("rdt.jvmTarget", "1.8"))!!.description
-      supportsK2 = true
-      if (this@RedactedPluginTest.useK2) {
-        languageVersion = "2.0"
+      languageVersion = if (this@RedactedPluginTest.useK2) {
+        "2.0"
+      } else {
+        "1.9"
       }
     }
   }
