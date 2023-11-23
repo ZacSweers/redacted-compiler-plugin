@@ -25,8 +25,6 @@ import org.jetbrains.kotlin.config.CompilerConfigurationKey
 
 internal val KEY_ENABLED =
   CompilerConfigurationKey<Boolean>("Enable/disable Redacted's plugin on the given compilation")
-internal val KEY_USE_FIR =
-  CompilerConfigurationKey<Boolean>("Enable/disable Redacted's FIR plugin on the given compilation")
 internal val KEY_REPLACEMENT_STRING =
   CompilerConfigurationKey<String>("The replacement string to use in redactions")
 internal val KEY_REDACTED_ANNOTATION =
@@ -45,15 +43,6 @@ public class RedactedCommandLineProcessor : CommandLineProcessor {
         valueDescription = "<true | false>",
         description = KEY_ENABLED.toString(),
         required = true,
-        allowMultipleOccurrences = false
-      )
-
-    val OPTION_USE_FIR =
-      CliOption(
-        optionName = "useFir",
-        valueDescription = "<true | false>",
-        description = KEY_USE_FIR.toString(),
-        required = false,
         allowMultipleOccurrences = false
       )
 
@@ -79,7 +68,7 @@ public class RedactedCommandLineProcessor : CommandLineProcessor {
   override val pluginId: String = "dev.zacsweers.redacted.compiler"
 
   override val pluginOptions: Collection<AbstractCliOption> =
-    listOf(OPTION_ENABLED, OPTION_USE_FIR, OPTION_REPLACEMENT_STRING, OPTION_REDACTED_ANNOTATION)
+    listOf(OPTION_ENABLED, OPTION_REPLACEMENT_STRING, OPTION_REDACTED_ANNOTATION)
 
   override fun processOption(
     option: AbstractCliOption,
@@ -88,7 +77,6 @@ public class RedactedCommandLineProcessor : CommandLineProcessor {
   ): Unit =
     when (option.optionName) {
       "enabled" -> configuration.put(KEY_ENABLED, value.toBoolean())
-      "useFir" -> configuration.put(KEY_USE_FIR, value.toBoolean())
       "replacementString" -> configuration.put(KEY_REPLACEMENT_STRING, value)
       "redactedAnnotation" -> configuration.put(KEY_REDACTED_ANNOTATION, value)
       else -> error("Unknown plugin option: ${option.optionName}")

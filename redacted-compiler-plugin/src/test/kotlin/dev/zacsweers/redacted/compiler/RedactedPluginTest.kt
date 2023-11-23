@@ -25,7 +25,6 @@ import com.tschuchort.compiletesting.SourceFile.Companion.kotlin
 import dev.zacsweers.redacted.compiler.RedactedCommandLineProcessor.Companion.OPTION_ENABLED
 import dev.zacsweers.redacted.compiler.RedactedCommandLineProcessor.Companion.OPTION_REDACTED_ANNOTATION
 import dev.zacsweers.redacted.compiler.RedactedCommandLineProcessor.Companion.OPTION_REPLACEMENT_STRING
-import dev.zacsweers.redacted.compiler.RedactedCommandLineProcessor.Companion.OPTION_USE_FIR
 import org.jetbrains.kotlin.compiler.plugin.CliOption
 import org.jetbrains.kotlin.compiler.plugin.CommandLineProcessor
 import org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi
@@ -38,20 +37,15 @@ import org.junit.runners.Parameterized
 
 @OptIn(ExperimentalCompilerApi::class)
 @RunWith(Parameterized::class)
-class RedactedPluginTest(
-  private val useK2: Boolean,
-  private val useFir: Boolean,
-) {
+class RedactedPluginTest(private val useK2: Boolean) {
 
   companion object {
     @JvmStatic
-    @Parameterized.Parameters(name = "useK2 = {0}, useFir = {1}")
+    @Parameterized.Parameters(name = "useK2 = {0}")
     fun data() =
       listOf(
-        arrayOf(false, false),
-        arrayOf(true, false),
-        // TODO enable when FIR errors actually fail the compilation? Seems they don't in
-        //      arrayOf(true, true),
+        arrayOf(true),
+        arrayOf(false),
       )
   }
 
@@ -96,7 +90,7 @@ class RedactedPluginTest(
     // TODO FIR reports diff line number: https://youtrack.jetbrains.com/issue/KT-56649
     assertThat(result.messages).contains("NonDataClass.kt:")
     // TODO FIR doesn't support custom error messages yet
-    if (!useFir) {
+    if (!useK2) {
       assertThat(result.messages).contains("@Redacted is only supported on data or value classes!")
     }
   }
@@ -122,7 +116,7 @@ class RedactedPluginTest(
     // e: /path/to/NonDataClass.kt: (5, 1): @Redacted is only supported on data classes!
     assertThat(result.messages).contains("NonClass.kt:")
     // TODO FIR doesn't support custom error messages yet
-    if (!useFir) {
+    if (!useK2) {
       assertThat(result.messages).contains("@Redacted is only supported on data or value classes!")
     }
   }
@@ -150,7 +144,7 @@ class RedactedPluginTest(
     // e: /path/to/NonDataClass.kt: (5, 1): @Redacted is only supported on data classes!
     assertThat(result.messages).contains("CustomToString.kt:")
     // TODO FIR doesn't support custom error messages yet
-    if (!useFir) {
+    if (!useK2) {
       assertThat(result.messages)
         .contains(
           "@Redacted is only supported on data or value classes that do *not* have a custom toString() function"
@@ -181,7 +175,7 @@ class RedactedPluginTest(
     // e: /path/to/AnnotatedValueProp.kt: (5, 1): @Redacted is redundant on value class properties
     assertThat(result.messages).contains("AnnotatedValueProp.kt:")
     // TODO FIR doesn't support custom error messages yet
-    if (!useFir) {
+    if (!useK2) {
       assertThat(result.messages).contains("@Redacted is redundant on value class properties")
     }
   }
@@ -208,7 +202,7 @@ class RedactedPluginTest(
     // e: /path/to/NonDataClass.kt: (5, 1): @Redacted is useless on object classes
     assertThat(result.messages).contains("DataObject.kt:")
     // TODO FIR doesn't support custom error messages yet
-    if (!useFir) {
+    if (!useK2) {
       assertThat(result.messages).contains("@Redacted is useless on object classes")
     }
   }
@@ -235,7 +229,7 @@ class RedactedPluginTest(
     // e: /path/to/NonDataClass.kt: (5, 1): @Redacted is only supported on data classes!
     assertThat(result.messages).contains("DoubleAnnotation.kt:")
     // TODO FIR doesn't support custom error messages yet
-    if (!useFir) {
+    if (!useK2) {
       assertThat(result.messages)
         .contains("@Redacted should only be applied to the class or its properties")
     }
@@ -488,7 +482,6 @@ class RedactedPluginTest(
       pluginOptions =
         listOf(
           processor.option(OPTION_ENABLED, "true"),
-          processor.option(OPTION_USE_FIR, useFir.toString()),
           processor.option(OPTION_REPLACEMENT_STRING, replacementString ?: "██"),
           processor.option(
             OPTION_REDACTED_ANNOTATION,
