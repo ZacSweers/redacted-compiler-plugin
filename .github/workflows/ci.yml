@@ -4,14 +4,13 @@ on: [ push, pull_request ]
 
 jobs:
   jvm:
-    name: jvm | StringConcat ${{ matrix.stringConcat }} | K2 ${{ matrix.k2 }}
+    name: jvm | StringConcat ${{ matrix.stringConcat }}
     runs-on: ubuntu-latest
 
     strategy:
       fail-fast: false
       matrix:
         stringConcat: [ 'inline', 'indy', 'indy-with-constants' ]
-        k2: [ 'true', 'false']
 
     steps:
       - name: Checkout
@@ -27,7 +26,7 @@ jobs:
           java-version: '20'
 
       - name: Build with Gradle
-        run: ./gradlew clean check -Dkjs=false -Dknative=false --stacktrace -Pstring_concat=${{ matrix.stringConcat }} -Pkotlin.experimental.tryK2=${{ matrix.k2 }}
+        run: ./gradlew clean check -Dkjs=false -Dknative=false --stacktrace -Pstring_concat=${{ matrix.stringConcat }}
 
   all-platforms:
     runs-on: ${{ matrix.os }}
