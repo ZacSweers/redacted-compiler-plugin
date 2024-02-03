@@ -24,7 +24,7 @@ import org.jetbrains.kotlin.name.FqName
 internal class RedactedIrGenerationExtension(
   private val messageCollector: MessageCollector,
   private val replacementString: String,
-  private val redactedAnnotationName: FqName
+  private val redactedAnnotationName: FqName,
 ) : IrGenerationExtension {
 
   override fun generate(moduleFragment: IrModuleFragment, pluginContext: IrPluginContext) {

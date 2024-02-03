@@ -1,10 +1,23 @@
 name: CI
 
-on: [ push, pull_request ]
+on:
+  # Only run push on main
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - '**/*.md'
+  # Always run on PRs
+  pull_request:
+    branches: [ main ]
+
+concurrency:
+  group: 'ci-${{ github.event.merge_group.head_ref || github.head_ref }}-${{ github.workflow }}'
+  cancel-in-progress: true
 
 jobs:
   jvm:
-    name: jvm | StringConcat ${{ matrix.stringConcat }}
+    name: jvm / StringConcat ${{ matrix.stringConcat }}
     runs-on: ubuntu-latest
 
     strategy:
@@ -17,43 +30,50 @@ jobs:
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
 
       - name: Gradle Wrapper Validation
-        uses: gradle/wrapper-validation-action@v1
+        uses: gradle/wrapper-validation-action@v2
 
       - name: Install JDK ${{ matrix.ci_java_version }}
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
-          java-version: '20'
+          java-version: '21'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
 
       - name: Build with Gradle
-        run: ./gradlew clean check -Dkjs=false -Dknative=false --stacktrace -Pstring_concat=${{ matrix.stringConcat }}
+        run: ./gradlew check -Dkjs=false -Dknative=false --stacktrace -Pstring_concat=${{ matrix.stringConcat }} --quiet
 
   all-platforms:
+    name: "platform / ${{ matrix.os }}"
     runs-on: ${{ matrix.os }}
 
     strategy:
       fail-fast: false
       matrix:
-        os: [ macos-11, ubuntu-latest, windows-latest ]
+        os: [ macos-14, ubuntu-latest, windows-latest ]
 
     steps:
       - name: Checkout
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
 
       - name: Validate Gradle Wrapper
-        uses: gradle/wrapper-validation-action@v1
+        uses: gradle/wrapper-validation-action@v2
 
       - name: Configure JDK
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
-          java-version: '20'
+          java-version: '21'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
 
       - name: Test
-        run: ./gradlew check
+        run: ./gradlew check --quiet
 
   publish:
-    runs-on: macos-13
+    runs-on: macos-14
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && github.repository == 'zacsweers/redacted-compiler-plugin'
     needs: [ jvm, all-platforms ]
 
@@ -62,10 +82,13 @@ jobs:
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
 
       - name: Configure JDK
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
-          java-version: '20'
+          java-version: '21'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
 
       - name: Upload snapshot (main only)
         env:

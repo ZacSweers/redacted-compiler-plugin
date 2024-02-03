@@ -34,7 +34,7 @@ public class RedactedGradleSubplugin : KotlinCompilerPluginSupportPlugin {
     SubpluginArtifact(
       groupId = "dev.zacsweers.redacted",
       artifactId = "redacted-compiler-plugin",
-      version = VERSION
+      version = VERSION,
     )
 
   override fun isApplicable(kotlinCompilation: KotlinCompilation<*>): Boolean = true
@@ -51,7 +51,7 @@ public class RedactedGradleSubplugin : KotlinCompilerPluginSupportPlugin {
     if (annotation.get() == DEFAULT_ANNOTATION) {
       project.dependencies.add(
         kotlinCompilation.implementationConfigurationName,
-        "dev.zacsweers.redacted:redacted-compiler-plugin-annotations:$VERSION"
+        "dev.zacsweers.redacted:redacted-compiler-plugin-annotations:$VERSION",
       )
     }
 
@@ -61,7 +61,7 @@ public class RedactedGradleSubplugin : KotlinCompilerPluginSupportPlugin {
       listOf(
         SubpluginOption(key = "enabled", value = enabled.toString()),
         SubpluginOption(key = "replacementString", value = extension.replacementString.get()),
-        SubpluginOption(key = "redactedAnnotation", value = annotation.get())
+        SubpluginOption(key = "redactedAnnotation", value = annotation.get()),
       )
     }
   }
