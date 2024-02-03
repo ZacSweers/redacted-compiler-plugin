@@ -65,7 +65,7 @@ internal object FirRedactedDeclarationChecker : FirRegularClassChecker() {
   override fun check(
     declaration: FirRegularClass,
     context: CheckerContext,
-    reporter: DiagnosticReporter
+    reporter: DiagnosticReporter,
   ) {
     val matcher = context.session.redactedPredicateMatcher
     val classRedactedAnnotation = declaration.redactedAnnotation(matcher)
@@ -78,7 +78,7 @@ internal object FirRedactedDeclarationChecker : FirRegularClassChecker() {
       reporter.reportOn(
         classRedactedAnnotation.source,
         KtErrorsRedacted.REDACTED_ON_CLASS_AND_PROPERTY_ERROR,
-        context
+        context,
       )
       redactedProperties.forEach {
         reporter.reportOn(it.source, KtErrorsRedacted.REDACTED_ON_CLASS_AND_PROPERTY_ERROR, context)
@@ -124,7 +124,7 @@ internal object FirRedactedDeclarationChecker : FirRegularClassChecker() {
       reporter.reportOn(
         customToStringFunction.source,
         KtErrorsRedacted.CUSTOM_TO_STRING_IN_REDACTED_CLASS_ERROR,
-        context
+        context,
       )
     }
   }
@@ -134,7 +134,7 @@ internal object FirRedactedDeclarationChecker : FirRegularClassChecker() {
 
   private fun redactedProperties(
     declaration: FirRegularClass,
-    matcher: FirRedactedPredicateMatcher
+    matcher: FirRedactedPredicateMatcher,
   ) =
     declaration.declarations
       .asSequence()
@@ -145,7 +145,7 @@ internal object FirRedactedDeclarationChecker : FirRegularClassChecker() {
 
 internal class FirRedactedPredicateMatcher(
   session: FirSession,
-  private val redactedAnnotation: ClassId
+  private val redactedAnnotation: ClassId,
 ) : FirExtensionSessionComponent(session) {
   companion object {
     fun getFactory(redactedAnnotation: ClassId): Factory {

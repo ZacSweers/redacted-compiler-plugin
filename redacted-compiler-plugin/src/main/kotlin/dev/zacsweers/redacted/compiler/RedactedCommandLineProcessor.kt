@@ -43,7 +43,7 @@ public class RedactedCommandLineProcessor : CommandLineProcessor {
         valueDescription = "<true | false>",
         description = KEY_ENABLED.toString(),
         required = true,
-        allowMultipleOccurrences = false
+        allowMultipleOccurrences = false,
       )
 
     val OPTION_REPLACEMENT_STRING =
@@ -52,7 +52,7 @@ public class RedactedCommandLineProcessor : CommandLineProcessor {
         valueDescription = "String",
         description = KEY_REPLACEMENT_STRING.toString(),
         required = true,
-        allowMultipleOccurrences = false
+        allowMultipleOccurrences = false,
       )
 
     val OPTION_REDACTED_ANNOTATION =
@@ -61,7 +61,7 @@ public class RedactedCommandLineProcessor : CommandLineProcessor {
         valueDescription = "String",
         description = KEY_REDACTED_ANNOTATION.toString(),
         required = true,
-        allowMultipleOccurrences = false
+        allowMultipleOccurrences = false,
       )
   }
 
@@ -73,7 +73,7 @@ public class RedactedCommandLineProcessor : CommandLineProcessor {
   override fun processOption(
     option: AbstractCliOption,
     value: String,
-    configuration: CompilerConfiguration
+    configuration: CompilerConfiguration,
   ): Unit =
     when (option.optionName) {
       "enabled" -> configuration.put(KEY_ENABLED, value.toBoolean())

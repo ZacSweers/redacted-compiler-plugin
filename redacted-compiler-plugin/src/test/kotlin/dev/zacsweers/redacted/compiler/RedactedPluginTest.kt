@@ -58,7 +58,7 @@ class RedactedPluginTest(private val useK2: Boolean) {
       @Retention(BINARY)
       @Target(PROPERTY, CLASS)
       annotation class Redacted
-      """
+      """,
     )
 
   @Test
@@ -74,7 +74,7 @@ class RedactedPluginTest(private val useK2: Boolean) {
 
                   class NonDataClass(@Redacted val a: Int)
                 """
-            .trimIndent()
+            .trimIndent(),
         )
       )
     assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.COMPILATION_ERROR)
@@ -101,7 +101,7 @@ class RedactedPluginTest(private val useK2: Boolean) {
           import dev.zacsweers.redacted.compiler.test.Redacted
 
           enum class NonClass(@Redacted val a: Int)
-          """
+          """,
         )
       )
     assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.COMPILATION_ERROR)
@@ -129,7 +129,7 @@ class RedactedPluginTest(private val useK2: Boolean) {
           data class CustomToString(@Redacted val a: Int) {
             override fun toString(): String = "foo"
           }
-          """
+          """,
         )
       )
     assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.COMPILATION_ERROR)
@@ -160,7 +160,7 @@ class RedactedPluginTest(private val useK2: Boolean) {
 
           @JvmInline
           value class AnnotatedValueProp(@Redacted val a: Int)
-          """
+          """,
         )
       )
     assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.COMPILATION_ERROR)
@@ -187,7 +187,7 @@ class RedactedPluginTest(private val useK2: Boolean) {
 
           @Redacted
           data object CustomToString
-          """
+          """,
         )
       )
     assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.COMPILATION_ERROR)
@@ -214,7 +214,7 @@ class RedactedPluginTest(private val useK2: Boolean) {
 
           @Redacted
           data class DoubleAnnotation(@Redacted val a: Int)
-          """
+          """,
         )
       )
     assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.COMPILATION_ERROR)
@@ -241,7 +241,7 @@ class RedactedPluginTest(private val useK2: Boolean) {
           import dev.zacsweers.redacted.compiler.test.Redacted
 
           data class Test(@Redacted val a: Int)
-          """
+          """,
         )
       )
 
@@ -263,7 +263,7 @@ class RedactedPluginTest(private val useK2: Boolean) {
           import dev.zacsweers.redacted.compiler.test.Redacted
 
           data class Test(@Redacted val a: Int)
-          """
+          """,
         )
       )
     assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.OK)
@@ -283,8 +283,8 @@ class RedactedPluginTest(private val useK2: Boolean) {
           import dev.zacsweers.redacted.compiler.test.Redacted
 
           data class Test(@Redacted val a: Int)
-          """
-        )
+          """,
+        ),
       )
     assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.OK)
     assertThat(result.messages).doesNotContain(LOG_PREFIX)
@@ -307,7 +307,7 @@ class RedactedPluginTest(private val useK2: Boolean) {
 
           @Redacted
           data class SensitiveData(val ssn: String, val birthday: String)
-          """
+          """,
         )
       )
     assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.OK)
@@ -337,7 +337,7 @@ class RedactedPluginTest(private val useK2: Boolean) {
           @Redacted
           @JvmInline
           value class ValueClass(val ssn: String)
-          """
+          """,
         )
       )
     assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.OK)
@@ -392,7 +392,7 @@ class RedactedPluginTest(private val useK2: Boolean) {
               val genericType: T,
               val nullableGenericType: T?
           )
-          """
+          """,
         )
       )
     assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.OK)
@@ -427,7 +427,7 @@ class RedactedPluginTest(private val useK2: Boolean) {
           /* redactedGenericType = */ 7,
           /* redactedNullableGenericType = */ null,
           /* genericType = */ 8,
-          /* nullableGenericType = */ null
+          /* nullableGenericType = */ null,
         )
     assertThat(complex.toString())
       .isEqualTo(
@@ -466,7 +466,7 @@ class RedactedPluginTest(private val useK2: Boolean) {
 
   private fun prepareCompilation(
     replacementString: String? = null,
-    vararg sourceFiles: SourceFile
+    vararg sourceFiles: SourceFile,
   ): KotlinCompilation {
     return KotlinCompilation().apply {
       workingDir = temporaryFolder.root
@@ -479,7 +479,7 @@ class RedactedPluginTest(private val useK2: Boolean) {
           processor.option(OPTION_REPLACEMENT_STRING, replacementString ?: "██"),
           processor.option(
             OPTION_REDACTED_ANNOTATION,
-            "dev/zacsweers/redacted/compiler/test/Redacted"
+            "dev/zacsweers/redacted/compiler/test/Redacted",
           ),
         )
       inheritClassPath = true
@@ -503,7 +503,7 @@ class RedactedPluginTest(private val useK2: Boolean) {
 
   private fun compile(
     replacementString: String? = null,
-    vararg sourceFiles: SourceFile
+    vararg sourceFiles: SourceFile,
   ): CompilationResult {
     return prepareCompilation(replacementString, *sourceFiles).compile()
   }

@@ -58,13 +58,13 @@ internal class RedactedIrVisitor(
   private val pluginContext: IrPluginContext,
   private val redactedAnnotation: FqName,
   private val replacementString: String,
-  private val messageCollector: MessageCollector
+  private val messageCollector: MessageCollector,
 ) : IrElementTransformerVoidWithContext() {
 
   private class Property(
     val ir: IrProperty,
     val isRedacted: Boolean,
-    val parameter: IrValueParameter
+    val parameter: IrValueParameter,
   )
 
   override fun visitFunctionNew(declaration: IrFunction): IrStatement {
@@ -131,7 +131,7 @@ internal class RedactedIrVisitor(
 
   private fun IrFunction.convertToGeneratedToString(
     properties: List<Property>,
-    classIsRedacted: Boolean
+    classIsRedacted: Boolean,
   ) {
     val parent = parent as IrClass
 
@@ -143,7 +143,7 @@ internal class RedactedIrVisitor(
           irClass = parent,
           irFunction = this@convertToGeneratedToString,
           irProperties = properties,
-          classIsRedacted = classIsRedacted
+          classIsRedacted = classIsRedacted,
         )
       }
 
@@ -170,7 +170,7 @@ internal class RedactedIrVisitor(
     irClass: IrClass,
     irFunction: IrFunction,
     irProperties: List<Property>,
-    classIsRedacted: Boolean
+    classIsRedacted: Boolean,
   ) {
     val irConcat = irConcat()
     irConcat.addArgument(irString(irClass.name.asString() + "("))
@@ -193,7 +193,7 @@ internal class RedactedIrVisitor(
             if (param.type.isArray() || param.type.isPrimitiveArray()) {
               irCall(
                   context.irBuiltIns.dataClassArrayMemberToStringSymbol,
-                  context.irBuiltIns.stringType
+                  context.irBuiltIns.stringType,
                 )
                 .apply { putValueArgument(0, irPropertyValue) }
             } else {
@@ -229,7 +229,7 @@ internal class RedactedIrVisitor(
     val sourceRangeInfo =
       fileEntry.getSourceRangeInfo(
         beginOffset = irElement?.startOffset ?: SYNTHETIC_OFFSET,
-        endOffset = irElement?.endOffset ?: SYNTHETIC_OFFSET
+        endOffset = irElement?.endOffset ?: SYNTHETIC_OFFSET,
       )
     return CompilerMessageLocationWithRange.create(
       path = sourceRangeInfo.filePath,
@@ -237,7 +237,7 @@ internal class RedactedIrVisitor(
       columnStart = sourceRangeInfo.startColumnNumber + 1,
       lineEnd = sourceRangeInfo.endLineNumber + 1,
       columnEnd = sourceRangeInfo.endColumnNumber + 1,
-      lineContent = null
+      lineContent = null,
     )!!
   }
 }
