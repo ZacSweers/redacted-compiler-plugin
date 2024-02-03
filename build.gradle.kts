@@ -4,8 +4,6 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmCompilerOptions
 import org.jetbrains.kotlin.gradle.dsl.KotlinProjectExtension
 import org.jetbrains.kotlin.gradle.plugin.KotlinBasePlugin
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootExtension
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
@@ -23,12 +21,6 @@ plugins {
   alias(libs.plugins.mavenPublish) apply false
   alias(libs.plugins.spotless)
   alias(libs.plugins.binaryCompatibilityValidator)
-}
-
-plugins.withType<NodeJsRootPlugin>().configureEach {
-  // 16+ required for Apple Silicon support
-  // https://youtrack.jetbrains.com/issue/KT-49109#focus=Comments-27-5259190.0-0
-  the<NodeJsRootExtension>().nodeVersion = "18.0.0"
 }
 
 apiValidation { ignoredProjects += listOf("sample", "sample-jvm") }
