@@ -18,4 +18,5 @@ package dev.zacsweers.redacted.compiler
 import org.jetbrains.kotlin.ir.declarations.IrDeclarationOrigin
 import org.jetbrains.kotlin.ir.declarations.IrDeclarationOriginImpl
 
-internal val RedactedOrigin: IrDeclarationOrigin = IrDeclarationOriginImpl("GENERATED_REDACTED_CLASS_MEMBER")
+internal val RedactedOrigin: IrDeclarationOrigin =
+  IrDeclarationOriginImpl("GENERATED_REDACTED_CLASS_MEMBER")
