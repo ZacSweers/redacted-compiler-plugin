@@ -1,6 +1,19 @@
 name: CI
 
-on: [ push, pull_request ]
+on:
+  # Only run push on main
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - '**/*.md'
+  # Always run on PRs
+  pull_request:
+    branches: [ main ]
+
+concurrency:
+  group: 'ci-${{ github.event.merge_group.head_ref || github.head_ref }}-${{ github.workflow }}'
+  cancel-in-progress: true
 
 jobs:
   jvm:
@@ -24,10 +37,13 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
-          java-version: '20'
+          java-version: '21'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
 
       - name: Build with Gradle
-        run: ./gradlew clean check -Dkjs=false -Dknative=false --stacktrace -Pstring_concat=${{ matrix.stringConcat }} -Pkotlin.experimental.tryK2=${{ matrix.k2 }}
+        run: ./gradlew check -Dkjs=false -Dknative=false --stacktrace -Pstring_concat=${{ matrix.stringConcat }} -Pkotlin.experimental.tryK2=${{ matrix.k2 }} --quiet
 
   all-platforms:
     runs-on: ${{ matrix.os }}
@@ -48,10 +64,13 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
-          java-version: '20'
+          java-version: '21'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
 
       - name: Test
-        run: ./gradlew check
+        run: ./gradlew check --quiet
 
   publish:
     runs-on: macos-13
@@ -66,7 +85,10 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
-          java-version: '20'
+          java-version: '21'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
 
       - name: Upload snapshot (main only)
         env:

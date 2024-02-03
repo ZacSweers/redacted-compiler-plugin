@@ -16,10 +16,10 @@
 autoService = "1.1.1"
 kotlinCompileTesting = "0.4.0"
 kotlin = "1.9.22"
-jdk = "20"
+jdk = "21"
 jvmTarget = "11"
 ksp = "1.9.22-1.0.17"
-ktfmt = "0.46"
+ktfmt = "0.47"
 moshi = "1.14.0"
 
 [plugins]
