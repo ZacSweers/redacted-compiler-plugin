@@ -51,7 +51,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ macos-11, ubuntu-latest, windows-latest ]
+        os: [ macos-14, ubuntu-latest, windows-latest ]
 
     steps:
       - name: Checkout
@@ -73,7 +73,7 @@ jobs:
         run: ./gradlew check --quiet
 
   publish:
-    runs-on: macos-13
+    runs-on: macos-14
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && github.repository == 'zacsweers/redacted-compiler-plugin'
     needs: [ jvm, all-platforms ]
 
