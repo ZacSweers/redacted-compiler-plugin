@@ -61,7 +61,7 @@ class SmokeTest {
         redactedGenericType = 7,
         redactedNullableGenericType = null,
         genericType = 8,
-        nullableGenericType = null
+        nullableGenericType = null,
       )
 
     assertThat(complex.toString())
@@ -119,6 +119,6 @@ class SmokeTest {
     @Redacted val redactedGenericType: T,
     @Redacted val redactedNullableGenericType: T?,
     val genericType: T,
-    val nullableGenericType: T?
+    val nullableGenericType: T?,
   )
 }
