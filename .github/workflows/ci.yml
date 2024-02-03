@@ -17,7 +17,7 @@ concurrency:
 
 jobs:
   jvm:
-    name: jvm | StringConcat ${{ matrix.stringConcat }} | K2 ${{ matrix.k2 }}
+    name: jvm / StringConcat ${{ matrix.stringConcat }} / K2 ${{ matrix.k2 }}
     runs-on: ubuntu-latest
 
     strategy:
@@ -46,6 +46,7 @@ jobs:
         run: ./gradlew check -Dkjs=false -Dknative=false --stacktrace -Pstring_concat=${{ matrix.stringConcat }} -Pkotlin.experimental.tryK2=${{ matrix.k2 }} --quiet
 
   all-platforms:
+    name: "platform / ${{ matrix.os }}"
     runs-on: ${{ matrix.os }}
 
     strategy:
