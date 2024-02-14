@@ -20,6 +20,7 @@ import org.jetbrains.kotlin.diagnostics.DiagnosticReporter
 import org.jetbrains.kotlin.diagnostics.KtDiagnosticFactory0
 import org.jetbrains.kotlin.diagnostics.reportOn
 import org.jetbrains.kotlin.fir.FirSession
+import org.jetbrains.kotlin.fir.analysis.checkers.MppCheckerKind
 import org.jetbrains.kotlin.fir.analysis.checkers.context.CheckerContext
 import org.jetbrains.kotlin.fir.analysis.checkers.declaration.DeclarationCheckers
 import org.jetbrains.kotlin.fir.analysis.checkers.declaration.FirRegularClassChecker
@@ -61,7 +62,7 @@ internal class FirRedactedCheckers(session: FirSession) : FirAdditionalCheckersE
     }
 }
 
-internal object FirRedactedDeclarationChecker : FirRegularClassChecker() {
+internal object FirRedactedDeclarationChecker : FirRegularClassChecker(MppCheckerKind.Common) {
   override fun check(
     declaration: FirRegularClass,
     context: CheckerContext,
