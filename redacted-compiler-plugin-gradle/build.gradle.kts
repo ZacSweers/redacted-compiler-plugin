@@ -90,5 +90,5 @@ configure<MavenPublishBaseExtension> { publishToMavenCentral(automaticRelease = 
 
 // configuration required to produce unique META-INF/*.kotlin_module file names
 tasks.withType<KotlinCompile>().configureEach {
-  kotlinOptions { moduleName = project.property("POM_ARTIFACT_ID") as String }
+  compilerOptions { moduleName.set(project.property("POM_ARTIFACT_ID") as String) }
 }
