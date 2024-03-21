@@ -1,6 +1,7 @@
 **/build
 .idea
 .gradle
+.kotlin/
 .iml
 .project
 .classpath

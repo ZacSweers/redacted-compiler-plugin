@@ -8,9 +8,11 @@ plugins {
 kotlin {
   jvm {
     compilations.configureEach {
-      compilerOptions.configure {
-        jvmTarget.set(JvmTarget.JVM_11)
-        freeCompilerArgs.add("-Xstring-concat=${project.findProperty("string_concat")}")
+      compileTaskProvider.configure {
+        compilerOptions {
+          jvmTarget.set(JvmTarget.JVM_11)
+          freeCompilerArgs.add("-Xstring-concat=${project.findProperty("string_concat")}")
+        }
       }
     }
   }
