@@ -30,6 +30,7 @@ import org.jetbrains.kotlin.ir.builders.IrBlockBodyBuilder
 import org.jetbrains.kotlin.ir.builders.irBlockBody
 import org.jetbrains.kotlin.ir.builders.irCall
 import org.jetbrains.kotlin.ir.builders.irConcat
+import org.jetbrains.kotlin.ir.builders.irGet
 import org.jetbrains.kotlin.ir.builders.irGetField
 import org.jetbrains.kotlin.ir.builders.irReturn
 import org.jetbrains.kotlin.ir.builders.irString
@@ -41,7 +42,6 @@ import org.jetbrains.kotlin.ir.declarations.IrFunction
 import org.jetbrains.kotlin.ir.declarations.IrProperty
 import org.jetbrains.kotlin.ir.declarations.IrValueParameter
 import org.jetbrains.kotlin.ir.expressions.addArgument
-import org.jetbrains.kotlin.ir.expressions.impl.IrGetValueImpl
 import org.jetbrains.kotlin.ir.symbols.UnsafeDuringIrConstructionAPI
 import org.jetbrains.kotlin.ir.types.isArray
 import org.jetbrains.kotlin.ir.types.isString
@@ -213,10 +213,7 @@ internal class RedactedIrVisitor(
   }
 
   private fun IrBlockBodyBuilder.receiver(irFunction: IrFunction) =
-    IrGetValueImpl(irFunction.dispatchReceiverParameter!!)
-
-  private fun IrBlockBodyBuilder.IrGetValueImpl(irParameter: IrValueParameter) =
-    IrGetValueImpl(startOffset, endOffset, irParameter.type, irParameter.symbol)
+    irGet(irFunction.dispatchReceiverParameter!!)
 
   private fun log(message: String) {
     messageCollector.report(CompilerMessageSeverity.LOGGING, "$LOG_PREFIX $message")
