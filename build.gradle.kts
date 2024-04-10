@@ -23,7 +23,14 @@ plugins {
   alias(libs.plugins.binaryCompatibilityValidator)
 }
 
-apiValidation { ignoredProjects += listOf("sample", "sample-jvm") }
+apiValidation {
+  ignoredProjects += listOf("sample", "sample-jvm")
+  // TODO this isn't working yet
+  //  @OptIn(kotlinx.validation.ExperimentalBCVApi::class)
+  //  klib {
+  //    enabled = true
+  //  }
+}
 
 spotless {
   format("misc") {
