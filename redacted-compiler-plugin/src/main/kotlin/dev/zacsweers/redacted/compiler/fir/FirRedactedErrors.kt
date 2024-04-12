@@ -26,15 +26,15 @@ import org.jetbrains.kotlin.diagnostics.rendering.RootDiagnosticRendererFactory
 //  https://youtrack.jetbrains.com/issue/KT-53510
 internal object FirRedactedErrors {
   val REDACTED_ON_CLASS_AND_PROPERTY_ERROR by
-      error0<PsiElement>(SourceElementPositioningStrategies.NAME_IDENTIFIER)
+    error0<PsiElement>(SourceElementPositioningStrategies.NAME_IDENTIFIER)
   val REDACTED_ON_NON_CLASS_ERROR by
-      error0<PsiElement>(SourceElementPositioningStrategies.NAME_IDENTIFIER)
+    error0<PsiElement>(SourceElementPositioningStrategies.NAME_IDENTIFIER)
   val REDACTED_ON_NON_DATA_OR_VALUE_CLASS_ERROR by
-      error0<PsiElement>(SourceElementPositioningStrategies.NAME_IDENTIFIER)
+    error0<PsiElement>(SourceElementPositioningStrategies.NAME_IDENTIFIER)
   val REDACTED_ON_VALUE_CLASS_PROPERTY_ERROR by
-      error0<PsiElement>(SourceElementPositioningStrategies.NAME_IDENTIFIER)
+    error0<PsiElement>(SourceElementPositioningStrategies.NAME_IDENTIFIER)
   val CUSTOM_TO_STRING_IN_REDACTED_CLASS_ERROR by
-      error0<PsiElement>(SourceElementPositioningStrategies.NAME_IDENTIFIER)
+    error0<PsiElement>(SourceElementPositioningStrategies.NAME_IDENTIFIER)
 
   init {
     RootDiagnosticRendererFactory.registerFactory(FirRedactedErrorMessages)
@@ -43,21 +43,23 @@ internal object FirRedactedErrors {
 
 private object FirRedactedErrorMessages : BaseDiagnosticRendererFactory() {
   override val MAP: KtDiagnosticFactoryToRendererMap =
-      KtDiagnosticFactoryToRendererMap("Redacted").apply {
-        put(
-            FirRedactedErrors.REDACTED_ON_CLASS_AND_PROPERTY_ERROR,
-            "@Redacted should only be applied to the class or its properties, not both.")
-        put(
-            FirRedactedErrors.REDACTED_ON_NON_CLASS_ERROR,
-            "@Redacted is useless on object classes.")
-        put(
-            FirRedactedErrors.REDACTED_ON_NON_DATA_OR_VALUE_CLASS_ERROR,
-            "@Redacted is only supported on data or value classes!")
-        put(
-            FirRedactedErrors.REDACTED_ON_VALUE_CLASS_PROPERTY_ERROR,
-            "@Redacted is redundant on value class properties, just annotate the class instead.")
-        put(
-            FirRedactedErrors.CUSTOM_TO_STRING_IN_REDACTED_CLASS_ERROR,
-            "@Redacted is only supported on data or value classes that do *not* have a custom toString() function. Please remove the function or remove the @Redacted annotations.")
-      }
+    KtDiagnosticFactoryToRendererMap("Redacted").apply {
+      put(
+        FirRedactedErrors.REDACTED_ON_CLASS_AND_PROPERTY_ERROR,
+        "@Redacted should only be applied to the class or its properties, not both.",
+      )
+      put(FirRedactedErrors.REDACTED_ON_NON_CLASS_ERROR, "@Redacted is useless on object classes.")
+      put(
+        FirRedactedErrors.REDACTED_ON_NON_DATA_OR_VALUE_CLASS_ERROR,
+        "@Redacted is only supported on data or value classes!",
+      )
+      put(
+        FirRedactedErrors.REDACTED_ON_VALUE_CLASS_PROPERTY_ERROR,
+        "@Redacted is redundant on value class properties, just annotate the class instead.",
+      )
+      put(
+        FirRedactedErrors.CUSTOM_TO_STRING_IN_REDACTED_CLASS_ERROR,
+        "@Redacted is only supported on data or value classes that do *not* have a custom toString() function. Please remove the function or remove the @Redacted annotations.",
+      )
+    }
 }

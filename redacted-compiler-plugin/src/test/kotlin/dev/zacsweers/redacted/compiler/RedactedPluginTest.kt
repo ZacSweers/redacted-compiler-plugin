@@ -109,7 +109,7 @@ class RedactedPluginTest(private val useK2: Boolean) {
     assertThat(result.messages).contains("NonClass.kt:5:")
     result.assertErrorMessage(
       k1Message = "@Redacted is only supported on data or value classes!",
-      k2Message = "@Redacted is useless on object classes"
+      k2Message = "@Redacted is useless on object classes",
     )
   }
 

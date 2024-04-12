@@ -82,7 +82,11 @@ internal object FirRedactedDeclarationChecker : FirRegularClassChecker(MppChecke
         context,
       )
       redactedProperties.forEach {
-        reporter.reportOn(it.source, FirRedactedErrors.REDACTED_ON_CLASS_AND_PROPERTY_ERROR, context)
+        reporter.reportOn(
+          it.source,
+          FirRedactedErrors.REDACTED_ON_CLASS_AND_PROPERTY_ERROR,
+          context,
+        )
       }
     }
 
