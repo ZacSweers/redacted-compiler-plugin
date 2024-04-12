@@ -78,11 +78,11 @@ internal object FirRedactedDeclarationChecker : FirRegularClassChecker(MppChecke
     if (hasRedactedProperty && classRedactedAnnotation != null) {
       reporter.reportOn(
         classRedactedAnnotation.source,
-        KtErrorsRedacted.REDACTED_ON_CLASS_AND_PROPERTY_ERROR,
+        FirRedactedErrors.REDACTED_ON_CLASS_AND_PROPERTY_ERROR,
         context,
       )
       redactedProperties.forEach {
-        reporter.reportOn(it.source, KtErrorsRedacted.REDACTED_ON_CLASS_AND_PROPERTY_ERROR, context)
+        reporter.reportOn(it.source, FirRedactedErrors.REDACTED_ON_CLASS_AND_PROPERTY_ERROR, context)
       }
     }
 
@@ -94,7 +94,7 @@ internal object FirRedactedDeclarationChecker : FirRegularClassChecker(MppChecke
     }
 
     if (declaration.classKind != ClassKind.CLASS) {
-      report(KtErrorsRedacted.REDACTED_ON_NON_CLASS_ERROR)
+      report(FirRedactedErrors.REDACTED_ON_NON_CLASS_ERROR)
       return
     }
 
@@ -102,12 +102,12 @@ internal object FirRedactedDeclarationChecker : FirRegularClassChecker(MppChecke
       !declaration.hasModifier(KtTokens.DATA_KEYWORD) &&
         !declaration.hasModifier(KtTokens.VALUE_KEYWORD)
     ) {
-      report(KtErrorsRedacted.REDACTED_ON_NON_DATA_OR_VALUE_CLASS_ERROR)
+      report(FirRedactedErrors.REDACTED_ON_NON_DATA_OR_VALUE_CLASS_ERROR)
       return
     }
 
     if (declaration.hasModifier(KtTokens.VALUE_KEYWORD) && hasRedactedProperty) {
-      report(KtErrorsRedacted.REDACTED_ON_VALUE_CLASS_PROPERTY_ERROR)
+      report(FirRedactedErrors.REDACTED_ON_VALUE_CLASS_PROPERTY_ERROR)
       return
     }
 
@@ -123,7 +123,7 @@ internal object FirRedactedDeclarationChecker : FirRegularClassChecker(MppChecke
     if (customToStringFunction != null) {
       reporter.reportOn(
         customToStringFunction.source,
-        KtErrorsRedacted.CUSTOM_TO_STRING_IN_REDACTED_CLASS_ERROR,
+        FirRedactedErrors.CUSTOM_TO_STRING_IN_REDACTED_CLASS_ERROR,
         context,
       )
     }

@@ -107,7 +107,10 @@ class RedactedPluginTest(private val useK2: Boolean) {
     // Full log is something like this:
     // e: /path/to/NonDataClass.kt:5:20 @Redacted is only supported on data classes!
     assertThat(result.messages).contains("NonClass.kt:5:")
-    result.assertErrorMessage("@Redacted is only supported on data or value classes!")
+    result.assertErrorMessage(
+      k1Message = "@Redacted is only supported on data or value classes!",
+      k2Message = "@Redacted is useless on object classes"
+    )
   }
 
   @Test
@@ -493,10 +496,14 @@ class RedactedPluginTest(private val useK2: Boolean) {
     return prepareCompilation(replacementString, *sourceFiles).compile()
   }
 
-  private fun CompilationResult.assertErrorMessage(message: String) {
-    // TODO FIR doesn't support custom error messages yet
-    if (!useK2) {
-      assertThat(messages).contains(message)
+  private fun CompilationResult.assertErrorMessage(
+    k1Message: String,
+    k2Message: String = k1Message,
+  ) {
+    if (useK2) {
+      assertThat(messages).contains(k2Message)
+    } else {
+      assertThat(messages).contains(k1Message)
     }
   }
 }
