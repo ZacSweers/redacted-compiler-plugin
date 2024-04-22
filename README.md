@@ -63,6 +63,9 @@ redacted {
   // classes by '.', e.g. "kotlin/Map.Entry"
   redactedAnnotation = "dev/zacsweers/redacted/annotations/Redacted" // Default
 
+  // Define a custom unredacted annotation.
+  unredactedAnnotation = "dev/zacsweers/redacted/annotations/Unredacted" // Default
+
   // Define whether or not this is enabled. Useful if you want to gate this behind a dynamic
   // build configuration.
   enabled = true // Default
@@ -84,6 +87,42 @@ multiplatform and supports all common JVM, JS, and native targets.
 - Kotlin compiler plugins are not a stable API! Compiled outputs from this plugin _should_ be stable,
 but usage in newer versions of kotlinc are not guaranteed to be stable.
 - IDE support is not currently possible. See [#8](https://github.com/ZacSweers/redacted-compiler-plugin/issues/8).
+
+
+## Advanced Usage
+
+In situations where it is desirable to redact everything and opt-out on certain properties,
+two options are provided:
+
+**Class redaction**
+
+For one-off classes that may contain a large number of fields that should be redacted, you can augment the `@Redacted`
+class behavior:
+
+```kotlin
+@Redacted
+data class User(@Unredacted val name: String, val phoneNumber: String, val ssn: String)
+```
+
+```
+User(name=Bob, phoneNumber=██, ssn=██)
+```
+
+**Supertype redaction**
+
+For situations where you need to enforce that an API only accepts redacted inputs, you can apply `@Redacted` to a
+parent interface.
+
+```kotlin
+@Redacted
+interface RedactedObject
+
+data class User(@Unredacted val name: String, val phoneNumber: String, val ssn: String) : RedactedObject
+```
+
+```
+User(name=Bob, phoneNumber=██, ssn=██)
+```
 
 License
 -------

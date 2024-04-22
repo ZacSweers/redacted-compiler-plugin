@@ -20,6 +20,7 @@ import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
 
 internal const val DEFAULT_ANNOTATION = "dev/zacsweers/redacted/annotations/Redacted"
+internal const val DEFAULT_UNREDACTED_ANNOTATION = "dev/zacsweers/redacted/annotations/Unredacted"
 
 public abstract class RedactedPluginExtension @Inject constructor(objects: ObjectFactory) {
   /**
@@ -31,6 +32,9 @@ public abstract class RedactedPluginExtension @Inject constructor(objects: Objec
    */
   public val redactedAnnotation: Property<String> =
     objects.property(String::class.java).convention(DEFAULT_ANNOTATION)
+
+  public val unredactedAnnotation: Property<String> =
+    objects.property(String::class.java).convention(DEFAULT_UNREDACTED_ANNOTATION)
 
   public val enabled: Property<Boolean> =
     objects.property(Boolean::class.javaObjectType).convention(true)

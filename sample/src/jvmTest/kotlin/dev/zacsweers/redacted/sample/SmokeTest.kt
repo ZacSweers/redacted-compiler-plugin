@@ -17,9 +17,29 @@ package dev.zacsweers.redacted.sample
 
 import com.google.common.truth.Truth.assertThat
 import dev.zacsweers.redacted.annotations.Redacted
+import dev.zacsweers.redacted.annotations.Unredacted
 import org.junit.Test
 
 class SmokeTest {
+
+  @Test
+  fun supertypeRedactedExample() {
+    val data = SuperRedacted("Bob", "2815551234")
+    assertThat(data.toString()).isEqualTo("SuperRedacted(name=Bob, phoneNumber=██)")
+  }
+
+  @Test
+  fun unredactedPropertyOnRedactedClassExample() {
+    val data = RedactedClass("Bob", "2815551234")
+    assertThat(data.toString()).isEqualTo("RedactedClass(name=Bob, phoneNumber=██)")
+  }
+
+  @Redacted interface Base
+
+  data class SuperRedacted(@Unredacted val name: String, val phoneNumber: String) : Base
+
+  @Redacted data class RedactedClass(@Unredacted val name: String, val phoneNumber: String)
+
   @Test
   fun userExample() {
     val user = User("Bob", "2815551234")
