@@ -18,7 +18,6 @@ package dev.zacsweers.redacted.compiler
 import org.jetbrains.kotlin.backend.common.IrElementTransformerVoidWithContext
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
-import org.jetbrains.kotlin.backend.wasm.ir2wasm.allSuperInterfaces
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageLocationWithRange
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSourceLocation
@@ -43,14 +42,7 @@ import org.jetbrains.kotlin.ir.expressions.addArgument
 import org.jetbrains.kotlin.ir.expressions.impl.IrGetValueImpl
 import org.jetbrains.kotlin.ir.types.isArray
 import org.jetbrains.kotlin.ir.types.isString
-import org.jetbrains.kotlin.ir.util.SYNTHETIC_OFFSET
-import org.jetbrains.kotlin.ir.util.file
-import org.jetbrains.kotlin.ir.util.hasAnnotation
-import org.jetbrains.kotlin.ir.util.isInterface
-import org.jetbrains.kotlin.ir.util.isObject
-import org.jetbrains.kotlin.ir.util.isPrimitiveArray
-import org.jetbrains.kotlin.ir.util.primaryConstructor
-import org.jetbrains.kotlin.ir.util.properties
+import org.jetbrains.kotlin.ir.util.*
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.util.OperatorNameConventions
 
@@ -83,8 +75,9 @@ internal class RedactedIrVisitor(
 
       val properties = mutableListOf<Property>()
       val classIsRedacted = declarationParent.hasAnnotation(redactedAnnotation)
-      val supertypeIsRedacted =
-        declarationParent.allSuperInterfaces().any { it.hasAnnotation(redactedAnnotation) }
+      val supertypeIsRedacted by lazy {
+        declarationParent.getAllSuperclasses().any { it.hasAnnotation(redactedAnnotation) }
+      }
       var anyRedacted = false
       var anyUnredacted = false
       for (prop in declarationParent.properties) {
@@ -105,10 +98,6 @@ internal class RedactedIrVisitor(
           declaration.reportError(
             "@Redacted is only supported on data or value classes that do *not* have a custom toString() function. Please remove the function or remove the @Redacted annotations."
           )
-          return super.visitFunctionNew(declaration)
-        }
-        if (declarationParent.isInterface) {
-          // Nothing to do here, only handled when a data class implements this interface
           return super.visitFunctionNew(declaration)
         }
         if (!declarationParent.isData && !declarationParent.isValue) {
@@ -203,7 +192,7 @@ internal class RedactedIrVisitor(
   ) {
     val irConcat = irConcat()
     irConcat.addArgument(irString(irClass.name.asString() + "("))
-    val hasUnredactedProperties = irProperties.any { it.isUnredacted }
+    val hasUnredactedProperties by lazy { irProperties.any { it.isUnredacted } }
     if (classIsRedacted && !hasUnredactedProperties) {
       irConcat.addArgument(irString(replacementString))
     } else {
