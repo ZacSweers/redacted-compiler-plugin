@@ -15,6 +15,7 @@
  */
 package dev.zacsweers.redacted.compiler
 
+import kotlin.LazyThreadSafetyMode.NONE
 import org.jetbrains.kotlin.backend.common.IrElementTransformerVoidWithContext
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
@@ -42,7 +43,14 @@ import org.jetbrains.kotlin.ir.expressions.addArgument
 import org.jetbrains.kotlin.ir.expressions.impl.IrGetValueImpl
 import org.jetbrains.kotlin.ir.types.isArray
 import org.jetbrains.kotlin.ir.types.isString
-import org.jetbrains.kotlin.ir.util.*
+import org.jetbrains.kotlin.ir.util.SYNTHETIC_OFFSET
+import org.jetbrains.kotlin.ir.util.file
+import org.jetbrains.kotlin.ir.util.getAllSuperclasses
+import org.jetbrains.kotlin.ir.util.hasAnnotation
+import org.jetbrains.kotlin.ir.util.isObject
+import org.jetbrains.kotlin.ir.util.isPrimitiveArray
+import org.jetbrains.kotlin.ir.util.primaryConstructor
+import org.jetbrains.kotlin.ir.util.properties
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.util.OperatorNameConventions
 
@@ -75,15 +83,16 @@ internal class RedactedIrVisitor(
 
       val properties = mutableListOf<Property>()
       val classIsRedacted = declarationParent.hasAnnotation(redactedAnnotation)
-      val supertypeIsRedacted by lazy {
-        declarationParent.getAllSuperclasses().any { it.hasAnnotation(redactedAnnotation) }
-      }
+      val supertypeIsRedacted by
+        lazy(NONE) {
+          declarationParent.getAllSuperclasses().any { it.hasAnnotation(redactedAnnotation) }
+        }
       var anyRedacted = false
       var anyUnredacted = false
       for (prop in declarationParent.properties) {
         val parameter = constructorParameters[prop.name.asString()] ?: continue
-        val isRedacted = prop.isRedacted()
-        val isUnredacted = prop.isUnredacted()
+        val isRedacted = prop.isRedacted
+        val isUnredacted = prop.isUnredacted
         if (isRedacted) {
           anyRedacted = true
         }
@@ -170,13 +179,11 @@ internal class RedactedIrVisitor(
     }
   }
 
-  private fun IrProperty.isRedacted(): Boolean {
-    return hasAnnotation(redactedAnnotation)
-  }
+  private val IrProperty.isRedacted: Boolean
+    get() = hasAnnotation(redactedAnnotation)
 
-  private fun IrProperty.isUnredacted(): Boolean {
-    return hasAnnotation(unredactedAnnotation)
-  }
+  private val IrProperty.isUnredacted: Boolean
+    get() = hasAnnotation(unredactedAnnotation)
 
   /**
    * The actual body of the toString method. Copied from
@@ -192,7 +199,7 @@ internal class RedactedIrVisitor(
   ) {
     val irConcat = irConcat()
     irConcat.addArgument(irString(irClass.name.asString() + "("))
-    val hasUnredactedProperties by lazy { irProperties.any { it.isUnredacted } }
+    val hasUnredactedProperties by lazy(NONE) { irProperties.any { it.isUnredacted } }
     if (classIsRedacted && !hasUnredactedProperties) {
       irConcat.addArgument(irString(replacementString))
     } else {
