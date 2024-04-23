@@ -92,13 +92,14 @@ internal object FirRedactedDeclarationChecker : FirRegularClassChecker() {
       }
     }
 
-    if (declaration.classKind != ClassKind.CLASS) {
+    if (declaration.classKind != ClassKind.CLASS && declaration.classKind != ClassKind.INTERFACE) {
       report(KtErrorsRedacted.REDACTED_ON_NON_CLASS_ERROR)
       return
     }
 
     if (
-      !declaration.hasModifier(KtTokens.DATA_KEYWORD) &&
+      declaration.classKind != ClassKind.INTERFACE &&
+        !declaration.hasModifier(KtTokens.DATA_KEYWORD) &&
         !declaration.hasModifier(KtTokens.VALUE_KEYWORD)
     ) {
       report(KtErrorsRedacted.REDACTED_ON_NON_DATA_OR_VALUE_CLASS_ERROR)
