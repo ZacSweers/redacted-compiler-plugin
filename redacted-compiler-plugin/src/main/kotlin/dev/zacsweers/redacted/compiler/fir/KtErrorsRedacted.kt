@@ -26,6 +26,8 @@ internal object KtErrorsRedacted {
     error0<PsiElement>(SourceElementPositioningStrategies.NAME_IDENTIFIER)
   val REDACTED_ON_NON_CLASS_ERROR by
     error0<PsiElement>(SourceElementPositioningStrategies.NAME_IDENTIFIER)
+  val REDACTED_ON_ENUM_CLASS_ERROR by
+    error0<PsiElement>(SourceElementPositioningStrategies.NAME_IDENTIFIER)
   val REDACTED_ON_NON_DATA_OR_VALUE_CLASS_ERROR by
     error0<PsiElement>(SourceElementPositioningStrategies.NAME_IDENTIFIER)
   val REDACTED_ON_VALUE_CLASS_PROPERTY_ERROR by

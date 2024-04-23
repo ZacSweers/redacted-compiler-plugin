@@ -1,3 +1,6 @@
 public abstract interface annotation class dev/zacsweers/redacted/annotations/Redacted : java/lang/annotation/Annotation {
 }
 
+public abstract interface annotation class dev/zacsweers/redacted/annotations/Unredacted : java/lang/annotation/Annotation {
+}
+
