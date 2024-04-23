@@ -14,7 +14,7 @@ _2024-04-23_
     @Unredacted val name: String,
     val phoneNumber: String
   )
-  
+
   // This will redact `phoneNumber` but not `name`
   // User(name=Bob, phoneNumber=██)
   ```
