@@ -1,6 +1,27 @@
 Changelog
 =========
 
+1.8.0
+-----
+
+_2024-04-23_
+
+- **New**: Support for annotating interfaces and non-final classes as `@Redacted`. In this event, all `data`/`value` subclasses will be treated as `@Redacted`.
+- **New**: Support for `@Unredacted` to explicitly opt out of redacting specific properties in otherwise-redacted classes.
+  ```kotlin
+  @Redacted
+  data class User(
+    @Unredacted val name: String,
+    val phoneNumber: String
+  )
+  
+  // This will redact `phoneNumber` but not `name`
+  // User(name=Bob, phoneNumber=██)
+  ```
+- Update Kotlin to `1.9.23`.
+
+Special thanks to [@DrewCarlson](https://github.com/DrewCarlson) for contributing to this release!
+
 1.7.1
 -----
 
