@@ -116,7 +116,7 @@ class RedactedPluginTest(private val useK2: Boolean) {
     assertThat(result.messages).contains("NonClass.kt:")
     // TODO K2 doesn't support custom error messages yet
     if (!useK2) {
-      assertThat(result.messages).contains("@Redacted is only supported on data or value classes!")
+      assertThat(result.messages).contains("@Redacted does not support enum classes or entries!")
     }
   }
 

@@ -29,6 +29,9 @@ import org.jetbrains.kotlin.fir.declarations.FirDeclaration
 import org.jetbrains.kotlin.fir.declarations.FirFunction
 import org.jetbrains.kotlin.fir.declarations.FirProperty
 import org.jetbrains.kotlin.fir.declarations.FirRegularClass
+import org.jetbrains.kotlin.fir.declarations.utils.isEnumClass
+import org.jetbrains.kotlin.fir.declarations.utils.isFinal
+import org.jetbrains.kotlin.fir.declarations.utils.isFromEnumClass
 import org.jetbrains.kotlin.fir.declarations.utils.isOverride
 import org.jetbrains.kotlin.fir.expressions.FirAnnotation
 import org.jetbrains.kotlin.fir.extensions.FirExtensionRegistrar
@@ -97,8 +100,13 @@ internal object FirRedactedDeclarationChecker : FirRegularClassChecker() {
       return
     }
 
+    if (declaration.isFromEnumClass || declaration.isEnumClass) {
+      report(KtErrorsRedacted.REDACTED_ON_ENUM_CLASS_ERROR)
+      return
+    }
+
     if (
-      declaration.classKind != ClassKind.INTERFACE &&
+      declaration.isFinal &&
         !declaration.hasModifier(KtTokens.DATA_KEYWORD) &&
         !declaration.hasModifier(KtTokens.VALUE_KEYWORD)
     ) {

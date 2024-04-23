@@ -25,6 +25,7 @@ import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSourceLocation
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.ir.IrElement
 import org.jetbrains.kotlin.ir.IrStatement
+import org.jetbrains.kotlin.ir.backend.js.utils.isInstantiableEnum
 import org.jetbrains.kotlin.ir.builders.IrBlockBodyBuilder
 import org.jetbrains.kotlin.ir.builders.irBlockBody
 import org.jetbrains.kotlin.ir.builders.irCall
@@ -43,14 +44,7 @@ import org.jetbrains.kotlin.ir.expressions.addArgument
 import org.jetbrains.kotlin.ir.expressions.impl.IrGetValueImpl
 import org.jetbrains.kotlin.ir.types.isArray
 import org.jetbrains.kotlin.ir.types.isString
-import org.jetbrains.kotlin.ir.util.SYNTHETIC_OFFSET
-import org.jetbrains.kotlin.ir.util.file
-import org.jetbrains.kotlin.ir.util.getAllSuperclasses
-import org.jetbrains.kotlin.ir.util.hasAnnotation
-import org.jetbrains.kotlin.ir.util.isObject
-import org.jetbrains.kotlin.ir.util.isPrimitiveArray
-import org.jetbrains.kotlin.ir.util.primaryConstructor
-import org.jetbrains.kotlin.ir.util.properties
+import org.jetbrains.kotlin.ir.util.*
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.util.OperatorNameConventions
 
@@ -109,7 +103,17 @@ internal class RedactedIrVisitor(
           )
           return super.visitFunctionNew(declaration)
         }
-        if (!declarationParent.isData && !declarationParent.isValue) {
+        if (
+          declarationParent.isInstantiableEnum ||
+            declarationParent.isEnumClass ||
+            declarationParent.isEnumEntry
+        ) {
+          declarationParent.reportError("@Redacted does not support enum classes or entries!")
+          return super.visitFunctionNew(declaration)
+        }
+        if (
+          declarationParent.isFinalClass && !declarationParent.isData && !declarationParent.isValue
+        ) {
           declarationParent.reportError("@Redacted is only supported on data or value classes!")
           return super.visitFunctionNew(declaration)
         }
