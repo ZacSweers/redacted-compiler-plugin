@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Zac Sweers
+ * Copyright (C) 2024 Zac Sweers
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,21 @@
 package dev.zacsweers.redacted.annotations
 
 import kotlin.annotation.AnnotationRetention.BINARY
-import kotlin.annotation.AnnotationTarget.CLASS
 import kotlin.annotation.AnnotationTarget.PROPERTY
 
 /**
- * An annotation to indicate that a particular property or class should be redacted in `toString()`
- * implementations. When applied to an interface, subtypes will behave as if the class is annotated
- * with `@Redacted`.
+ * An annotation to indicate that a particular property should NOT be redacted in `toString()`
+ * implementations.
  *
- * For properties, each individual property will be redacted. Example: `User(name=Bob,
- * phoneNumber=██)`
+ * This annotation can be applied to a property in any class that applies `@Redacted` or implements
+ * an interface that applies `@Redacted`.
  *
- * For classes, the entire class will be redacted. Example: `SensitiveData(██)`
+ * Example:
+ * ```
+ * @Redacted
+ * data class User(@Unredacted val name: String, val phoneNumber: String)
+ *
+ * println(user) // User(name = "Bob", phoneNumber = "██")
+ * ```
  */
-@Retention(BINARY) @Target(PROPERTY, CLASS) public annotation class Redacted
+@Retention(BINARY) @Target(PROPERTY) public annotation class Unredacted

@@ -17,9 +17,69 @@ package dev.zacsweers.redacted.sample
 
 import com.google.common.truth.Truth.assertThat
 import dev.zacsweers.redacted.annotations.Redacted
+import dev.zacsweers.redacted.annotations.Unredacted
 import org.junit.Test
 
 class SmokeTest {
+
+  @Test
+  fun abstractExample() {
+    val secretChild = AbstractBase.SecretChild("private")
+    assertThat(secretChild.toString()).isEqualTo("SecretChild(redact=██)")
+  }
+
+  @Test
+  fun unredactedAbstractExample() {
+    val notSoSecretChild = AbstractBase.NotSoSecretChild("public")
+    assertThat(notSoSecretChild.toString()).isEqualTo("NotSoSecretChild(unredacted=public)")
+  }
+
+  @Redacted
+  abstract class AbstractBase {
+
+    data class SecretChild(val redact: String) : AbstractBase()
+
+    data class NotSoSecretChild(@Unredacted val unredacted: String) : AbstractBase()
+  }
+
+  @Test
+  fun sealedExample() {
+    val secretChild = SecretParent.SecretChild("private")
+    assertThat(secretChild.toString()).isEqualTo("SecretChild(redact=██)")
+  }
+
+  @Test
+  fun unredactedSealedExample() {
+    val notSoSecretChild = SecretParent.NotSoSecretChild("public")
+    assertThat(notSoSecretChild.toString()).isEqualTo("NotSoSecretChild(unredacted=public)")
+  }
+
+  @Redacted
+  sealed class SecretParent {
+
+    data class SecretChild(val redact: String) : SecretParent()
+
+    data class NotSoSecretChild(@Unredacted val unredacted: String) : SecretParent()
+  }
+
+  @Test
+  fun supertypeRedactedExample() {
+    val data = SuperRedacted("Bob", "2815551234")
+    assertThat(data.toString()).isEqualTo("SuperRedacted(name=Bob, phoneNumber=██)")
+  }
+
+  @Test
+  fun unredactedPropertyOnRedactedClassExample() {
+    val data = RedactedClass("Bob", "2815551234")
+    assertThat(data.toString()).isEqualTo("RedactedClass(name=Bob, phoneNumber=██)")
+  }
+
+  @Redacted interface Base
+
+  data class SuperRedacted(@Unredacted val name: String, val phoneNumber: String) : Base
+
+  @Redacted data class RedactedClass(@Unredacted val name: String, val phoneNumber: String)
+
   @Test
   fun userExample() {
     val user = User("Bob", "2815551234")

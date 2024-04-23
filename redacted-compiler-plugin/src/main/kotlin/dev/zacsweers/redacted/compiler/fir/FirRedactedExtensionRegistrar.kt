@@ -30,6 +30,9 @@ import org.jetbrains.kotlin.fir.declarations.FirDeclaration
 import org.jetbrains.kotlin.fir.declarations.FirFunction
 import org.jetbrains.kotlin.fir.declarations.FirProperty
 import org.jetbrains.kotlin.fir.declarations.FirRegularClass
+import org.jetbrains.kotlin.fir.declarations.utils.isEnumClass
+import org.jetbrains.kotlin.fir.declarations.utils.isFinal
+import org.jetbrains.kotlin.fir.declarations.utils.isFromEnumClass
 import org.jetbrains.kotlin.fir.declarations.utils.isOverride
 import org.jetbrains.kotlin.fir.expressions.FirAnnotation
 import org.jetbrains.kotlin.fir.extensions.FirExtensionRegistrar
@@ -97,13 +100,19 @@ internal object FirRedactedDeclarationChecker : FirRegularClassChecker(MppChecke
       }
     }
 
-    if (declaration.classKind != ClassKind.CLASS) {
+    if (declaration.classKind != ClassKind.CLASS && declaration.classKind != ClassKind.INTERFACE) {
       report(FirRedactedErrors.REDACTED_ON_NON_CLASS_ERROR)
       return
     }
 
+    if (declaration.isFromEnumClass || declaration.isEnumClass) {
+      report(FirRedactedErrors.REDACTED_ON_ENUM_CLASS_ERROR)
+      return
+    }
+
     if (
-      !declaration.hasModifier(KtTokens.DATA_KEYWORD) &&
+      declaration.isFinal &&
+        !declaration.hasModifier(KtTokens.DATA_KEYWORD) &&
         !declaration.hasModifier(KtTokens.VALUE_KEYWORD)
     ) {
       report(FirRedactedErrors.REDACTED_ON_NON_DATA_OR_VALUE_CLASS_ERROR)

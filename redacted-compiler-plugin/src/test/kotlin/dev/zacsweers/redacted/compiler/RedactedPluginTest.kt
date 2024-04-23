@@ -25,6 +25,7 @@ import com.tschuchort.compiletesting.SourceFile.Companion.kotlin
 import dev.zacsweers.redacted.compiler.RedactedCommandLineProcessor.Companion.OPTION_ENABLED
 import dev.zacsweers.redacted.compiler.RedactedCommandLineProcessor.Companion.OPTION_REDACTED_ANNOTATION
 import dev.zacsweers.redacted.compiler.RedactedCommandLineProcessor.Companion.OPTION_REPLACEMENT_STRING
+import dev.zacsweers.redacted.compiler.RedactedCommandLineProcessor.Companion.OPTION_UNREDACTED_ANNOTATION
 import org.jetbrains.kotlin.compiler.plugin.CliOption
 import org.jetbrains.kotlin.compiler.plugin.CommandLineProcessor
 import org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi
@@ -60,6 +61,10 @@ class RedactedPluginTest(private val useK2: Boolean) {
       @Retention(BINARY)
       @Target(PROPERTY, CLASS)
       annotation class Redacted
+
+      @Retention(BINARY)
+      @Target(PROPERTY)
+      annotation class Unredacted
       """,
     )
 
@@ -108,7 +113,7 @@ class RedactedPluginTest(private val useK2: Boolean) {
     // e: /path/to/NonDataClass.kt:5:20 @Redacted is only supported on data classes!
     assertThat(result.messages).contains("NonClass.kt:5:")
     result.assertErrorMessage(
-      k1Message = "@Redacted is only supported on data or value classes!",
+      k1Message = "@Redacted does not support enum classes or entries!",
       k2Message = "@Redacted is useless on object classes",
     )
   }
@@ -466,6 +471,10 @@ class RedactedPluginTest(private val useK2: Boolean) {
           processor.option(
             OPTION_REDACTED_ANNOTATION,
             "dev/zacsweers/redacted/compiler/test/Redacted",
+          ),
+          processor.option(
+            OPTION_UNREDACTED_ANNOTATION,
+            "dev/zacsweers/redacted/compiler/test/Unredacted",
           ),
         )
       inheritClassPath = true

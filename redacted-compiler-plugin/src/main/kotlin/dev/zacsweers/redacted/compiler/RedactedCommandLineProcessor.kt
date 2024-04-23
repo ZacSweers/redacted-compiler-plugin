@@ -31,6 +31,10 @@ internal val KEY_REDACTED_ANNOTATION =
   CompilerConfigurationKey<String>(
     "The redacted marker annotation (i.e. com/example/Redacted) to look for when redacting"
   )
+internal val KEY_UNREDACTED_ANNOTATION =
+  CompilerConfigurationKey<String>(
+    "The unredacted marker annotation (i.e. com/example/Unredacted) to look for when redacting"
+  )
 
 @OptIn(ExperimentalCompilerApi::class)
 @AutoService(CommandLineProcessor::class)
@@ -63,12 +67,26 @@ public class RedactedCommandLineProcessor : CommandLineProcessor {
         required = true,
         allowMultipleOccurrences = false,
       )
+
+    val OPTION_UNREDACTED_ANNOTATION =
+      CliOption(
+        optionName = "unredactedAnnotation",
+        valueDescription = "String",
+        description = KEY_UNREDACTED_ANNOTATION.toString(),
+        required = true,
+        allowMultipleOccurrences = false,
+      )
   }
 
   override val pluginId: String = "dev.zacsweers.redacted.compiler"
 
   override val pluginOptions: Collection<AbstractCliOption> =
-    listOf(OPTION_ENABLED, OPTION_REPLACEMENT_STRING, OPTION_REDACTED_ANNOTATION)
+    listOf(
+      OPTION_ENABLED,
+      OPTION_REPLACEMENT_STRING,
+      OPTION_REDACTED_ANNOTATION,
+      OPTION_UNREDACTED_ANNOTATION,
+    )
 
   override fun processOption(
     option: AbstractCliOption,
@@ -79,6 +97,7 @@ public class RedactedCommandLineProcessor : CommandLineProcessor {
       "enabled" -> configuration.put(KEY_ENABLED, value.toBoolean())
       "replacementString" -> configuration.put(KEY_REPLACEMENT_STRING, value)
       "redactedAnnotation" -> configuration.put(KEY_REDACTED_ANNOTATION, value)
+      "unredactedAnnotation" -> configuration.put(KEY_UNREDACTED_ANNOTATION, value)
       else -> error("Unknown plugin option: ${option.optionName}")
     }
 }

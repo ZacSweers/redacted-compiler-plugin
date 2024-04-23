@@ -45,6 +45,7 @@ public class RedactedGradleSubplugin : KotlinCompilerPluginSupportPlugin {
     val project = kotlinCompilation.target.project
     val extension = project.extensions.getByType(RedactedPluginExtension::class.java)
     val annotation = extension.redactedAnnotation
+    val unredactedAnnotation = extension.unredactedAnnotation
 
     // Default annotation is used, so add it as a dependency
     // Note only multiplatform, jvm/android, and js are supported. Anyone else is on their own.
@@ -62,6 +63,7 @@ public class RedactedGradleSubplugin : KotlinCompilerPluginSupportPlugin {
         SubpluginOption(key = "enabled", value = enabled.toString()),
         SubpluginOption(key = "replacementString", value = extension.replacementString.get()),
         SubpluginOption(key = "redactedAnnotation", value = annotation.get()),
+        SubpluginOption(key = "unredactedAnnotation", value = unredactedAnnotation.get()),
       )
     }
   }

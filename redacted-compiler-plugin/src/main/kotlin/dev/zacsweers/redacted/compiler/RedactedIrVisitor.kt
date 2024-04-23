@@ -17,6 +17,7 @@
 
 package dev.zacsweers.redacted.compiler
 
+import kotlin.LazyThreadSafetyMode.NONE
 import org.jetbrains.kotlin.backend.common.IrElementTransformerVoidWithContext
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
@@ -26,6 +27,7 @@ import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSourceLocation
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.ir.IrElement
 import org.jetbrains.kotlin.ir.IrStatement
+import org.jetbrains.kotlin.ir.backend.js.utils.isInstantiableEnum
 import org.jetbrains.kotlin.ir.builders.IrBlockBodyBuilder
 import org.jetbrains.kotlin.ir.builders.irBlockBody
 import org.jetbrains.kotlin.ir.builders.irCall
@@ -47,7 +49,11 @@ import org.jetbrains.kotlin.ir.types.isArray
 import org.jetbrains.kotlin.ir.types.isString
 import org.jetbrains.kotlin.ir.util.SYNTHETIC_OFFSET
 import org.jetbrains.kotlin.ir.util.file
+import org.jetbrains.kotlin.ir.util.getAllSuperclasses
 import org.jetbrains.kotlin.ir.util.hasAnnotation
+import org.jetbrains.kotlin.ir.util.isEnumClass
+import org.jetbrains.kotlin.ir.util.isEnumEntry
+import org.jetbrains.kotlin.ir.util.isFinalClass
 import org.jetbrains.kotlin.ir.util.isObject
 import org.jetbrains.kotlin.ir.util.isPrimitiveArray
 import org.jetbrains.kotlin.ir.util.primaryConstructor
@@ -60,6 +66,7 @@ internal const val LOG_PREFIX = "*** REDACTED (IR):"
 internal class RedactedIrVisitor(
   private val pluginContext: IrPluginContext,
   private val redactedAnnotation: FqName,
+  private val unredactedAnnotation: FqName,
   private val replacementString: String,
   private val messageCollector: MessageCollector,
 ) : IrElementTransformerVoidWithContext() {
@@ -67,6 +74,7 @@ internal class RedactedIrVisitor(
   private class Property(
     val ir: IrProperty,
     val isRedacted: Boolean,
+    val isUnredacted: Boolean,
     val parameter: IrValueParameter,
   )
 
@@ -82,23 +90,43 @@ internal class RedactedIrVisitor(
 
       val properties = mutableListOf<Property>()
       val classIsRedacted = declarationParent.hasAnnotation(redactedAnnotation)
+      val supertypeIsRedacted by
+        lazy(NONE) {
+          declarationParent.getAllSuperclasses().any { it.hasAnnotation(redactedAnnotation) }
+        }
       var anyRedacted = false
+      var anyUnredacted = false
       for (prop in declarationParent.properties) {
         val parameter = constructorParameters[prop.name.asString()] ?: continue
-        val isRedacted = prop.isRedacted()
+        val isRedacted = prop.isRedacted
+        val isUnredacted = prop.isUnredacted
         if (isRedacted) {
           anyRedacted = true
         }
-        properties += Property(prop, isRedacted, parameter)
+        if (isUnredacted) {
+          anyUnredacted = true
+        }
+        properties += Property(prop, isRedacted, isUnredacted, parameter)
       }
-      if (classIsRedacted || anyRedacted) {
+
+      if (classIsRedacted || supertypeIsRedacted || anyRedacted) {
         if (declaration.origin == IrDeclarationOrigin.DEFINED) {
           declaration.reportError(
             "@Redacted is only supported on data or value classes that do *not* have a custom toString() function. Please remove the function or remove the @Redacted annotations."
           )
           return super.visitFunctionNew(declaration)
         }
-        if (!declarationParent.isData && !declarationParent.isValue) {
+        if (
+          declarationParent.isInstantiableEnum ||
+            declarationParent.isEnumClass ||
+            declarationParent.isEnumEntry
+        ) {
+          declarationParent.reportError("@Redacted does not support enum classes or entries!")
+          return super.visitFunctionNew(declaration)
+        }
+        if (
+          declarationParent.isFinalClass && !declarationParent.isData && !declarationParent.isValue
+        ) {
           declarationParent.reportError("@Redacted is only supported on data or value classes!")
           return super.visitFunctionNew(declaration)
         }
@@ -112,13 +140,19 @@ internal class RedactedIrVisitor(
           declarationParent.reportError("@Redacted is useless on object classes.")
           return super.visitFunctionNew(declaration)
         }
-        if (!(classIsRedacted xor anyRedacted)) {
+        if (anyUnredacted && (!classIsRedacted && !supertypeIsRedacted)) {
+          declarationParent.reportError(
+            "@Unredacted should only be applied to properties in a class or a supertype is marked @Redacted."
+          )
+          return super.visitFunctionNew(declaration)
+        }
+        if (!(classIsRedacted xor anyRedacted xor supertypeIsRedacted)) {
           declarationParent.reportError(
             "@Redacted should only be applied to the class or its properties, not both."
           )
           return super.visitFunctionNew(declaration)
         }
-        declaration.convertToGeneratedToString(properties, classIsRedacted)
+        declaration.convertToGeneratedToString(properties, classIsRedacted, supertypeIsRedacted)
       }
     }
 
@@ -135,6 +169,7 @@ internal class RedactedIrVisitor(
   private fun IrFunction.convertToGeneratedToString(
     properties: List<Property>,
     classIsRedacted: Boolean,
+    supertypeIsRedacted: Boolean,
   ) {
     val parent = parent as IrClass
 
@@ -147,6 +182,7 @@ internal class RedactedIrVisitor(
           irFunction = this@convertToGeneratedToString,
           irProperties = properties,
           classIsRedacted = classIsRedacted,
+          supertypeIsRedacted = supertypeIsRedacted,
         )
       }
 
@@ -160,9 +196,11 @@ internal class RedactedIrVisitor(
     }
   }
 
-  private fun IrProperty.isRedacted(): Boolean {
-    return hasAnnotation(redactedAnnotation)
-  }
+  private val IrProperty.isRedacted: Boolean
+    get() = hasAnnotation(redactedAnnotation)
+
+  private val IrProperty.isUnredacted: Boolean
+    get() = hasAnnotation(unredactedAnnotation)
 
   /**
    * The actual body of the toString method. Copied from
@@ -174,10 +212,12 @@ internal class RedactedIrVisitor(
     irFunction: IrFunction,
     irProperties: List<Property>,
     classIsRedacted: Boolean,
+    supertypeIsRedacted: Boolean,
   ) {
     val irConcat = irConcat()
     irConcat.addArgument(irString(irClass.name.asString() + "("))
-    if (classIsRedacted) {
+    val hasUnredactedProperties by lazy(NONE) { irProperties.any { it.isUnredacted } }
+    if (classIsRedacted && !hasUnredactedProperties) {
       irConcat.addArgument(irString(replacementString))
     } else {
       var first = true
@@ -185,8 +225,11 @@ internal class RedactedIrVisitor(
         if (!first) irConcat.addArgument(irString(", "))
 
         irConcat.addArgument(irString(property.ir.name.asString() + "="))
-
-        if (property.isRedacted) {
+        val redactProperty =
+          property.isRedacted ||
+            (classIsRedacted && !property.isUnredacted) ||
+            (supertypeIsRedacted && !property.isUnredacted)
+        if (redactProperty) {
           irConcat.addArgument(irString(replacementString))
         } else {
           val irPropertyValue = irGetField(receiver(irFunction), property.ir.backingField!!)

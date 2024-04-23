@@ -40,14 +40,22 @@ public class RedactedComponentRegistrar : CompilerPluginRegistrar() {
       configuration.get(CLIConfigurationKeys.MESSAGE_COLLECTOR_KEY, MessageCollector.NONE)
     val replacementString = checkNotNull(configuration[KEY_REPLACEMENT_STRING])
     val redactedAnnotation = checkNotNull(configuration[KEY_REDACTED_ANNOTATION])
+    val unredactedAnnotation = checkNotNull(configuration[KEY_UNREDACTED_ANNOTATION])
     val redactedAnnotationClassId = ClassId.fromString(redactedAnnotation)
     val fqRedactedAnnotation = redactedAnnotationClassId.asSingleFqName()
+    val unredactedAnnotationClassId = ClassId.fromString(unredactedAnnotation)
+    val fqUnredactedAnnotation = unredactedAnnotationClassId.asSingleFqName()
 
     FirExtensionRegistrarAdapter.registerExtension(
       FirRedactedExtensionRegistrar(redactedAnnotationClassId)
     )
     IrGenerationExtension.registerExtension(
-      RedactedIrGenerationExtension(messageCollector, replacementString, fqRedactedAnnotation)
+      RedactedIrGenerationExtension(
+        messageCollector,
+        replacementString,
+        fqRedactedAnnotation,
+        fqUnredactedAnnotation,
+      )
     )
   }
 }
