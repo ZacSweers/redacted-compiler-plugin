@@ -87,6 +87,7 @@ internal class RedactedIrVisitor(
 
       val properties = mutableListOf<Property>()
       val classIsRedacted = declarationParent.hasAnnotation(redactedAnnotation)
+      val classIsUnredacted = declarationParent.hasAnnotation(unredactedAnnotation)
       val supertypeIsRedacted by
         lazy(NONE) {
           declarationParent.getAllSuperclasses().any { it.hasAnnotation(redactedAnnotation) }
@@ -106,7 +107,7 @@ internal class RedactedIrVisitor(
         properties += Property(prop, isRedacted, isUnredacted, parameter)
       }
 
-      if (classIsRedacted || supertypeIsRedacted || anyRedacted) {
+      if (classIsRedacted || supertypeIsRedacted || classIsUnredacted || anyRedacted) {
         if (declaration.origin == IrDeclarationOrigin.DEFINED) {
           declaration.reportError(
             "@Redacted is only supported on data or value classes that do *not* have a custom toString() function. Please remove the function or remove the @Redacted annotations."
@@ -134,7 +135,24 @@ internal class RedactedIrVisitor(
           return super.visitFunctionNew(declaration)
         }
         if (declarationParent.isObject) {
-          declarationParent.reportError("@Redacted is useless on object classes.")
+          if (!supertypeIsRedacted) {
+            declarationParent.reportError("@Redacted is useless on object classes.")
+            return super.visitFunctionNew(declaration)
+          } else if (classIsUnredacted) {
+            declarationParent.reportError("@Unredacted is useless on object classes.")
+            return super.visitFunctionNew(declaration)
+          }
+        }
+        if (classIsRedacted && classIsUnredacted) {
+          declarationParent.reportError(
+            "@Redacted and @Unredacted cannot be applied to a single class."
+          )
+          return super.visitFunctionNew(declaration)
+        }
+        if (classIsUnredacted && !supertypeIsRedacted) {
+          declarationParent.reportError(
+            "@Unredacted cannot be applied to a class unless a supertype is marked @Redacted."
+          )
           return super.visitFunctionNew(declaration)
         }
         if (anyUnredacted && (!classIsRedacted && !supertypeIsRedacted)) {
@@ -149,7 +167,12 @@ internal class RedactedIrVisitor(
           )
           return super.visitFunctionNew(declaration)
         }
-        declaration.convertToGeneratedToString(properties, classIsRedacted, supertypeIsRedacted)
+        declaration.convertToGeneratedToString(
+          properties,
+          classIsRedacted,
+          classIsUnredacted,
+          supertypeIsRedacted,
+        )
       }
     }
 
@@ -166,6 +189,7 @@ internal class RedactedIrVisitor(
   private fun IrFunction.convertToGeneratedToString(
     properties: List<Property>,
     classIsRedacted: Boolean,
+    classIsUnredacted: Boolean,
     supertypeIsRedacted: Boolean,
   ) {
     val parent = parent as IrClass
@@ -179,6 +203,7 @@ internal class RedactedIrVisitor(
           irFunction = this@convertToGeneratedToString,
           irProperties = properties,
           classIsRedacted = classIsRedacted,
+          classIsUnredacted = classIsUnredacted,
           supertypeIsRedacted = supertypeIsRedacted,
         )
       }
@@ -209,12 +234,13 @@ internal class RedactedIrVisitor(
     irFunction: IrFunction,
     irProperties: List<Property>,
     classIsRedacted: Boolean,
+    classIsUnredacted: Boolean,
     supertypeIsRedacted: Boolean,
   ) {
     val irConcat = irConcat()
     irConcat.addArgument(irString(irClass.name.asString() + "("))
     val hasUnredactedProperties by lazy(NONE) { irProperties.any { it.isUnredacted } }
-    if (classIsRedacted && !hasUnredactedProperties) {
+    if (classIsRedacted && !classIsUnredacted && !hasUnredactedProperties) {
       irConcat.addArgument(irString(replacementString))
     } else {
       var first = true
@@ -225,7 +251,7 @@ internal class RedactedIrVisitor(
         val redactProperty =
           property.isRedacted ||
             (classIsRedacted && !property.isUnredacted) ||
-            (supertypeIsRedacted && !property.isUnredacted)
+            (supertypeIsRedacted && !classIsUnredacted && !property.isUnredacted)
         if (redactProperty) {
           irConcat.addArgument(irString(replacementString))
         } else {

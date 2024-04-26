@@ -34,12 +34,27 @@ class SmokeTest {
     assertThat(notSoSecretChild.toString()).isEqualTo("NotSoSecretChild(unredacted=public)")
   }
 
+  @Test
+  fun unredactedClassAbstractExample() {
+    val notAtAllSecretChild = AbstractBase.NotAtAllSecretChild("public")
+    assertThat(notAtAllSecretChild.toString()).isEqualTo("NotAtAllSecretChild(unredacted=public)")
+  }
+
+  @Test
+  fun redactedObjectAbstractExample() {
+    assertThat(AbstractBase.ProplessChild.toString()).isEqualTo("ProplessChild()")
+  }
+
   @Redacted
   abstract class AbstractBase {
 
     data class SecretChild(val redact: String) : AbstractBase()
 
     data class NotSoSecretChild(@Unredacted val unredacted: String) : AbstractBase()
+
+    @Unredacted data class NotAtAllSecretChild(val unredacted: String) : AbstractBase()
+
+    data object ProplessChild : AbstractBase()
   }
 
   @Test
@@ -54,12 +69,27 @@ class SmokeTest {
     assertThat(notSoSecretChild.toString()).isEqualTo("NotSoSecretChild(unredacted=public)")
   }
 
+  @Test
+  fun unredactedClassSealedExample() {
+    val notAtAllSecretChild = SecretParent.NotAtAllSecretChild("public")
+    assertThat(notAtAllSecretChild.toString()).isEqualTo("NotAtAllSecretChild(unredacted=public)")
+  }
+
+  @Test
+  fun redactedObjectSealedExample() {
+    assertThat(SecretParent.ProplessChild.toString()).isEqualTo("ProplessChild()")
+  }
+
   @Redacted
   sealed class SecretParent {
 
     data class SecretChild(val redact: String) : SecretParent()
 
     data class NotSoSecretChild(@Unredacted val unredacted: String) : SecretParent()
+
+    @Unredacted data class NotAtAllSecretChild(val unredacted: String) : AbstractBase()
+
+    data object ProplessChild : SecretParent()
   }
 
   @Test
