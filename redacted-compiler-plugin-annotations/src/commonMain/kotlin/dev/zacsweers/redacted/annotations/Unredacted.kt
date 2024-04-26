@@ -16,6 +16,7 @@
 package dev.zacsweers.redacted.annotations
 
 import kotlin.annotation.AnnotationRetention.BINARY
+import kotlin.annotation.AnnotationTarget.CLASS
 import kotlin.annotation.AnnotationTarget.PROPERTY
 
 /**
@@ -33,4 +34,4 @@ import kotlin.annotation.AnnotationTarget.PROPERTY
  * println(user) // User(name = "Bob", phoneNumber = "██")
  * ```
  */
-@Retention(BINARY) @Target(PROPERTY) public annotation class Unredacted
+@Retention(BINARY) @Target(PROPERTY, CLASS) public annotation class Unredacted
