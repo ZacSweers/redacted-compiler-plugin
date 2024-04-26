@@ -1,6 +1,17 @@
 Changelog
 =========
 
+1.8.1
+-----
+
+_2024-04-26_
+
+- Allow `@Unredacted` to be applied to a class, only when a supertype is `@Redacted`
+- Allow `@Redacted` supertypes to be inherited by objects, only when the child does not implement a custom `toString` method
+- Fail compilation when `@Unredacted` and `@Redacted` are applied to the same class
+
+Special thanks to [@DrewCarlson](https://github.com/DrewCarlson) for contributing to this release!
+
 1.8.0
 -----
 
