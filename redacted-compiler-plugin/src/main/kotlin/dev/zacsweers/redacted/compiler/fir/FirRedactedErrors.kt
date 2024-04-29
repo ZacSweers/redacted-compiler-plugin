@@ -17,7 +17,7 @@ package dev.zacsweers.redacted.compiler.fir
 
 import org.jetbrains.kotlin.com.intellij.psi.PsiElement
 import org.jetbrains.kotlin.diagnostics.KtDiagnosticFactoryToRendererMap
-import org.jetbrains.kotlin.diagnostics.SourceElementPositioningStrategies
+import org.jetbrains.kotlin.diagnostics.SourceElementPositioningStrategies.NAME_IDENTIFIER
 import org.jetbrains.kotlin.diagnostics.error0
 import org.jetbrains.kotlin.diagnostics.rendering.BaseDiagnosticRendererFactory
 import org.jetbrains.kotlin.diagnostics.rendering.RootDiagnosticRendererFactory
@@ -25,18 +25,12 @@ import org.jetbrains.kotlin.diagnostics.rendering.RootDiagnosticRendererFactory
 // TODO expose custom error messages when K2 supports it:
 //  https://youtrack.jetbrains.com/issue/KT-53510
 internal object FirRedactedErrors {
-  val REDACTED_ON_CLASS_AND_PROPERTY_ERROR by
-    error0<PsiElement>(SourceElementPositioningStrategies.NAME_IDENTIFIER)
-  val REDACTED_ON_NON_CLASS_ERROR by
-    error0<PsiElement>(SourceElementPositioningStrategies.NAME_IDENTIFIER)
-  val REDACTED_ON_ENUM_CLASS_ERROR by
-    error0<PsiElement>(SourceElementPositioningStrategies.NAME_IDENTIFIER)
-  val REDACTED_ON_NON_DATA_OR_VALUE_CLASS_ERROR by
-    error0<PsiElement>(SourceElementPositioningStrategies.NAME_IDENTIFIER)
-  val REDACTED_ON_VALUE_CLASS_PROPERTY_ERROR by
-    error0<PsiElement>(SourceElementPositioningStrategies.NAME_IDENTIFIER)
-  val CUSTOM_TO_STRING_IN_REDACTED_CLASS_ERROR by
-    error0<PsiElement>(SourceElementPositioningStrategies.NAME_IDENTIFIER)
+  val REDACTED_ON_CLASS_AND_PROPERTY_ERROR by error0<PsiElement>(NAME_IDENTIFIER)
+  val REDACTED_ON_NON_CLASS_ERROR by error0<PsiElement>(NAME_IDENTIFIER)
+  val REDACTED_ON_ENUM_CLASS_ERROR by error0<PsiElement>(NAME_IDENTIFIER)
+  val REDACTED_ON_NON_DATA_OR_VALUE_CLASS_ERROR by error0<PsiElement>(NAME_IDENTIFIER)
+  val REDACTED_ON_VALUE_CLASS_PROPERTY_ERROR by error0<PsiElement>(NAME_IDENTIFIER)
+  val CUSTOM_TO_STRING_IN_REDACTED_CLASS_ERROR by error0<PsiElement>(NAME_IDENTIFIER)
 
   init {
     RootDiagnosticRendererFactory.registerFactory(FirRedactedErrorMessages)
