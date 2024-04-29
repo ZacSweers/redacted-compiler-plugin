@@ -73,12 +73,13 @@ internal object FirRedactedDeclarationChecker : FirRegularClassChecker(MppChecke
   ) {
     val matcher = context.session.redactedPredicateMatcher
     val classRedactedAnnotation = declaration.redactedAnnotation(matcher)
+    val classIsRedacted = classRedactedAnnotation != null
     val redactedProperties = redactedProperties(declaration, matcher)
     val hasRedactedProperty = redactedProperties.isNotEmpty()
-    val hasRedactions = classRedactedAnnotation != null || hasRedactedProperty
+    val hasRedactions = classIsRedacted || hasRedactedProperty
     if (!hasRedactions) return
 
-    if (hasRedactedProperty && classRedactedAnnotation != null) {
+    if (hasRedactedProperty && classIsRedacted) {
       reporter.reportOn(
         classRedactedAnnotation.source,
         FirRedactedErrors.REDACTED_ON_CLASS_AND_PROPERTY_ERROR,
