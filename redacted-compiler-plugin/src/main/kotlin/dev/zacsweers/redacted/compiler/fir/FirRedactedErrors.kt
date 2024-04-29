@@ -15,6 +15,7 @@
  */
 package dev.zacsweers.redacted.compiler.fir
 
+import dev.zacsweers.redacted.compiler.ErrorMessages
 import org.jetbrains.kotlin.com.intellij.psi.PsiElement
 import org.jetbrains.kotlin.diagnostics.KtDiagnosticFactoryToRendererMap
 import org.jetbrains.kotlin.diagnostics.SourceElementPositioningStrategies.NAME_IDENTIFIER
@@ -42,20 +43,24 @@ private object FirRedactedErrorMessages : BaseDiagnosticRendererFactory() {
     KtDiagnosticFactoryToRendererMap("Redacted").apply {
       put(
         FirRedactedErrors.REDACTED_ON_CLASS_AND_PROPERTY_ERROR,
-        "@Redacted should only be applied to the class or its properties, not both.",
+        ErrorMessages.REDACTED_ON_CLASS_AND_PROPERTY_ERROR,
       )
-      put(FirRedactedErrors.REDACTED_ON_NON_CLASS_ERROR, "@Redacted is useless on object classes.")
+      put(FirRedactedErrors.REDACTED_ON_NON_CLASS_ERROR, ErrorMessages.REDACTED_ON_OBJECT_ERROR)
       put(
         FirRedactedErrors.REDACTED_ON_NON_DATA_OR_VALUE_CLASS_ERROR,
-        "@Redacted is only supported on data or value classes!",
+        ErrorMessages.REDACTED_ON_NON_DATA_OR_VALUE_CLASS_ERROR,
       )
       put(
         FirRedactedErrors.REDACTED_ON_VALUE_CLASS_PROPERTY_ERROR,
-        "@Redacted is redundant on value class properties, just annotate the class instead.",
+        ErrorMessages.REDACTED_ON_VALUE_CLASS_PROPERTY_ERROR,
       )
       put(
         FirRedactedErrors.CUSTOM_TO_STRING_IN_REDACTED_CLASS_ERROR,
-        "@Redacted is only supported on data or value classes that do *not* have a custom toString() function. Please remove the function or remove the @Redacted annotations.",
+        ErrorMessages.CUSTOM_TO_STRING_IN_REDACTED_CLASS_ERROR,
+      )
+      put(
+        FirRedactedErrors.REDACTED_ON_ENUM_CLASS_ERROR,
+        ErrorMessages.REDACTED_ON_ENUM_CLASS_ERROR,
       )
     }
 }

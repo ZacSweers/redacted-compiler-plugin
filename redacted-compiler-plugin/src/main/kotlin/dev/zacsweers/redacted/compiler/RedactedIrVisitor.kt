@@ -112,9 +112,7 @@ internal class RedactedIrVisitor(
 
       if (classIsRedacted || supertypeIsRedacted || classIsUnredacted || anyRedacted) {
         if (declaration.origin == IrDeclarationOrigin.DEFINED) {
-          declaration.reportError(
-            "@Redacted is only supported on data or value classes that do *not* have a custom toString() function. Please remove the function or remove the @Redacted annotations."
-          )
+          declaration.reportError(ErrorMessages.CUSTOM_TO_STRING_IN_REDACTED_CLASS_ERROR)
           return super.visitFunctionNew(declaration)
         }
         if (
@@ -122,52 +120,42 @@ internal class RedactedIrVisitor(
             declarationParent.isEnumClass ||
             declarationParent.isEnumEntry
         ) {
-          declarationParent.reportError("@Redacted does not support enum classes or entries!")
+          declarationParent.reportError(ErrorMessages.REDACTED_ON_ENUM_CLASS_ERROR)
           return super.visitFunctionNew(declaration)
         }
         if (
           declarationParent.isFinalClass && !declarationParent.isData && !declarationParent.isValue
         ) {
-          declarationParent.reportError("@Redacted is only supported on data or value classes!")
+          declarationParent.reportError(ErrorMessages.REDACTED_ON_NON_DATA_OR_VALUE_CLASS_ERROR)
           return super.visitFunctionNew(declaration)
         }
         if (declarationParent.isValue && !classIsRedacted) {
-          declarationParent.reportError(
-            "@Redacted is redundant on value class properties, just annotate the class instead."
-          )
+          declarationParent.reportError(ErrorMessages.REDACTED_ON_VALUE_CLASS_PROPERTY_ERROR)
           return super.visitFunctionNew(declaration)
         }
         if (declarationParent.isObject) {
           if (!supertypeIsRedacted) {
-            declarationParent.reportError("@Redacted is useless on object classes.")
+            declarationParent.reportError(ErrorMessages.REDACTED_ON_OBJECT_ERROR)
             return super.visitFunctionNew(declaration)
           } else if (classIsUnredacted) {
-            declarationParent.reportError("@Unredacted is useless on object classes.")
+            declarationParent.reportError(ErrorMessages.UNREDACTED_ON_OBJECT_ERROR)
             return super.visitFunctionNew(declaration)
           }
         }
         if (classIsRedacted && classIsUnredacted) {
-          declarationParent.reportError(
-            "@Redacted and @Unredacted cannot be applied to a single class."
-          )
+          declarationParent.reportError(ErrorMessages.UNREDACTED_AND_REDACTED_ERROR)
           return super.visitFunctionNew(declaration)
         }
         if (classIsUnredacted && !supertypeIsRedacted) {
-          declarationParent.reportError(
-            "@Unredacted cannot be applied to a class unless a supertype is marked @Redacted."
-          )
+          declarationParent.reportError(ErrorMessages.UNREDACTED_ON_NONREDACTED_SUBTYPE_ERROR)
           return super.visitFunctionNew(declaration)
         }
         if (anyUnredacted && (!classIsRedacted && !supertypeIsRedacted)) {
-          declarationParent.reportError(
-            "@Unredacted should only be applied to properties in a class or a supertype is marked @Redacted."
-          )
+          declarationParent.reportError(ErrorMessages.UNREDACTED_ON_NON_PROPERTY)
           return super.visitFunctionNew(declaration)
         }
         if (!(classIsRedacted xor anyRedacted xor supertypeIsRedacted)) {
-          declarationParent.reportError(
-            "@Redacted should only be applied to the class or its properties, not both."
-          )
+          declarationParent.reportError(ErrorMessages.REDACTED_ON_CLASS_AND_PROPERTY_ERROR)
           return super.visitFunctionNew(declaration)
         }
         declaration.convertToGeneratedToString(
