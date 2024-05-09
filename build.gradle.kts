@@ -1,4 +1,5 @@
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
+import kotlinx.validation.ExperimentalBCVApi
 import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmCompilerOptions
@@ -25,11 +26,11 @@ plugins {
 
 apiValidation {
   ignoredProjects += listOf("sample", "sample-jvm")
-  // TODO this isn't working yet
-  //  @OptIn(kotlinx.validation.ExperimentalBCVApi::class)
-  //  klib {
-  //    enabled = true
-  //  }
+  @OptIn(ExperimentalBCVApi::class)
+  klib {
+    strictValidation = true
+    enabled = true
+  }
 }
 
 spotless {
