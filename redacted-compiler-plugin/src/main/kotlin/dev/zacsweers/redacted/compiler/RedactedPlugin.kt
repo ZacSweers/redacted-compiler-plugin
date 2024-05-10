@@ -47,7 +47,7 @@ public class RedactedComponentRegistrar : CompilerPluginRegistrar() {
     val fqUnredactedAnnotation = unredactedAnnotationClassId.asSingleFqName()
 
     FirExtensionRegistrarAdapter.registerExtension(
-      FirRedactedExtensionRegistrar(redactedAnnotationClassId)
+      FirRedactedExtensionRegistrar(redactedAnnotationClassId, unredactedAnnotationClassId)
     )
     IrGenerationExtension.registerExtension(
       RedactedIrGenerationExtension(

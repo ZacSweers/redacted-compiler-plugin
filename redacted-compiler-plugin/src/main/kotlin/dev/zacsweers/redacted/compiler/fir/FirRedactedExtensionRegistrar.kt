@@ -30,6 +30,7 @@ import org.jetbrains.kotlin.fir.declarations.FirDeclaration
 import org.jetbrains.kotlin.fir.declarations.FirFunction
 import org.jetbrains.kotlin.fir.declarations.FirProperty
 import org.jetbrains.kotlin.fir.declarations.FirRegularClass
+import org.jetbrains.kotlin.fir.declarations.getAnnotationByClassId
 import org.jetbrains.kotlin.fir.declarations.utils.isEnumClass
 import org.jetbrains.kotlin.fir.declarations.utils.isFinal
 import org.jetbrains.kotlin.fir.declarations.utils.isFromEnumClass
@@ -38,10 +39,7 @@ import org.jetbrains.kotlin.fir.expressions.FirAnnotation
 import org.jetbrains.kotlin.fir.extensions.FirExtensionRegistrar
 import org.jetbrains.kotlin.fir.extensions.FirExtensionSessionComponent
 import org.jetbrains.kotlin.fir.extensions.FirExtensionSessionComponent.Factory
-import org.jetbrains.kotlin.fir.types.ConeClassLikeType
-import org.jetbrains.kotlin.fir.types.classId
 import org.jetbrains.kotlin.fir.types.coneType
-import org.jetbrains.kotlin.fir.types.coneTypeSafe
 import org.jetbrains.kotlin.fir.types.isString
 import org.jetbrains.kotlin.lexer.KtTokens
 import org.jetbrains.kotlin.name.ClassId
@@ -49,10 +47,12 @@ import org.jetbrains.kotlin.name.Name
 
 private val TO_STRING_NAME = Name.identifier("toString")
 
-internal class FirRedactedExtensionRegistrar(private val redactedAnnotation: ClassId) :
-  FirExtensionRegistrar() {
+internal class FirRedactedExtensionRegistrar(
+  private val redactedAnnotation: ClassId,
+  private val unRedactedAnnotation: ClassId,
+) : FirExtensionRegistrar() {
   override fun ExtensionRegistrarContext.configurePlugin() {
-    +FirRedactedPredicateMatcher.getFactory(redactedAnnotation)
+    +FirRedactedPredicateMatcher.getFactory(redactedAnnotation, unRedactedAnnotation)
     +::FirRedactedCheckers
   }
 }
@@ -61,11 +61,13 @@ internal class FirRedactedCheckers(session: FirSession) : FirAdditionalCheckersE
   override val declarationCheckers: DeclarationCheckers =
     object : DeclarationCheckers() {
       override val regularClassCheckers: Set<FirRegularClassChecker> =
-        setOf(FirRedactedDeclarationChecker)
+        setOf(FirRedactedDeclarationChecker(session))
     }
 }
 
-internal object FirRedactedDeclarationChecker : FirRegularClassChecker(MppCheckerKind.Common) {
+internal class FirRedactedDeclarationChecker(private val session: FirSession) :
+  FirRegularClassChecker(MppCheckerKind.Common) {
+
   override fun check(
     declaration: FirRegularClass,
     context: CheckerContext,
@@ -74,6 +76,13 @@ internal object FirRedactedDeclarationChecker : FirRegularClassChecker(MppChecke
     val matcher = context.session.redactedPredicateMatcher
     val classRedactedAnnotation = declaration.redactedAnnotation(matcher)
     val classIsRedacted = classRedactedAnnotation != null
+    // TODO finish implementing
+    //    val supertypeIsRedacted by
+    //      lazy(NONE) {
+    //        declaration.superTypeRefs.any {
+    //          it.toRegularClassSymbol(session)? .let { matcher.unRedactedAnnotation(it) } != null
+    //        }
+    //      }
     val redactedProperties = redactedProperties(declaration, matcher)
     val hasRedactedProperty = redactedProperties.isNotEmpty()
     val hasRedactions = classIsRedacted || hasRedactedProperty
@@ -143,7 +152,7 @@ internal object FirRedactedDeclarationChecker : FirRegularClassChecker(MppChecke
     }
   }
 
-  private fun FirRegularClass.redactedAnnotation(matcher: FirRedactedPredicateMatcher) =
+  private fun FirDeclaration.redactedAnnotation(matcher: FirRedactedPredicateMatcher) =
     matcher.redactedAnnotation(this)
 
   private fun redactedProperties(
@@ -160,18 +169,21 @@ internal object FirRedactedDeclarationChecker : FirRegularClassChecker(MppChecke
 internal class FirRedactedPredicateMatcher(
   session: FirSession,
   private val redactedAnnotation: ClassId,
+  private val unRedactedAnnotation: ClassId,
 ) : FirExtensionSessionComponent(session) {
   companion object {
-    fun getFactory(redactedAnnotation: ClassId): Factory {
-      return Factory { session -> FirRedactedPredicateMatcher(session, redactedAnnotation) }
-    }
+    fun getFactory(redactedAnnotation: ClassId, unRedactedAnnotation: ClassId) =
+      Factory { session ->
+        FirRedactedPredicateMatcher(session, redactedAnnotation, unRedactedAnnotation)
+      }
   }
 
   fun redactedAnnotation(declaration: FirDeclaration): FirAnnotation? {
-    return declaration.annotations.firstOrNull { firAnnotation ->
-      firAnnotation.annotationTypeRef.coneTypeSafe<ConeClassLikeType>()?.classId ==
-        redactedAnnotation
-    }
+    return declaration.annotations.getAnnotationByClassId(redactedAnnotation, session)
+  }
+
+  fun unRedactedAnnotation(declaration: FirDeclaration): FirAnnotation? {
+    return declaration.annotations.getAnnotationByClassId(unRedactedAnnotation, session)
   }
 }
 
