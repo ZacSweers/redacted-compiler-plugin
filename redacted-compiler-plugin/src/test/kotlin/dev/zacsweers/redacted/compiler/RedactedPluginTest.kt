@@ -19,6 +19,7 @@ import com.google.common.truth.Truth.assertThat
 import com.tschuchort.compiletesting.CompilationResult
 import com.tschuchort.compiletesting.JvmCompilationResult
 import com.tschuchort.compiletesting.KotlinCompilation
+import com.tschuchort.compiletesting.KotlinCompilation.ExitCode.COMPILATION_ERROR
 import com.tschuchort.compiletesting.PluginOption
 import com.tschuchort.compiletesting.SourceFile
 import com.tschuchort.compiletesting.SourceFile.Companion.kotlin
@@ -26,6 +27,7 @@ import dev.zacsweers.redacted.compiler.RedactedCommandLineProcessor.Companion.OP
 import dev.zacsweers.redacted.compiler.RedactedCommandLineProcessor.Companion.OPTION_REDACTED_ANNOTATION
 import dev.zacsweers.redacted.compiler.RedactedCommandLineProcessor.Companion.OPTION_REPLACEMENT_STRING
 import dev.zacsweers.redacted.compiler.RedactedCommandLineProcessor.Companion.OPTION_UNREDACTED_ANNOTATION
+import dev.zacsweers.redacted.compiler.RedactedCommandLineProcessor.Companion.OPTION_VALIDATE_IR
 import org.jetbrains.kotlin.compiler.plugin.CliOption
 import org.jetbrains.kotlin.compiler.plugin.CommandLineProcessor
 import org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi
@@ -38,12 +40,17 @@ import org.junit.runners.Parameterized
 
 @OptIn(ExperimentalCompilerApi::class)
 @RunWith(Parameterized::class)
-class RedactedPluginTest(private val useK2: Boolean) {
+class RedactedPluginTest(private val useK2: Boolean, private val validateIr: Boolean) {
 
   companion object {
     @JvmStatic
-    @Parameterized.Parameters(name = "useK2 = {0}")
-    fun data() = listOf(arrayOf(true), arrayOf(false))
+    @Parameterized.Parameters(name = "useK2 = {0}, validateIr = {1}")
+    fun data() =
+      listOf(
+        arrayOf(true, true),
+        arrayOf(true, false), // The default behavior
+        arrayOf(false, true),
+      )
   }
 
   @Rule @JvmField var temporaryFolder: TemporaryFolder = TemporaryFolder()
@@ -84,7 +91,7 @@ class RedactedPluginTest(private val useK2: Boolean) {
             .trimIndent(),
         )
       )
-    assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.COMPILATION_ERROR)
+    assertThat(result.exitCode).isEqualTo(COMPILATION_ERROR)
 
     // Full log is something like this:
     // e: /path/to/NonDataClass.kt:5:20 @Redacted is only supported on data classes!
@@ -107,15 +114,12 @@ class RedactedPluginTest(private val useK2: Boolean) {
           """,
         )
       )
-    assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.COMPILATION_ERROR)
+    assertThat(result.exitCode).isEqualTo(COMPILATION_ERROR)
 
     // Full log is something like this:
     // e: /path/to/NonDataClass.kt:5:20 @Redacted is only supported on data classes!
     assertThat(result.messages).contains("NonClass.kt:5:")
-    result.assertErrorMessage(
-      k1Message = "@Redacted does not support enum classes or entries!",
-      k2Message = "@Redacted is useless on object classes",
-    )
+    result.assertErrorMessage("@Redacted does not support enum classes or entries!")
   }
 
   @Test
@@ -135,7 +139,7 @@ class RedactedPluginTest(private val useK2: Boolean) {
           """,
         )
       )
-    assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.COMPILATION_ERROR)
+    assertThat(result.exitCode).isEqualTo(COMPILATION_ERROR)
 
     // Full log is something like this:
     // e: /path/to/NonDataClass.kt:5:20 @Redacted is only supported on data classes!
@@ -162,7 +166,7 @@ class RedactedPluginTest(private val useK2: Boolean) {
           """,
         )
       )
-    assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.COMPILATION_ERROR)
+    assertThat(result.exitCode).isEqualTo(COMPILATION_ERROR)
 
     // Full log is something like this:
     // e: /path/to/AnnotatedValueProp.kt:5:1 @Redacted is redundant on value class properties
@@ -188,7 +192,7 @@ class RedactedPluginTest(private val useK2: Boolean) {
           """,
         )
       )
-    assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.COMPILATION_ERROR)
+    assertThat(result.exitCode).isEqualTo(COMPILATION_ERROR)
 
     // Full log is something like this:
     // e: /path/to/NonDataClass.kt: (5, 1): @Redacted is useless on object classes
@@ -212,7 +216,7 @@ class RedactedPluginTest(private val useK2: Boolean) {
           """,
         )
       )
-    assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.COMPILATION_ERROR)
+    assertThat(result.exitCode).isEqualTo(COMPILATION_ERROR)
 
     // Full log is something like this:
     // e: /path/to/NonDataClass.kt:5:20 @Redacted is only supported on data classes!
@@ -476,6 +480,7 @@ class RedactedPluginTest(private val useK2: Boolean) {
             OPTION_UNREDACTED_ANNOTATION,
             "dev/zacsweers/redacted/compiler/test/Unredacted",
           ),
+          processor.option(OPTION_VALIDATE_IR, validateIr),
         )
       inheritClassPath = true
       sources = sourceFiles.asList() + redacted

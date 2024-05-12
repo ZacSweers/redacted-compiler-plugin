@@ -23,6 +23,7 @@ import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.compiler.plugin.CompilerPluginRegistrar
 import org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi
 import org.jetbrains.kotlin.config.CompilerConfiguration
+import org.jetbrains.kotlin.config.languageVersionSettings
 import org.jetbrains.kotlin.fir.extensions.FirExtensionRegistrarAdapter
 import org.jetbrains.kotlin.name.ClassId
 
@@ -40,21 +41,26 @@ public class RedactedComponentRegistrar : CompilerPluginRegistrar() {
       configuration.get(CLIConfigurationKeys.MESSAGE_COLLECTOR_KEY, MessageCollector.NONE)
     val replacementString = checkNotNull(configuration[KEY_REPLACEMENT_STRING])
     val redactedAnnotation = checkNotNull(configuration[KEY_REDACTED_ANNOTATION])
-    val unredactedAnnotation = checkNotNull(configuration[KEY_UNREDACTED_ANNOTATION])
+    val unRedactedAnnotation = checkNotNull(configuration[KEY_UNREDACTED_ANNOTATION])
+    val usesK2 = configuration.languageVersionSettings.languageVersion.usesK2
+    val validateIr = configuration[KEY_VALIDATE_IR] == true || !usesK2
     val redactedAnnotationClassId = ClassId.fromString(redactedAnnotation)
     val fqRedactedAnnotation = redactedAnnotationClassId.asSingleFqName()
-    val unredactedAnnotationClassId = ClassId.fromString(unredactedAnnotation)
-    val fqUnredactedAnnotation = unredactedAnnotationClassId.asSingleFqName()
+    val unRedactedAnnotationClassId = ClassId.fromString(unRedactedAnnotation)
+    val fqUnRedactedAnnotation = unRedactedAnnotationClassId.asSingleFqName()
 
-    FirExtensionRegistrarAdapter.registerExtension(
-      FirRedactedExtensionRegistrar(redactedAnnotationClassId, unredactedAnnotationClassId)
-    )
+    if (usesK2) {
+      FirExtensionRegistrarAdapter.registerExtension(
+        FirRedactedExtensionRegistrar(redactedAnnotationClassId, unRedactedAnnotationClassId)
+      )
+    }
     IrGenerationExtension.registerExtension(
       RedactedIrGenerationExtension(
         messageCollector,
         replacementString,
         fqRedactedAnnotation,
-        fqUnredactedAnnotation,
+        fqUnRedactedAnnotation,
+        validateIr,
       )
     )
   }
