@@ -85,6 +85,7 @@ spotless {
 dependencies {
   compileOnly(libs.kotlin.gradlePlugin)
   compileOnly(libs.kotlin.gradlePlugin.api)
+  compileOnly(libs.kotlin.stdlib)
 }
 
 configure<MavenPublishBaseExtension> { publishToMavenCentral(automaticRelease = true) }
