@@ -28,7 +28,8 @@ apiValidation {
   ignoredProjects += listOf("sample", "sample-jvm")
   @OptIn(ExperimentalBCVApi::class)
   klib {
-    strictValidation = true
+    // This is only really possible to run on macOS
+    //    strictValidation = true
     enabled = true
   }
 }
