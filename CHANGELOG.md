@@ -1,6 +1,11 @@
 Changelog
 =========
 
+**Unreleased**
+--------------
+
+- Omit the stdlib from transitive dependencies on the compiler plugin and Gradle plugin artifacts. Both kotlinc and Gradle impose their own versions on the classpath.
+
 1.8.1
 -----
 
