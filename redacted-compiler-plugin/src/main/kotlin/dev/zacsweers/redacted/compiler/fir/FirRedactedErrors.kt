@@ -23,8 +23,6 @@ import org.jetbrains.kotlin.diagnostics.error0
 import org.jetbrains.kotlin.diagnostics.rendering.BaseDiagnosticRendererFactory
 import org.jetbrains.kotlin.diagnostics.rendering.RootDiagnosticRendererFactory
 
-// TODO expose custom error messages when K2 supports it:
-//  https://youtrack.jetbrains.com/issue/KT-53510
 internal object FirRedactedErrors {
   val REDACTED_ON_CLASS_AND_PROPERTY_ERROR by error0<PsiElement>(NAME_IDENTIFIER)
   val REDACTED_ON_NON_CLASS_ERROR by error0<PsiElement>(NAME_IDENTIFIER)
