@@ -32,7 +32,6 @@ import org.jetbrains.kotlin.fir.declarations.FirFunction
 import org.jetbrains.kotlin.fir.declarations.FirProperty
 import org.jetbrains.kotlin.fir.declarations.getAnnotationByClassId
 import org.jetbrains.kotlin.fir.declarations.hasAnnotation
-import org.jetbrains.kotlin.fir.declarations.utils.isData
 import org.jetbrains.kotlin.fir.declarations.utils.isEnumClass
 import org.jetbrains.kotlin.fir.declarations.utils.isExpect
 import org.jetbrains.kotlin.fir.declarations.utils.isExtension
@@ -42,7 +41,6 @@ import org.jetbrains.kotlin.fir.declarations.utils.isInline
 import org.jetbrains.kotlin.fir.declarations.utils.nameOrSpecialName
 import org.jetbrains.kotlin.fir.declarations.utils.superConeTypes
 import org.jetbrains.kotlin.fir.extensions.FirExtensionRegistrar
-import org.jetbrains.kotlin.fir.extensions.FirExtensionSessionComponent.Factory
 import org.jetbrains.kotlin.fir.resolve.fullyExpandedType
 import org.jetbrains.kotlin.fir.resolve.providers.toSymbol
 import org.jetbrains.kotlin.fir.types.ConeErrorType
@@ -96,7 +94,7 @@ internal class FirRedactedDeclarationChecker(
     val supertypeIsRedacted by unsafeLazy {
       declaration.superConeTypes.any {
         if (it is ConeErrorType) return@any false
-        it.classId?.toSymbol(session)?.hasAnnotation(unRedactedAnnotation, session) == true
+        it.classId?.toSymbol(session)?.hasAnnotation(redactedAnnotation, session) == true
       }
     }
     var anyRedacted = false
