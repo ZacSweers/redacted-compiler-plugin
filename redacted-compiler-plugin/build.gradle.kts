@@ -11,10 +11,12 @@ tasks.withType<Test>().configureEach {
 
 dependencies {
   compileOnly(libs.kotlin.compilerEmbeddable)
+  compileOnly(libs.kotlin.stdlib)
   implementation(libs.autoService)
   ksp(libs.autoService.ksp)
 
   testImplementation(libs.kotlin.reflect)
+  testImplementation(libs.kotlin.stdlib)
   testImplementation(libs.kotlin.compilerEmbeddable)
   // Cover for https://github.com/tschuchortdev/kotlin-compile-testing/issues/274
   testImplementation(libs.kotlin.aptEmbeddable)
