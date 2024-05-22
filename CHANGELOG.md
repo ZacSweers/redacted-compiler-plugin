@@ -4,9 +4,15 @@ Changelog
 **Unreleased**
 --------------
 
+1.9.0
+-----
+
+_2024-05-22_
+
 - Update to Kotlin `2.0.0` (aka K2). This plugin now assumes 2.0, but can be used with Kotlin 1.9.x as well.
 - Fully implement validation checks in FIR, allowing the plugin to report errors earlier and also (eventually) have errors appear automatically in the IDE.
   - The IR plugin no longer validates by default.
+  - At the time of writing, I'm not able to get errors to appear in the IDE even if non-bundled plugins are force-enabled. Follow [KTIJ-29248](https://youtrack.jetbrains.com/issue/KTIJ-29248) for more info.
 - The `enabled` compiler option is no longer required and just defaults to true.
 - Omit the stdlib from transitive dependencies on the compiler plugin and Gradle plugin artifacts. Both kotlinc and Gradle impose their own versions on the classpath.
 
