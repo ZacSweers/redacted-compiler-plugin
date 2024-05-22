@@ -42,13 +42,14 @@ kotlin {
   jvm()
   js(IR) {
     compilations.configureEach {
-      compilerOptions.configure {
-        moduleKind.set(MODULE_UMD)
-        sourceMap.set(true)
-        metaInfo.set(true)
+      compileTaskProvider.configure {
+        compilerOptions {
+          moduleKind.set(MODULE_UMD)
+          sourceMap.set(true)
+        }
       }
     }
-    nodejs { testTask(Action { useMocha { timeout = "30s" } }) }
+    nodejs { testTask { useMocha { timeout = "30s" } } }
     browser()
     binaries.executable()
   }

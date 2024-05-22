@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+@file:OptIn(UnsafeDuringIrConstructionAPI::class)
+
 package dev.zacsweers.redacted.compiler
 
-import kotlin.LazyThreadSafetyMode.NONE
 import org.jetbrains.kotlin.backend.common.IrElementTransformerVoidWithContext
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
@@ -30,6 +31,7 @@ import org.jetbrains.kotlin.ir.builders.IrBlockBodyBuilder
 import org.jetbrains.kotlin.ir.builders.irBlockBody
 import org.jetbrains.kotlin.ir.builders.irCall
 import org.jetbrains.kotlin.ir.builders.irConcat
+import org.jetbrains.kotlin.ir.builders.irGet
 import org.jetbrains.kotlin.ir.builders.irGetField
 import org.jetbrains.kotlin.ir.builders.irReturn
 import org.jetbrains.kotlin.ir.builders.irString
@@ -41,7 +43,7 @@ import org.jetbrains.kotlin.ir.declarations.IrFunction
 import org.jetbrains.kotlin.ir.declarations.IrProperty
 import org.jetbrains.kotlin.ir.declarations.IrValueParameter
 import org.jetbrains.kotlin.ir.expressions.addArgument
-import org.jetbrains.kotlin.ir.expressions.impl.IrGetValueImpl
+import org.jetbrains.kotlin.ir.symbols.UnsafeDuringIrConstructionAPI
 import org.jetbrains.kotlin.ir.types.isArray
 import org.jetbrains.kotlin.ir.types.isString
 import org.jetbrains.kotlin.ir.util.SYNTHETIC_OFFSET
@@ -53,6 +55,7 @@ import org.jetbrains.kotlin.ir.util.isEnumEntry
 import org.jetbrains.kotlin.ir.util.isFinalClass
 import org.jetbrains.kotlin.ir.util.isObject
 import org.jetbrains.kotlin.ir.util.isPrimitiveArray
+import org.jetbrains.kotlin.ir.util.parentClassOrNull
 import org.jetbrains.kotlin.ir.util.primaryConstructor
 import org.jetbrains.kotlin.ir.util.properties
 import org.jetbrains.kotlin.name.FqName
@@ -63,9 +66,10 @@ internal const val LOG_PREFIX = "*** REDACTED (IR):"
 internal class RedactedIrVisitor(
   private val pluginContext: IrPluginContext,
   private val redactedAnnotation: FqName,
-  private val unredactedAnnotation: FqName,
+  private val unRedactedAnnotation: FqName,
   private val replacementString: String,
   private val messageCollector: MessageCollector,
+  private val validateIr: Boolean = false,
 ) : IrElementTransformerVoidWithContext() {
 
   private class Property(
@@ -78,40 +82,41 @@ internal class RedactedIrVisitor(
   override fun visitFunctionNew(declaration: IrFunction): IrStatement {
     log("Reading <$declaration>")
 
-    val declarationParent = declaration.parent
-    if (declarationParent is IrClass && declaration.isToStringFromAny()) {
-      val primaryConstructor =
-        declarationParent.primaryConstructor ?: return super.visitFunctionNew(declaration)
-      val constructorParameters =
-        primaryConstructor.valueParameters.associateBy { it.name.asString() }
+    if (!declaration.isToStringFromAny()) return super.visitFunctionNew(declaration)
 
-      val properties = mutableListOf<Property>()
-      val classIsRedacted = declarationParent.hasAnnotation(redactedAnnotation)
-      val classIsUnredacted = declarationParent.hasAnnotation(unredactedAnnotation)
-      val supertypeIsRedacted by
-        lazy(NONE) {
-          declarationParent.getAllSuperclasses().any { it.hasAnnotation(redactedAnnotation) }
-        }
-      var anyRedacted = false
-      var anyUnredacted = false
-      for (prop in declarationParent.properties) {
-        val parameter = constructorParameters[prop.name.asString()] ?: continue
-        val isRedacted = prop.isRedacted
-        val isUnredacted = prop.isUnredacted
-        if (isRedacted) {
-          anyRedacted = true
-        }
-        if (isUnredacted) {
-          anyUnredacted = true
-        }
-        properties += Property(prop, isRedacted, isUnredacted, parameter)
+    val declarationParent =
+      declaration.parentClassOrNull ?: return super.visitFunctionNew(declaration)
+    val primaryConstructor =
+      declarationParent.primaryConstructor ?: return super.visitFunctionNew(declaration)
+    val constructorParameters =
+      primaryConstructor.valueParameters.associateBy { it.name.asString() }
+
+    val properties = mutableListOf<Property>()
+    val classIsRedacted = declarationParent.hasAnnotation(redactedAnnotation)
+    val classIsUnredacted = declarationParent.hasAnnotation(unRedactedAnnotation)
+    val supertypeIsRedacted by unsafeLazy {
+      declarationParent.getAllSuperclasses().any { it.hasAnnotation(redactedAnnotation) }
+    }
+    var anyRedacted = false
+    var anyUnredacted = false
+    for (prop in declarationParent.properties) {
+      val parameter = constructorParameters[prop.name.asString()] ?: continue
+      val isRedacted = prop.isRedacted
+      val isUnredacted = prop.isUnredacted
+      if (isRedacted) {
+        anyRedacted = true
       }
+      if (isUnredacted) {
+        anyUnredacted = true
+      }
+      properties += Property(prop, isRedacted, isUnredacted, parameter)
+    }
 
-      if (classIsRedacted || supertypeIsRedacted || classIsUnredacted || anyRedacted) {
+    if (classIsRedacted || supertypeIsRedacted || classIsUnredacted || anyRedacted) {
+      if (validateIr) {
+
         if (declaration.origin == IrDeclarationOrigin.DEFINED) {
-          declaration.reportError(
-            "@Redacted is only supported on data or value classes that do *not* have a custom toString() function. Please remove the function or remove the @Redacted annotations."
-          )
+          declaration.reportError(ErrorMessages.CUSTOM_TO_STRING_IN_REDACTED_CLASS_ERROR)
           return super.visitFunctionNew(declaration)
         }
         if (
@@ -119,61 +124,51 @@ internal class RedactedIrVisitor(
             declarationParent.isEnumClass ||
             declarationParent.isEnumEntry
         ) {
-          declarationParent.reportError("@Redacted does not support enum classes or entries!")
+          declarationParent.reportError(ErrorMessages.REDACTED_ON_ENUM_CLASS_ERROR)
           return super.visitFunctionNew(declaration)
         }
         if (
           declarationParent.isFinalClass && !declarationParent.isData && !declarationParent.isValue
         ) {
-          declarationParent.reportError("@Redacted is only supported on data or value classes!")
+          declarationParent.reportError(ErrorMessages.REDACTED_ON_NON_DATA_OR_VALUE_CLASS_ERROR)
           return super.visitFunctionNew(declaration)
         }
         if (declarationParent.isValue && !classIsRedacted) {
-          declarationParent.reportError(
-            "@Redacted is redundant on value class properties, just annotate the class instead."
-          )
+          declarationParent.reportError(ErrorMessages.REDACTED_ON_VALUE_CLASS_PROPERTY_ERROR)
           return super.visitFunctionNew(declaration)
         }
         if (declarationParent.isObject) {
           if (!supertypeIsRedacted) {
-            declarationParent.reportError("@Redacted is useless on object classes.")
+            declarationParent.reportError(ErrorMessages.REDACTED_ON_OBJECT_ERROR)
             return super.visitFunctionNew(declaration)
           } else if (classIsUnredacted) {
-            declarationParent.reportError("@Unredacted is useless on object classes.")
+            declarationParent.reportError(ErrorMessages.UNREDACTED_ON_OBJECT_ERROR)
             return super.visitFunctionNew(declaration)
           }
         }
         if (classIsRedacted && classIsUnredacted) {
-          declarationParent.reportError(
-            "@Redacted and @Unredacted cannot be applied to a single class."
-          )
+          declarationParent.reportError(ErrorMessages.UNREDACTED_AND_REDACTED_ERROR)
           return super.visitFunctionNew(declaration)
         }
         if (classIsUnredacted && !supertypeIsRedacted) {
-          declarationParent.reportError(
-            "@Unredacted cannot be applied to a class unless a supertype is marked @Redacted."
-          )
+          declarationParent.reportError(ErrorMessages.UNREDACTED_ON_NONREDACTED_SUBTYPE_ERROR)
           return super.visitFunctionNew(declaration)
         }
         if (anyUnredacted && (!classIsRedacted && !supertypeIsRedacted)) {
-          declarationParent.reportError(
-            "@Unredacted should only be applied to properties in a class or a supertype is marked @Redacted."
-          )
+          declarationParent.reportError(ErrorMessages.UNREDACTED_ON_NON_PROPERTY)
           return super.visitFunctionNew(declaration)
         }
         if (!(classIsRedacted xor anyRedacted xor supertypeIsRedacted)) {
-          declarationParent.reportError(
-            "@Redacted should only be applied to the class or its properties, not both."
-          )
+          declarationParent.reportError(ErrorMessages.REDACTED_ON_CLASS_AND_PROPERTY_ERROR)
           return super.visitFunctionNew(declaration)
         }
-        declaration.convertToGeneratedToString(
-          properties,
-          classIsRedacted,
-          classIsUnredacted,
-          supertypeIsRedacted,
-        )
       }
+      declaration.convertToGeneratedToString(
+        properties,
+        classIsRedacted,
+        classIsUnredacted,
+        supertypeIsRedacted,
+      )
     }
 
     return super.visitFunctionNew(declaration)
@@ -222,7 +217,7 @@ internal class RedactedIrVisitor(
     get() = hasAnnotation(redactedAnnotation)
 
   private val IrProperty.isUnredacted: Boolean
-    get() = hasAnnotation(unredactedAnnotation)
+    get() = hasAnnotation(unRedactedAnnotation)
 
   /**
    * The actual body of the toString method. Copied from
@@ -239,7 +234,7 @@ internal class RedactedIrVisitor(
   ) {
     val irConcat = irConcat()
     irConcat.addArgument(irString(irClass.name.asString() + "("))
-    val hasUnredactedProperties by lazy(NONE) { irProperties.any { it.isUnredacted } }
+    val hasUnredactedProperties by unsafeLazy { irProperties.any { it.isUnredacted } }
     if (classIsRedacted && !classIsUnredacted && !hasUnredactedProperties) {
       irConcat.addArgument(irString(replacementString))
     } else {
@@ -279,10 +274,7 @@ internal class RedactedIrVisitor(
   }
 
   private fun IrBlockBodyBuilder.receiver(irFunction: IrFunction) =
-    IrGetValueImpl(irFunction.dispatchReceiverParameter!!)
-
-  private fun IrBlockBodyBuilder.IrGetValueImpl(irParameter: IrValueParameter) =
-    IrGetValueImpl(startOffset, endOffset, irParameter.type, irParameter.symbol)
+    irGet(irFunction.dispatchReceiverParameter!!)
 
   private fun log(message: String) {
     messageCollector.report(CompilerMessageSeverity.LOGGING, "$LOG_PREFIX $message")

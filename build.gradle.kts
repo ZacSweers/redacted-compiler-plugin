@@ -1,11 +1,10 @@
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
+import kotlinx.validation.ExperimentalBCVApi
 import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmCompilerOptions
 import org.jetbrains.kotlin.gradle.dsl.KotlinProjectExtension
 import org.jetbrains.kotlin.gradle.plugin.KotlinBasePlugin
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootExtension
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
@@ -25,13 +24,15 @@ plugins {
   alias(libs.plugins.binaryCompatibilityValidator)
 }
 
-plugins.withType<NodeJsRootPlugin>().configureEach {
-  // 16+ required for Apple Silicon support
-  // https://youtrack.jetbrains.com/issue/KT-49109#focus=Comments-27-5259190.0-0
-  the<NodeJsRootExtension>().nodeVersion = "18.0.0"
+apiValidation {
+  ignoredProjects += listOf("sample", "sample-jvm")
+  @OptIn(ExperimentalBCVApi::class)
+  klib {
+    // This is only really possible to run on macOS
+    //    strictValidation = true
+    enabled = true
+  }
 }
-
-apiValidation { ignoredProjects += listOf("sample", "sample-jvm") }
 
 spotless {
   format("misc") {

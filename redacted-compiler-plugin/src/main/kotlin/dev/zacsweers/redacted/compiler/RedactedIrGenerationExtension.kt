@@ -25,7 +25,8 @@ internal class RedactedIrGenerationExtension(
   private val messageCollector: MessageCollector,
   private val replacementString: String,
   private val redactedAnnotationName: FqName,
-  private val unredactedAnnotationName: FqName,
+  private val unRedactedAnnotationName: FqName,
+  private val validateIr: Boolean,
 ) : IrGenerationExtension {
 
   override fun generate(moduleFragment: IrModuleFragment, pluginContext: IrPluginContext) {
@@ -33,9 +34,10 @@ internal class RedactedIrGenerationExtension(
       RedactedIrVisitor(
         pluginContext,
         redactedAnnotationName,
-        unredactedAnnotationName,
+        unRedactedAnnotationName,
         replacementString,
         messageCollector,
+        validateIr,
       )
     moduleFragment.transform(redactedTransformer, null)
   }

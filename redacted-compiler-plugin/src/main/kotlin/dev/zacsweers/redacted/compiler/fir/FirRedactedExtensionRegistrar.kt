@@ -15,160 +15,205 @@
  */
 package dev.zacsweers.redacted.compiler.fir
 
-import org.jetbrains.kotlin.descriptors.ClassKind
+import dev.zacsweers.redacted.compiler.unsafeLazy
+import org.jetbrains.kotlin.descriptors.isEnumEntry
+import org.jetbrains.kotlin.descriptors.isObject
 import org.jetbrains.kotlin.diagnostics.DiagnosticReporter
-import org.jetbrains.kotlin.diagnostics.KtDiagnosticFactory0
 import org.jetbrains.kotlin.diagnostics.reportOn
 import org.jetbrains.kotlin.fir.FirSession
+import org.jetbrains.kotlin.fir.analysis.checkers.MppCheckerKind
 import org.jetbrains.kotlin.fir.analysis.checkers.context.CheckerContext
 import org.jetbrains.kotlin.fir.analysis.checkers.declaration.DeclarationCheckers
-import org.jetbrains.kotlin.fir.analysis.checkers.declaration.FirRegularClassChecker
-import org.jetbrains.kotlin.fir.analysis.checkers.hasModifier
+import org.jetbrains.kotlin.fir.analysis.checkers.declaration.FirClassChecker
 import org.jetbrains.kotlin.fir.analysis.extensions.FirAdditionalCheckersExtension
-import org.jetbrains.kotlin.fir.declarations.FirDeclaration
+import org.jetbrains.kotlin.fir.declarations.FirClass
+import org.jetbrains.kotlin.fir.declarations.FirDeclarationOrigin
 import org.jetbrains.kotlin.fir.declarations.FirFunction
 import org.jetbrains.kotlin.fir.declarations.FirProperty
-import org.jetbrains.kotlin.fir.declarations.FirRegularClass
+import org.jetbrains.kotlin.fir.declarations.getAnnotationByClassId
+import org.jetbrains.kotlin.fir.declarations.hasAnnotation
 import org.jetbrains.kotlin.fir.declarations.utils.isEnumClass
+import org.jetbrains.kotlin.fir.declarations.utils.isExpect
+import org.jetbrains.kotlin.fir.declarations.utils.isExtension
+import org.jetbrains.kotlin.fir.declarations.utils.isExternal
 import org.jetbrains.kotlin.fir.declarations.utils.isFinal
-import org.jetbrains.kotlin.fir.declarations.utils.isFromEnumClass
-import org.jetbrains.kotlin.fir.declarations.utils.isOverride
-import org.jetbrains.kotlin.fir.expressions.FirAnnotation
+import org.jetbrains.kotlin.fir.declarations.utils.isInline
+import org.jetbrains.kotlin.fir.declarations.utils.nameOrSpecialName
+import org.jetbrains.kotlin.fir.declarations.utils.superConeTypes
 import org.jetbrains.kotlin.fir.extensions.FirExtensionRegistrar
-import org.jetbrains.kotlin.fir.extensions.FirExtensionSessionComponent
-import org.jetbrains.kotlin.fir.extensions.FirExtensionSessionComponent.Factory
-import org.jetbrains.kotlin.fir.types.ConeClassLikeType
+import org.jetbrains.kotlin.fir.resolve.fullyExpandedType
+import org.jetbrains.kotlin.fir.resolve.providers.toSymbol
+import org.jetbrains.kotlin.fir.types.ConeErrorType
 import org.jetbrains.kotlin.fir.types.classId
 import org.jetbrains.kotlin.fir.types.coneType
-import org.jetbrains.kotlin.fir.types.coneTypeSafe
 import org.jetbrains.kotlin.fir.types.isString
-import org.jetbrains.kotlin.lexer.KtTokens
 import org.jetbrains.kotlin.name.ClassId
-import org.jetbrains.kotlin.name.Name
+import org.jetbrains.kotlin.util.OperatorNameConventions
 
-private val TO_STRING_NAME = Name.identifier("toString")
-
-internal class FirRedactedExtensionRegistrar(private val redactedAnnotation: ClassId) :
-  FirExtensionRegistrar() {
+internal class FirRedactedExtensionRegistrar(
+  private val redactedAnnotation: ClassId,
+  private val unRedactedAnnotation: ClassId,
+) : FirExtensionRegistrar() {
   override fun ExtensionRegistrarContext.configurePlugin() {
-    +FirRedactedPredicateMatcher.getFactory(redactedAnnotation)
-    +::FirRedactedCheckers
+    +FirRedactedCheckers.getFactory(redactedAnnotation, unRedactedAnnotation)
   }
 }
 
-internal class FirRedactedCheckers(session: FirSession) : FirAdditionalCheckersExtension(session) {
-  override val declarationCheckers: DeclarationCheckers =
-    object : DeclarationCheckers() {
-      override val regularClassCheckers: Set<FirRegularClassChecker> =
-        setOf(FirRedactedDeclarationChecker)
-    }
-}
-
-internal object FirRedactedDeclarationChecker : FirRegularClassChecker() {
-  override fun check(
-    declaration: FirRegularClass,
-    context: CheckerContext,
-    reporter: DiagnosticReporter,
-  ) {
-    val matcher = context.session.redactedPredicateMatcher
-    val classRedactedAnnotation = declaration.redactedAnnotation(matcher)
-    val redactedProperties = redactedProperties(declaration, matcher)
-    val hasRedactedProperty = redactedProperties.isNotEmpty()
-    val hasRedactions = classRedactedAnnotation != null || hasRedactedProperty
-    if (!hasRedactions) return
-
-    if (hasRedactedProperty && classRedactedAnnotation != null) {
-      reporter.reportOn(
-        classRedactedAnnotation.source,
-        KtErrorsRedacted.REDACTED_ON_CLASS_AND_PROPERTY_ERROR,
-        context,
-      )
-      redactedProperties.forEach {
-        reporter.reportOn(it.source, KtErrorsRedacted.REDACTED_ON_CLASS_AND_PROPERTY_ERROR, context)
-      }
-    }
-
-    val allRedactions = redactedProperties.plus(classRedactedAnnotation).filterNotNull()
-    fun report(diagnosticFactory: KtDiagnosticFactory0) {
-      for (redaction in allRedactions) {
-        reporter.reportOn(redaction.source, diagnosticFactory, context)
-      }
-    }
-
-    if (declaration.classKind != ClassKind.CLASS && declaration.classKind != ClassKind.INTERFACE) {
-      report(KtErrorsRedacted.REDACTED_ON_NON_CLASS_ERROR)
-      return
-    }
-
-    if (declaration.isFromEnumClass || declaration.isEnumClass) {
-      report(KtErrorsRedacted.REDACTED_ON_ENUM_CLASS_ERROR)
-      return
-    }
-
-    if (
-      declaration.isFinal &&
-        !declaration.hasModifier(KtTokens.DATA_KEYWORD) &&
-        !declaration.hasModifier(KtTokens.VALUE_KEYWORD)
-    ) {
-      report(KtErrorsRedacted.REDACTED_ON_NON_DATA_OR_VALUE_CLASS_ERROR)
-      return
-    }
-
-    if (declaration.hasModifier(KtTokens.VALUE_KEYWORD) && hasRedactedProperty) {
-      report(KtErrorsRedacted.REDACTED_ON_VALUE_CLASS_PROPERTY_ERROR)
-      return
-    }
-
-    val customToStringFunction =
-      declaration.declarations.find {
-        it is FirFunction &&
-          it.isOverride &&
-          it.symbol.callableId.callableName == TO_STRING_NAME &&
-          it.dispatchReceiverType == null &&
-          it.receiverParameter == null &&
-          it.valueParameters.isEmpty() &&
-          it.returnTypeRef.coneType.isString
-      }
-    if (customToStringFunction != null) {
-      reporter.reportOn(
-        customToStringFunction.source,
-        KtErrorsRedacted.CUSTOM_TO_STRING_IN_REDACTED_CLASS_ERROR,
-        context,
-      )
-    }
-  }
-
-  private fun FirRegularClass.redactedAnnotation(matcher: FirRedactedPredicateMatcher) =
-    matcher.redactedAnnotation(this)
-
-  private fun redactedProperties(
-    declaration: FirRegularClass,
-    matcher: FirRedactedPredicateMatcher,
-  ) =
-    declaration.declarations
-      .asSequence()
-      .filterIsInstance<FirProperty>()
-      .mapNotNull { matcher.redactedAnnotation(it) }
-      .toList()
-}
-
-internal class FirRedactedPredicateMatcher(
+internal class FirRedactedCheckers(
   session: FirSession,
   private val redactedAnnotation: ClassId,
-) : FirExtensionSessionComponent(session) {
+  private val unRedactedAnnotation: ClassId,
+) : FirAdditionalCheckersExtension(session) {
   companion object {
-    fun getFactory(redactedAnnotation: ClassId): Factory {
-      return Factory { session -> FirRedactedPredicateMatcher(session, redactedAnnotation) }
-    }
+    fun getFactory(redactedAnnotation: ClassId, unRedactedAnnotation: ClassId) =
+      Factory { session ->
+        FirRedactedCheckers(session, redactedAnnotation, unRedactedAnnotation)
+      }
   }
 
-  fun redactedAnnotation(declaration: FirDeclaration): FirAnnotation? {
-    return declaration.annotations.firstOrNull { firAnnotation ->
-      firAnnotation.annotationTypeRef.coneTypeSafe<ConeClassLikeType>()?.classId ==
-        redactedAnnotation
+  override val declarationCheckers: DeclarationCheckers =
+    object : DeclarationCheckers() {
+      override val classCheckers: Set<FirClassChecker>
+        get() =
+          setOf(FirRedactedDeclarationChecker(session, redactedAnnotation, unRedactedAnnotation))
     }
-  }
 }
 
-internal val FirSession.redactedPredicateMatcher: FirRedactedPredicateMatcher by
-  FirSession.sessionComponentAccessor()
+internal class FirRedactedDeclarationChecker(
+  private val session: FirSession,
+  private val redactedAnnotation: ClassId,
+  private val unRedactedAnnotation: ClassId,
+) : FirClassChecker(MppCheckerKind.Common) {
+
+  override fun check(declaration: FirClass, context: CheckerContext, reporter: DiagnosticReporter) {
+    val classRedactedAnnotation = declaration.getAnnotationByClassId(redactedAnnotation, session)
+    val classIsRedacted = classRedactedAnnotation != null
+    val classUnRedactedAnnotation =
+      declaration.getAnnotationByClassId(unRedactedAnnotation, session)
+    val classIsUnRedacted = classUnRedactedAnnotation != null
+    val supertypeIsRedacted by unsafeLazy {
+      declaration.superConeTypes.any {
+        if (it is ConeErrorType) return@any false
+        it.classId?.toSymbol(session)?.hasAnnotation(redactedAnnotation, session) == true
+      }
+    }
+    var anyRedacted = false
+    var anyUnredacted = false
+
+    for (prop in declaration.declarations.filterIsInstance<FirProperty>()) {
+      val isRedacted = prop.isRedacted
+      val isUnredacted = prop.isUnredacted
+      if (isRedacted) {
+        anyRedacted = true
+      }
+      if (isUnredacted) {
+        anyUnredacted = true
+      }
+    }
+
+    if (classIsRedacted || supertypeIsRedacted || classIsUnRedacted || anyRedacted) {
+      val customToStringFunction =
+        declaration.declarations.filterIsInstance<FirFunction>().find {
+          it.isToStringFromAny() && it.origin == FirDeclarationOrigin.Source
+        }
+      if (customToStringFunction != null) {
+        reporter.reportOn(
+          customToStringFunction.source,
+          FirRedactedErrors.CUSTOM_TO_STRING_IN_REDACTED_CLASS_ERROR,
+          context,
+        )
+        return
+      }
+      if (
+        declaration.isInstantiableEnum ||
+          declaration.isEnumClass ||
+          declaration.classKind.isEnumEntry
+      ) {
+        reporter.reportOn(
+          declaration.source,
+          FirRedactedErrors.REDACTED_ON_ENUM_CLASS_ERROR,
+          context,
+        )
+        return
+      }
+      if (declaration.isFinal && !declaration.status.isData && !declaration.isInline) {
+        reporter.reportOn(
+          declaration.source,
+          FirRedactedErrors.REDACTED_ON_NON_DATA_OR_VALUE_CLASS_ERROR,
+          context,
+        )
+        return
+      }
+      if (declaration.isInline && !classIsRedacted) {
+        reporter.reportOn(
+          declaration.source,
+          FirRedactedErrors.REDACTED_ON_VALUE_CLASS_PROPERTY_ERROR,
+          context,
+        )
+        return
+      }
+      if (declaration.classKind.isObject) {
+        if (!supertypeIsRedacted) {
+          reporter.reportOn(
+            classRedactedAnnotation!!.source,
+            FirRedactedErrors.REDACTED_ON_OBJECT_ERROR,
+            context,
+          )
+          return
+        } else if (classIsUnRedacted) {
+          reporter.reportOn(
+            classUnRedactedAnnotation.source,
+            FirRedactedErrors.UNREDACTED_ON_OBJECT_ERROR,
+            context,
+          )
+          return
+        }
+      }
+      if (classIsRedacted && classIsUnRedacted) {
+        reporter.reportOn(
+          declaration.source,
+          FirRedactedErrors.UNREDACTED_AND_REDACTED_ERROR,
+          context,
+        )
+        return
+      }
+      if (classIsUnRedacted && !supertypeIsRedacted) {
+        reporter.reportOn(
+          declaration.source,
+          FirRedactedErrors.UNREDACTED_ON_NONREDACTED_SUBTYPE_ERROR,
+          context,
+        )
+        return
+      }
+      if (anyUnredacted && (!classIsRedacted && !supertypeIsRedacted)) {
+        reporter.reportOn(declaration.source, FirRedactedErrors.UNREDACTED_ON_NON_PROPERTY, context)
+        return
+      }
+      if (!(classIsRedacted xor anyRedacted xor supertypeIsRedacted)) {
+        reporter.reportOn(
+          declaration.source,
+          FirRedactedErrors.REDACTED_ON_CLASS_AND_PROPERTY_ERROR,
+          context,
+        )
+        return
+      }
+      // Rest filled in by the IR plugin
+    }
+  }
+
+  private fun FirFunction.isToStringFromAny(): Boolean =
+    nameOrSpecialName == OperatorNameConventions.TO_STRING &&
+      dispatchReceiverType != null &&
+      !isExtension &&
+      valueParameters.isEmpty() &&
+      returnTypeRef.coneType.fullyExpandedType(session).isString
+
+  private val FirProperty.isRedacted: Boolean
+    get() = hasAnnotation(redactedAnnotation, session)
+
+  private val FirProperty.isUnredacted: Boolean
+    get() = hasAnnotation(unRedactedAnnotation, session)
+
+  private val FirClass.isInstantiableEnum: Boolean
+    get() = isEnumClass && !isExpect && !isExternal
+}

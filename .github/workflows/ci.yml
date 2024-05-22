@@ -17,14 +17,13 @@ concurrency:
 
 jobs:
   jvm:
-    name: jvm / StringConcat ${{ matrix.stringConcat }} / K2 ${{ matrix.k2 }}
+    name: jvm / StringConcat ${{ matrix.stringConcat }}
     runs-on: ubuntu-latest
 
     strategy:
       fail-fast: false
       matrix:
         stringConcat: [ 'inline', 'indy', 'indy-with-constants' ]
-        k2: [ 'true', 'false']
 
     steps:
       - name: Checkout
@@ -43,7 +42,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v3
 
       - name: Build with Gradle
-        run: ./gradlew check -Dkjs=false -Dknative=false --stacktrace -Pstring_concat=${{ matrix.stringConcat }} -Pkotlin.experimental.tryK2=${{ matrix.k2 }} --quiet
+        run: ./gradlew check -Dkjs=false -Dknative=false --stacktrace -Pstring_concat=${{ matrix.stringConcat }} --quiet
 
   all-platforms:
     name: "platform / ${{ matrix.os }}"

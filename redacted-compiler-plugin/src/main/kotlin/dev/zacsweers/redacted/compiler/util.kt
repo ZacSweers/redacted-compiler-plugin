@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Zac Sweers
+ * Copyright (C) 2024 Zac Sweers
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,4 @@
  */
 package dev.zacsweers.redacted.compiler
 
-import org.jetbrains.kotlin.ir.declarations.IrDeclarationOrigin
-import org.jetbrains.kotlin.ir.declarations.IrDeclarationOriginImpl
-
-internal val RedactedOrigin: IrDeclarationOrigin =
-  IrDeclarationOriginImpl("GENERATED_REDACTED_CLASS_MEMBER")
+internal fun <T> unsafeLazy(initializer: () -> T) = lazy(LazyThreadSafetyMode.NONE, initializer)
