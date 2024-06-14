@@ -19,7 +19,7 @@ kotlin = "2.0.0"
 jdk = "21"
 jvmTarget = "11"
 ksp = "2.0.0-1.0.22"
-ktfmt = "0.49"
+ktfmt = "0.51"
 moshi = "1.15.1"
 
 [plugins]
