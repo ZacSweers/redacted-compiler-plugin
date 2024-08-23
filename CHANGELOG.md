@@ -4,6 +4,14 @@ Changelog
 **Unreleased**
 --------------
 
+1.10.0
+------
+
+_2024-08-22_
+
+- Update to Kotlin `2.0.20`.
+- Build against Gradle `8.10`.
+
 1.9.0
 -----
 
