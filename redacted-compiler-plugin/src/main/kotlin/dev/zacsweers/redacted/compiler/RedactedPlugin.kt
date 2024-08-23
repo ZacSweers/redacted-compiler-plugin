@@ -18,10 +18,10 @@ package dev.zacsweers.redacted.compiler
 import com.google.auto.service.AutoService
 import dev.zacsweers.redacted.compiler.fir.FirRedactedExtensionRegistrar
 import org.jetbrains.kotlin.backend.common.extensions.IrGenerationExtension
-import org.jetbrains.kotlin.cli.common.CLIConfigurationKeys
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.compiler.plugin.CompilerPluginRegistrar
 import org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi
+import org.jetbrains.kotlin.config.CommonConfigurationKeys
 import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.config.languageVersionSettings
 import org.jetbrains.kotlin.fir.extensions.FirExtensionRegistrarAdapter
@@ -38,7 +38,7 @@ public class RedactedComponentRegistrar : CompilerPluginRegistrar() {
     if (configuration[KEY_ENABLED] == false) return
 
     val messageCollector =
-      configuration.get(CLIConfigurationKeys.MESSAGE_COLLECTOR_KEY, MessageCollector.NONE)
+      configuration.get(CommonConfigurationKeys.MESSAGE_COLLECTOR_KEY, MessageCollector.NONE)
     val replacementString = checkNotNull(configuration[KEY_REPLACEMENT_STRING])
     val redactedAnnotation = checkNotNull(configuration[KEY_REDACTED_ANNOTATION])
     val unRedactedAnnotation = checkNotNull(configuration[KEY_UNREDACTED_ANNOTATION])
