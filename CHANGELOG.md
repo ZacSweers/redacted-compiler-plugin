@@ -4,8 +4,10 @@ Changelog
 **Unreleased**
 --------------
 
-- Fix FIR diagnostics rendering in the IDE.
+- Fix FIR diagnostics rendering in the IDE. Note this only works in the K2 Kotlin IDE plugin + setting the IntelliJ `kotlin.k2.only.bundled.compiler.plugins.enabled` registry key to `false`.
 - Build against Gradle `8.12`.
+- Only report errors in FIR now. Removes the `validateIr` plugin option.
+- No longer support K1.
 
 1.11.0
 ------
