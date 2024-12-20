@@ -55,54 +55,43 @@ internal class FirRedactedExtensionRegistrar(
   private val unRedactedAnnotation: ClassId,
 ) : FirExtensionRegistrar() {
   override fun ExtensionRegistrarContext.configurePlugin() {
-    +FirRedactedCheckers.getFactory(redactedAnnotation, unRedactedAnnotation)
+    +RedactedFirBuiltIns.getFactory(redactedAnnotation, unRedactedAnnotation)
+    +::FirRedactedCheckers
   }
 }
 
-internal class FirRedactedCheckers(
-  session: FirSession,
-  private val redactedAnnotation: ClassId,
-  private val unRedactedAnnotation: ClassId,
-) : FirAdditionalCheckersExtension(session) {
-  companion object {
-    fun getFactory(redactedAnnotation: ClassId, unRedactedAnnotation: ClassId) =
-      Factory { session ->
-        FirRedactedCheckers(session, redactedAnnotation, unRedactedAnnotation)
-      }
-  }
+internal class FirRedactedCheckers(session: FirSession) : FirAdditionalCheckersExtension(session) {
 
   override val declarationCheckers: DeclarationCheckers =
     object : DeclarationCheckers() {
       override val classCheckers: Set<FirClassChecker>
-        get() =
-          setOf(FirRedactedDeclarationChecker(session, redactedAnnotation, unRedactedAnnotation))
+        get() = setOf(FirRedactedDeclarationChecker)
     }
 }
 
-internal class FirRedactedDeclarationChecker(
-  private val session: FirSession,
-  private val redactedAnnotation: ClassId,
-  private val unRedactedAnnotation: ClassId,
-) : FirClassChecker(MppCheckerKind.Common) {
+internal object FirRedactedDeclarationChecker : FirClassChecker(MppCheckerKind.Common) {
 
   override fun check(declaration: FirClass, context: CheckerContext, reporter: DiagnosticReporter) {
-    val classRedactedAnnotation = declaration.getAnnotationByClassId(redactedAnnotation, session)
+    val classRedactedAnnotation =
+      declaration.getAnnotationByClassId(context.session.redactedAnnotation, context.session)
     val classIsRedacted = classRedactedAnnotation != null
     val classUnRedactedAnnotation =
-      declaration.getAnnotationByClassId(unRedactedAnnotation, session)
+      declaration.getAnnotationByClassId(context.session.unRedactedAnnotation, context.session)
     val classIsUnRedacted = classUnRedactedAnnotation != null
     val supertypeIsRedacted by unsafeLazy {
       declaration.superConeTypes.any {
         if (it is ConeErrorType) return@any false
-        it.classId?.toSymbol(session)?.hasAnnotation(redactedAnnotation, session) == true
+        it.classId
+          ?.toSymbol(context.session)
+          ?.hasAnnotation(context.session.redactedAnnotation, context.session) == true
       }
     }
     var anyRedacted = false
     var anyUnredacted = false
 
     for (prop in declaration.declarations.filterIsInstance<FirProperty>()) {
-      val isRedacted = prop.isRedacted
-      val isUnredacted = prop.isUnredacted
+      val isRedacted = prop.isRedacted(context.session)
+      val isUnredacted = prop.isUnredacted(context.session)
       if (isRedacted) {
         anyRedacted = true
       }
@@ -114,7 +103,7 @@ internal class FirRedactedDeclarationChecker(
     if (classIsRedacted || supertypeIsRedacted || classIsUnRedacted || anyRedacted) {
       val customToStringFunction =
         declaration.declarations.filterIsInstance<FirFunction>().find {
-          it.isToStringFromAny() && it.origin == FirDeclarationOrigin.Source
+          it.isToStringFromAny(context.session) && it.origin == FirDeclarationOrigin.Source
         }
       if (customToStringFunction != null) {
         reporter.reportOn(
@@ -205,18 +194,18 @@ internal class FirRedactedDeclarationChecker(
     }
   }
 
-  private fun FirFunction.isToStringFromAny(): Boolean =
+  private fun FirFunction.isToStringFromAny(session: FirSession): Boolean =
     nameOrSpecialName == OperatorNameConventions.TO_STRING &&
       dispatchReceiverType != null &&
       !isExtension &&
       valueParameters.isEmpty() &&
       returnTypeRef.coneType.fullyExpandedType(session).isString
 
-  private val FirProperty.isRedacted: Boolean
-    get() = hasAnnotation(redactedAnnotation, session)
+  private fun FirProperty.isRedacted(session: FirSession): Boolean =
+    hasAnnotation(session.redactedAnnotation, session)
 
-  private val FirProperty.isUnredacted: Boolean
-    get() = hasAnnotation(unRedactedAnnotation, session)
+  private fun FirProperty.isUnredacted(session: FirSession): Boolean =
+    hasAnnotation(session.unRedactedAnnotation, session)
 
   private val FirClass.isInstantiableEnum: Boolean
     get() = isEnumClass && !isExpect && !isExternal
