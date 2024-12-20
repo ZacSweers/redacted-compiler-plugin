@@ -15,14 +15,14 @@
  */
 package dev.zacsweers.redacted.compiler.fir
 
-import dev.zacsweers.redacted.compiler.ErrorMessages
 import org.jetbrains.kotlin.diagnostics.AbstractSourceElementPositioningStrategy
-import org.jetbrains.kotlin.diagnostics.DiagnosticFactory0DelegateProvider
+import org.jetbrains.kotlin.diagnostics.DiagnosticFactory1DelegateProvider
 import org.jetbrains.kotlin.diagnostics.KtDiagnosticFactoryToRendererMap
 import org.jetbrains.kotlin.diagnostics.Severity
 import org.jetbrains.kotlin.diagnostics.SourceElementPositioningStrategies
 import org.jetbrains.kotlin.diagnostics.SourceElementPositioningStrategies.NAME_IDENTIFIER
 import org.jetbrains.kotlin.diagnostics.rendering.BaseDiagnosticRendererFactory
+import org.jetbrains.kotlin.diagnostics.rendering.CommonRenderers.STRING
 import org.jetbrains.kotlin.diagnostics.rendering.RootDiagnosticRendererFactory
 
 /**
@@ -41,53 +41,21 @@ private val psiElementClass by lazy {
 }
 
 internal object RedactedDiagnostics : BaseDiagnosticRendererFactory() {
-  val REDACTED_ON_CLASS_AND_PROPERTY_ERROR by error0(NAME_IDENTIFIER)
-  val REDACTED_ON_OBJECT_ERROR by error0(NAME_IDENTIFIER)
-  val REDACTED_ON_ENUM_CLASS_ERROR by error0(NAME_IDENTIFIER)
-  val REDACTED_ON_NON_DATA_OR_VALUE_CLASS_ERROR by error0(NAME_IDENTIFIER)
-  val REDACTED_ON_VALUE_CLASS_PROPERTY_ERROR by error0(NAME_IDENTIFIER)
-  val CUSTOM_TO_STRING_IN_REDACTED_CLASS_ERROR by error0(NAME_IDENTIFIER)
-  val UNREDACTED_ON_OBJECT_ERROR by error0(NAME_IDENTIFIER)
-  val UNREDACTED_AND_REDACTED_ERROR by error0(NAME_IDENTIFIER)
-  val UNREDACTED_ON_NONREDACTED_SUBTYPE_ERROR by error0(NAME_IDENTIFIER)
-  val UNREDACTED_ON_NON_PROPERTY by error0(NAME_IDENTIFIER)
+  val REDACTED_ERROR by error1<String>(NAME_IDENTIFIER)
 
   override val MAP: KtDiagnosticFactoryToRendererMap =
-    KtDiagnosticFactoryToRendererMap("Redacted").apply {
-      put(REDACTED_ON_CLASS_AND_PROPERTY_ERROR, ErrorMessages.REDACTED_ON_CLASS_AND_PROPERTY_ERROR)
-      put(REDACTED_ON_OBJECT_ERROR, ErrorMessages.REDACTED_ON_OBJECT_ERROR)
-      put(
-        REDACTED_ON_NON_DATA_OR_VALUE_CLASS_ERROR,
-        ErrorMessages.REDACTED_ON_NON_DATA_OR_VALUE_CLASS_ERROR,
-      )
-      put(
-        REDACTED_ON_VALUE_CLASS_PROPERTY_ERROR,
-        ErrorMessages.REDACTED_ON_VALUE_CLASS_PROPERTY_ERROR,
-      )
-      put(
-        CUSTOM_TO_STRING_IN_REDACTED_CLASS_ERROR,
-        ErrorMessages.CUSTOM_TO_STRING_IN_REDACTED_CLASS_ERROR,
-      )
-      put(REDACTED_ON_ENUM_CLASS_ERROR, ErrorMessages.REDACTED_ON_ENUM_CLASS_ERROR)
-      put(UNREDACTED_ON_OBJECT_ERROR, ErrorMessages.UNREDACTED_ON_OBJECT_ERROR)
-      put(UNREDACTED_AND_REDACTED_ERROR, ErrorMessages.UNREDACTED_AND_REDACTED_ERROR)
-      put(
-        UNREDACTED_ON_NONREDACTED_SUBTYPE_ERROR,
-        ErrorMessages.UNREDACTED_ON_NONREDACTED_SUBTYPE_ERROR,
-      )
-      put(UNREDACTED_ON_NON_PROPERTY, ErrorMessages.UNREDACTED_ON_NON_PROPERTY)
-    }
+    KtDiagnosticFactoryToRendererMap("Redacted").apply { put(REDACTED_ERROR, "{0}", STRING) }
 
   init {
     RootDiagnosticRendererFactory.registerFactory(this)
   }
 
   /** Copy of [org.jetbrains.kotlin.diagnostics.error0] with hack for correct `PsiElement` class. */
-  private fun error0(
+  private fun <A> error1(
     positioningStrategy: AbstractSourceElementPositioningStrategy =
       SourceElementPositioningStrategies.DEFAULT
-  ): DiagnosticFactory0DelegateProvider {
-    return DiagnosticFactory0DelegateProvider(
+  ): DiagnosticFactory1DelegateProvider<A> {
+    return DiagnosticFactory1DelegateProvider<A>(
       severity = Severity.ERROR,
       positioningStrategy = positioningStrategy,
       psiType = psiElementClass,

@@ -43,7 +43,6 @@ public class RedactedComponentRegistrar : CompilerPluginRegistrar() {
     val redactedAnnotation = checkNotNull(configuration[KEY_REDACTED_ANNOTATION])
     val unRedactedAnnotation = checkNotNull(configuration[KEY_UNREDACTED_ANNOTATION])
     val usesK2 = configuration.languageVersionSettings.languageVersion.usesK2
-    val validateIr = configuration[KEY_VALIDATE_IR] == true || !usesK2
     val redactedAnnotationClassId = ClassId.fromString(redactedAnnotation)
     val fqRedactedAnnotation = redactedAnnotationClassId.asSingleFqName()
     val unRedactedAnnotationClassId = ClassId.fromString(unRedactedAnnotation)
@@ -60,7 +59,6 @@ public class RedactedComponentRegistrar : CompilerPluginRegistrar() {
         replacementString,
         fqRedactedAnnotation,
         fqUnRedactedAnnotation,
-        validateIr,
       )
     )
   }

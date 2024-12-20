@@ -108,7 +108,8 @@ internal object FirRedactedDeclarationChecker : FirClassChecker(MppCheckerKind.C
       if (customToStringFunction != null) {
         reporter.reportOn(
           customToStringFunction.source,
-          RedactedDiagnostics.CUSTOM_TO_STRING_IN_REDACTED_CLASS_ERROR,
+          RedactedDiagnostics.REDACTED_ERROR,
+          "@Redacted is only supported on data or value classes that do *not* have a custom toString() function. Please remove the function or remove the @Redacted annotations.",
           context,
         )
         return
@@ -120,15 +121,17 @@ internal object FirRedactedDeclarationChecker : FirClassChecker(MppCheckerKind.C
       ) {
         reporter.reportOn(
           declaration.source,
-          RedactedDiagnostics.REDACTED_ON_ENUM_CLASS_ERROR,
+          RedactedDiagnostics.REDACTED_ERROR,
+          "@Redacted does not support enum classes or entries!",
           context,
         )
         return
       }
-      if (declaration.isFinal && !declaration.status.isData && !declaration.isInline) {
+      if (declaration.isFinal && !(declaration.status.isData || declaration.isInline)) {
         reporter.reportOn(
           declaration.source,
-          RedactedDiagnostics.REDACTED_ON_NON_DATA_OR_VALUE_CLASS_ERROR,
+          RedactedDiagnostics.REDACTED_ERROR,
+          "@Redacted is only supported on data or value classes!",
           context,
         )
         return
@@ -136,7 +139,8 @@ internal object FirRedactedDeclarationChecker : FirClassChecker(MppCheckerKind.C
       if (declaration.isInline && !classIsRedacted) {
         reporter.reportOn(
           declaration.source,
-          RedactedDiagnostics.REDACTED_ON_VALUE_CLASS_PROPERTY_ERROR,
+          RedactedDiagnostics.REDACTED_ERROR,
+          "@Redacted is redundant on value class properties, just annotate the class instead.",
           context,
         )
         return
@@ -145,14 +149,16 @@ internal object FirRedactedDeclarationChecker : FirClassChecker(MppCheckerKind.C
         if (!supertypeIsRedacted) {
           reporter.reportOn(
             classRedactedAnnotation!!.source,
-            RedactedDiagnostics.REDACTED_ON_OBJECT_ERROR,
+            RedactedDiagnostics.REDACTED_ERROR,
+            "@Redacted is useless on object classes.",
             context,
           )
           return
         } else if (classIsUnRedacted) {
           reporter.reportOn(
             classUnRedactedAnnotation.source,
-            RedactedDiagnostics.UNREDACTED_ON_OBJECT_ERROR,
+            RedactedDiagnostics.REDACTED_ERROR,
+            "@Unredacted is useless on object classes.",
             context,
           )
           return
@@ -161,7 +167,8 @@ internal object FirRedactedDeclarationChecker : FirClassChecker(MppCheckerKind.C
       if (classIsRedacted && classIsUnRedacted) {
         reporter.reportOn(
           declaration.source,
-          RedactedDiagnostics.UNREDACTED_AND_REDACTED_ERROR,
+          RedactedDiagnostics.REDACTED_ERROR,
+          "@Redacted and @Unredacted cannot be applied to a single class.",
           context,
         )
         return
@@ -169,7 +176,8 @@ internal object FirRedactedDeclarationChecker : FirClassChecker(MppCheckerKind.C
       if (classIsUnRedacted && !supertypeIsRedacted) {
         reporter.reportOn(
           declaration.source,
-          RedactedDiagnostics.UNREDACTED_ON_NONREDACTED_SUBTYPE_ERROR,
+          RedactedDiagnostics.REDACTED_ERROR,
+          "@Unredacted cannot be applied to a class unless a supertype is marked @Redacted.",
           context,
         )
         return
@@ -177,7 +185,8 @@ internal object FirRedactedDeclarationChecker : FirClassChecker(MppCheckerKind.C
       if (anyUnredacted && (!classIsRedacted && !supertypeIsRedacted)) {
         reporter.reportOn(
           declaration.source,
-          RedactedDiagnostics.UNREDACTED_ON_NON_PROPERTY,
+          RedactedDiagnostics.REDACTED_ERROR,
+          "@Unredacted should only be applied to properties in a class or a supertype is marked @Redacted.",
           context,
         )
         return
@@ -185,7 +194,8 @@ internal object FirRedactedDeclarationChecker : FirClassChecker(MppCheckerKind.C
       if (!(classIsRedacted xor anyRedacted xor supertypeIsRedacted)) {
         reporter.reportOn(
           declaration.source,
-          RedactedDiagnostics.REDACTED_ON_CLASS_AND_PROPERTY_ERROR,
+          RedactedDiagnostics.REDACTED_ERROR,
+          "@Redacted should only be applied to the class or its properties, not both.",
           context,
         )
         return
