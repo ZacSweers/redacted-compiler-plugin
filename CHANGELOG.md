@@ -4,6 +4,8 @@ Changelog
 **Unreleased**
 --------------
 
+- Fix FIR diagnostics rendering in the IDE.
+
 1.11.0
 ------
 
