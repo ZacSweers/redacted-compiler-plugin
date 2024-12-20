@@ -119,7 +119,7 @@ internal class FirRedactedDeclarationChecker(
       if (customToStringFunction != null) {
         reporter.reportOn(
           customToStringFunction.source,
-          FirRedactedErrors.CUSTOM_TO_STRING_IN_REDACTED_CLASS_ERROR,
+          RedactedDiagnostics.CUSTOM_TO_STRING_IN_REDACTED_CLASS_ERROR,
           context,
         )
         return
@@ -131,7 +131,7 @@ internal class FirRedactedDeclarationChecker(
       ) {
         reporter.reportOn(
           declaration.source,
-          FirRedactedErrors.REDACTED_ON_ENUM_CLASS_ERROR,
+          RedactedDiagnostics.REDACTED_ON_ENUM_CLASS_ERROR,
           context,
         )
         return
@@ -139,7 +139,7 @@ internal class FirRedactedDeclarationChecker(
       if (declaration.isFinal && !declaration.status.isData && !declaration.isInline) {
         reporter.reportOn(
           declaration.source,
-          FirRedactedErrors.REDACTED_ON_NON_DATA_OR_VALUE_CLASS_ERROR,
+          RedactedDiagnostics.REDACTED_ON_NON_DATA_OR_VALUE_CLASS_ERROR,
           context,
         )
         return
@@ -147,7 +147,7 @@ internal class FirRedactedDeclarationChecker(
       if (declaration.isInline && !classIsRedacted) {
         reporter.reportOn(
           declaration.source,
-          FirRedactedErrors.REDACTED_ON_VALUE_CLASS_PROPERTY_ERROR,
+          RedactedDiagnostics.REDACTED_ON_VALUE_CLASS_PROPERTY_ERROR,
           context,
         )
         return
@@ -156,14 +156,14 @@ internal class FirRedactedDeclarationChecker(
         if (!supertypeIsRedacted) {
           reporter.reportOn(
             classRedactedAnnotation!!.source,
-            FirRedactedErrors.REDACTED_ON_OBJECT_ERROR,
+            RedactedDiagnostics.REDACTED_ON_OBJECT_ERROR,
             context,
           )
           return
         } else if (classIsUnRedacted) {
           reporter.reportOn(
             classUnRedactedAnnotation.source,
-            FirRedactedErrors.UNREDACTED_ON_OBJECT_ERROR,
+            RedactedDiagnostics.UNREDACTED_ON_OBJECT_ERROR,
             context,
           )
           return
@@ -172,7 +172,7 @@ internal class FirRedactedDeclarationChecker(
       if (classIsRedacted && classIsUnRedacted) {
         reporter.reportOn(
           declaration.source,
-          FirRedactedErrors.UNREDACTED_AND_REDACTED_ERROR,
+          RedactedDiagnostics.UNREDACTED_AND_REDACTED_ERROR,
           context,
         )
         return
@@ -180,19 +180,19 @@ internal class FirRedactedDeclarationChecker(
       if (classIsUnRedacted && !supertypeIsRedacted) {
         reporter.reportOn(
           declaration.source,
-          FirRedactedErrors.UNREDACTED_ON_NONREDACTED_SUBTYPE_ERROR,
+          RedactedDiagnostics.UNREDACTED_ON_NONREDACTED_SUBTYPE_ERROR,
           context,
         )
         return
       }
       if (anyUnredacted && (!classIsRedacted && !supertypeIsRedacted)) {
-        reporter.reportOn(declaration.source, FirRedactedErrors.UNREDACTED_ON_NON_PROPERTY, context)
+        reporter.reportOn(declaration.source, RedactedDiagnostics.UNREDACTED_ON_NON_PROPERTY, context)
         return
       }
       if (!(classIsRedacted xor anyRedacted xor supertypeIsRedacted)) {
         reporter.reportOn(
           declaration.source,
-          FirRedactedErrors.REDACTED_ON_CLASS_AND_PROPERTY_ERROR,
+          RedactedDiagnostics.REDACTED_ON_CLASS_AND_PROPERTY_ERROR,
           context,
         )
         return
