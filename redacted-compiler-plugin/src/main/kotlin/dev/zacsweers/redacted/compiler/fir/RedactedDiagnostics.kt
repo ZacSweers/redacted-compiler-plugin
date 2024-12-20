@@ -33,10 +33,10 @@ import org.jetbrains.kotlin.diagnostics.rendering.RootDiagnosticRendererFactory
 // https://github.com/TadeasKriz/K2PluginBase/blob/main/kotlin-plugin/src/main/kotlin/com/tadeaskriz/example/ExamplePluginErrors.kt#L8
 private val psiElementClass by lazy {
   try {
-    Class.forName("org.jetbrains.kotlin.com.intellij.psi.PsiElement")
-  } catch (_: ClassNotFoundException) {
-    Class.forName("com.intellij.psi.PsiElement")
-  }
+      Class.forName("org.jetbrains.kotlin.com.intellij.psi.PsiElement")
+    } catch (_: ClassNotFoundException) {
+      Class.forName("com.intellij.psi.PsiElement")
+    }
     .kotlin
 }
 

@@ -186,7 +186,11 @@ internal class FirRedactedDeclarationChecker(
         return
       }
       if (anyUnredacted && (!classIsRedacted && !supertypeIsRedacted)) {
-        reporter.reportOn(declaration.source, RedactedDiagnostics.UNREDACTED_ON_NON_PROPERTY, context)
+        reporter.reportOn(
+          declaration.source,
+          RedactedDiagnostics.UNREDACTED_ON_NON_PROPERTY,
+          context,
+        )
         return
       }
       if (!(classIsRedacted xor anyRedacted xor supertypeIsRedacted)) {
