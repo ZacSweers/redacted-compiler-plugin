@@ -4,6 +4,9 @@ Changelog
 **Unreleased**
 --------------
 
+- Fix FIR diagnostics rendering in the IDE.
+- Build against Gradle `8.12`.
+
 1.11.0
 ------
 
