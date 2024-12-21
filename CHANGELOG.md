@@ -12,6 +12,7 @@ Changelog
 - Build against Gradle `8.12`.
 - Only report errors in FIR now. Removes the `validateIr` plugin option.
 - No longer support K1.
+- Raise Gradle plugin Kotlin target to `1.9`.
 
 1.11.0
 ------

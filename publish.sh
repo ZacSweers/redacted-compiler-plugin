@@ -4,12 +4,12 @@ if [[ "$1" = "--local" ]]; then local=true; fi
 
 if ! [[ ${local} ]]; then
   cd redacted-compiler-plugin-gradle || exit
-  ./gradlew publish -x dokkaHtml --no-configuration-cache
+  ./gradlew publish --no-configuration-cache
   cd ..
-  ./gradlew publish -x dokkaHtml --no-configuration-cache
+  ./gradlew publish --no-configuration-cache
 else
   cd redacted-compiler-plugin-gradle || exit
-  ./gradlew publishToMavenLocal -x dokkaHtml
+  ./gradlew publishToMavenLocal
   cd ..
-  ./gradlew publishToMavenLocal -x dokkaHtml
+  ./gradlew publishToMavenLocal
 fi
