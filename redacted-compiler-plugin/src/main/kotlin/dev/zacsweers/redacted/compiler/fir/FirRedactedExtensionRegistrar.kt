@@ -40,6 +40,7 @@ import org.jetbrains.kotlin.fir.declarations.utils.isExternal
 import org.jetbrains.kotlin.fir.declarations.utils.isFinal
 import org.jetbrains.kotlin.fir.declarations.utils.isInline
 import org.jetbrains.kotlin.fir.declarations.utils.nameOrSpecialName
+import org.jetbrains.kotlin.fir.expressions.FirAnnotation
 import org.jetbrains.kotlin.fir.extensions.FirExtensionRegistrar
 import org.jetbrains.kotlin.fir.resolve.fullyExpandedType
 import org.jetbrains.kotlin.fir.resolve.toSymbol
@@ -107,8 +108,8 @@ internal object FirRedactedDeclarationChecker : FirClassChecker(MppCheckerKind.C
       null
     }
 
-    val redactedProperties = mutableMapOf<FirProperty, ClassId>()
-    val unredactedProperties = mutableMapOf<FirProperty, ClassId>()
+    val redactedProperties = mutableMapOf<FirProperty, Pair<FirAnnotation, ClassId>>()
+    val unredactedProperties = mutableMapOf<FirProperty, Pair<FirAnnotation, ClassId>>()
     for (prop in declaration.declarations.filterIsInstance<FirProperty>()) {
       prop.redactedAnnotation(context.session)?.let { redactedProperties[prop] = it }
       prop.unredactedAnnotation(context.session)?.let { unredactedProperties[prop] = it }
@@ -116,9 +117,9 @@ internal object FirRedactedDeclarationChecker : FirClassChecker(MppCheckerKind.C
     val anyRedacted = redactedProperties.isNotEmpty()
     val anyUnredacted = unredactedProperties.isNotEmpty()
 
-    val redactedName = { redactedProperties.values.first().shortClassName.asString() }
+    val redactedName = { redactedProperties.values.first().second.shortClassName.asString() }
 
-    val unRedactedName = { unredactedProperties.values.first().shortClassName.asString() }
+    val unRedactedName = { unredactedProperties.values.first().second.shortClassName.asString() }
 
     if (classIsRedacted || redactedSupertype != null || classIsUnRedacted || anyRedacted) {
       val customToStringFunction =
@@ -214,7 +215,7 @@ internal object FirRedactedDeclarationChecker : FirClassChecker(MppCheckerKind.C
       }
       if (!(classIsRedacted xor anyRedacted xor (redactedSupertype != null))) {
         val redactedName =
-          redactedProperties.values.firstOrNull()
+          redactedProperties.values.firstOrNull()?.second
             ?: classRedactedAnnotations.firstOrNull()?.toAnnotationClassIdSafe(context.session)
             ?: redactedSupertype?.redactedClassId
             ?: error("Not possible!")
@@ -248,9 +249,9 @@ internal object FirRedactedDeclarationChecker : FirClassChecker(MppCheckerKind.C
             context,
           )
         }
-        for ((redactedProp, _) in redactedProperties) {
+        for ((_, annotationAndId) in redactedProperties) {
           reporter.reportOn(
-            redactedProp.source,
+            annotationAndId.first.source,
             RedactedDiagnostics.REDACTED_ERROR,
             message,
             context,
@@ -270,15 +271,25 @@ internal object FirRedactedDeclarationChecker : FirClassChecker(MppCheckerKind.C
       returnTypeRef.coneType.fullyExpandedType(session).isString
 
   @OptIn(SymbolInternals::class)
-  private fun FirProperty.redactedAnnotation(session: FirSession): ClassId? =
+  private fun FirProperty.redactedAnnotation(session: FirSession): Pair<FirAnnotation, ClassId>? =
     resolvedAnnotationsWithClassIds(symbol).firstNotNullResult {
-      it.toAnnotationClassIdSafe(session).takeIf { it in session.redactedAnnotations }
+      val classId = it.toAnnotationClassIdSafe(session)
+      if (classId != null && classId in session.redactedAnnotations) {
+        it to classId
+      } else {
+        null
+      }
     }
 
   @OptIn(SymbolInternals::class)
-  private fun FirProperty.unredactedAnnotation(session: FirSession): ClassId? =
+  private fun FirProperty.unredactedAnnotation(session: FirSession): Pair<FirAnnotation, ClassId>? =
     resolvedAnnotationsWithClassIds(symbol).firstNotNullResult {
-      it.toAnnotationClassIdSafe(session).takeIf { it in session.unRedactedAnnotations }
+      val classId = it.toAnnotationClassIdSafe(session)
+      if (classId != null && classId in session.unRedactedAnnotations) {
+        it to classId
+      } else {
+        null
+      }
     }
 
   private val FirClass.isInstantiableEnum: Boolean
