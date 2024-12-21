@@ -27,13 +27,13 @@ internal val KEY_ENABLED =
   CompilerConfigurationKey<Boolean>("Enable/disable Redacted's plugin on the given compilation")
 internal val KEY_REPLACEMENT_STRING =
   CompilerConfigurationKey<String>("The replacement string to use in redactions")
-internal val KEY_REDACTED_ANNOTATION =
+internal val KEY_REDACTED_ANNOTATIONS =
   CompilerConfigurationKey<String>(
-    "The redacted marker annotation (i.e. com/example/Redacted) to look for when redacting"
+    "The redacted marker annotations (i.e. com/example/Redacted) to look for when redacting"
   )
 internal val KEY_UNREDACTED_ANNOTATION =
   CompilerConfigurationKey<String>(
-    "The unredacted marker annotation (i.e. com/example/Unredacted) to look for when redacting"
+    "The unredacted marker annotations (i.e. com/example/Unredacted) to look for when redacting"
   )
 
 @OptIn(ExperimentalCompilerApi::class)
@@ -59,18 +59,18 @@ public class RedactedCommandLineProcessor : CommandLineProcessor {
         allowMultipleOccurrences = false,
       )
 
-    val OPTION_REDACTED_ANNOTATION =
+    val OPTION_REDACTED_ANNOTATIONS =
       CliOption(
-        optionName = "redactedAnnotation",
+        optionName = "redactedAnnotations",
         valueDescription = "String",
-        description = KEY_REDACTED_ANNOTATION.toString(),
+        description = KEY_REDACTED_ANNOTATIONS.toString(),
         required = true,
         allowMultipleOccurrences = false,
       )
 
-    val OPTION_UNREDACTED_ANNOTATION =
+    val OPTION_UNREDACTED_ANNOTATIONS =
       CliOption(
-        optionName = "unredactedAnnotation",
+        optionName = "unredactedAnnotations",
         valueDescription = "String",
         description = KEY_UNREDACTED_ANNOTATION.toString(),
         required = true,
@@ -84,8 +84,8 @@ public class RedactedCommandLineProcessor : CommandLineProcessor {
     listOf(
       OPTION_ENABLED,
       OPTION_REPLACEMENT_STRING,
-      OPTION_REDACTED_ANNOTATION,
-      OPTION_UNREDACTED_ANNOTATION,
+      OPTION_REDACTED_ANNOTATIONS,
+      OPTION_UNREDACTED_ANNOTATIONS,
     )
 
   override fun processOption(
@@ -96,8 +96,8 @@ public class RedactedCommandLineProcessor : CommandLineProcessor {
     when (option.optionName) {
       "enabled" -> configuration.put(KEY_ENABLED, value.toBoolean())
       "replacementString" -> configuration.put(KEY_REPLACEMENT_STRING, value)
-      "redactedAnnotation" -> configuration.put(KEY_REDACTED_ANNOTATION, value)
-      "unredactedAnnotation" -> configuration.put(KEY_UNREDACTED_ANNOTATION, value)
+      "redactedAnnotations" -> configuration.put(KEY_REDACTED_ANNOTATIONS, value)
+      "unredactedAnnotations" -> configuration.put(KEY_UNREDACTED_ANNOTATION, value)
       else -> error("Unknown plugin option: ${option.optionName}")
     }
 }

@@ -45,6 +45,7 @@ import org.jetbrains.kotlin.ir.util.isPrimitiveArray
 import org.jetbrains.kotlin.ir.util.parentClassOrNull
 import org.jetbrains.kotlin.ir.util.primaryConstructor
 import org.jetbrains.kotlin.ir.util.properties
+import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.util.OperatorNameConventions
 
@@ -52,8 +53,8 @@ internal const val LOG_PREFIX = "*** REDACTED (IR):"
 
 internal class RedactedIrVisitor(
   private val pluginContext: IrPluginContext,
-  private val redactedAnnotation: FqName,
-  private val unRedactedAnnotation: FqName,
+  private val redactedAnnotations: Set<ClassId>,
+  private val unRedactedAnnotations: Set<ClassId>,
   private val replacementString: String,
   private val messageCollector: MessageCollector,
 ) : IrElementTransformerVoidWithContext() {
@@ -78,10 +79,10 @@ internal class RedactedIrVisitor(
       primaryConstructor.valueParameters.associateBy { it.name.asString() }
 
     val properties = mutableListOf<Property>()
-    val classIsRedacted = declarationParent.hasAnnotation(redactedAnnotation)
-    val classIsUnredacted = declarationParent.hasAnnotation(unRedactedAnnotation)
+    val classIsRedacted = redactedAnnotations.any(declarationParent::hasAnnotation)
+    val classIsUnredacted = unRedactedAnnotations.any(declarationParent::hasAnnotation)
     val supertypeIsRedacted by unsafeLazy {
-      declarationParent.getAllSuperclasses().any { it.hasAnnotation(redactedAnnotation) }
+      declarationParent.getAllSuperclasses().any { redactedAnnotations.any(it::hasAnnotation) }
     }
     var anyRedacted = false
     var anyUnredacted = false
@@ -150,10 +151,10 @@ internal class RedactedIrVisitor(
   }
 
   private val IrProperty.isRedacted: Boolean
-    get() = hasAnnotation(redactedAnnotation)
+    get() = redactedAnnotations.any(::hasAnnotation)
 
   private val IrProperty.isUnredacted: Boolean
-    get() = hasAnnotation(unRedactedAnnotation)
+    get() = unRedactedAnnotations.any(::hasAnnotation)
 
   /**
    * The actual body of the toString method. Copied from
