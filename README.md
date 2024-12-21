@@ -55,7 +55,7 @@ redact.
 
 You can configure custom behavior with properties on the `redacted` extension.
 
-```
+```kotlin
 redacted {
   // Define a custom annotation. The -annotations artifact won't be automatically added to
   // dependencies if you define your own!
