@@ -4,6 +4,11 @@ Changelog
 **Unreleased**
 --------------
 
+1.12.0
+------
+
+_2024-12-20_
+
 - Fix FIR diagnostics rendering in the IDE. Note this only works in the K2 Kotlin IDE plugin + setting the IntelliJ `kotlin.k2.only.bundled.compiler.plugins.enabled` registry key to `false`.
 - When custom annotations are defined, report those names in FIR error messages.
 - Support multiple custom annotations.
