@@ -1,5 +1,6 @@
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
-import org.jetbrains.dokka.gradle.DokkaTask
+import org.gradle.kotlin.dsl.configure
+import org.jetbrains.dokka.gradle.engine.parameters.VisibilityModifier
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -10,6 +11,7 @@ plugins {
   alias(libs.plugins.dokka)
   alias(libs.plugins.mavenPublish)
   alias(libs.plugins.spotless)
+  alias(libs.plugins.buildConfig)
 }
 
 java { toolchain { languageVersion.set(libs.versions.jdk.map(JavaLanguageVersion::of)) } }
@@ -18,36 +20,24 @@ tasks.withType<JavaCompile>().configureEach {
   options.release.set(libs.versions.jvmTarget.map(String::toInt))
 }
 
-// region Version.kt template for setting the project version in the build
-sourceSets {
-  main { java.srcDir(layout.buildDirectory.dir("generated/sources/version-templates/kotlin/main")) }
+buildConfig {
+  buildConfigField("String", "VERSION", "\"${project.property("VERSION_NAME")}\"")
+  packageName("dev.zacsweers.redacted.gradle")
+  useKotlinOutput {
+    topLevelConstants = true
+    internalVisibility = true
+  }
 }
 
-val copyVersionTemplatesProvider =
-  tasks.register<Copy>("copyVersionTemplates") {
-    inputs.property("version", project.property("VERSION_NAME"))
-    from(project.layout.projectDirectory.dir("version-templates"))
-    into(project.layout.buildDirectory.dir("generated/sources/version-templates/kotlin/main"))
-    expand(mapOf("projectVersion" to "${project.property("VERSION_NAME")}"))
-    filteringCharset = "UTF-8"
-  }
-
-// endregion
-
 tasks.withType<KotlinCompile>().configureEach {
-  dependsOn(copyVersionTemplatesProvider)
   compilerOptions {
     jvmTarget.set(libs.versions.jvmTarget.map(JvmTarget::fromTarget))
 
     // Lower version for Gradle compat
-    languageVersion.set(KotlinVersion.KOTLIN_1_8)
-    apiVersion.set(KotlinVersion.KOTLIN_1_8)
+    languageVersion.set(KotlinVersion.KOTLIN_1_9)
+    apiVersion.set(KotlinVersion.KOTLIN_1_9)
   }
 }
-
-tasks
-  .matching { it.name == "sourcesJar" || it.name == "dokkaHtml" }
-  .configureEach { dependsOn(copyVersionTemplatesProvider) }
 
 gradlePlugin {
   plugins {
@@ -58,9 +48,35 @@ gradlePlugin {
   }
 }
 
-tasks.named<DokkaTask>("dokkaHtml") {
-  outputDirectory.set(rootProject.file("../docs/0.x"))
-  dokkaSourceSets.configureEach { skipDeprecated.set(true) }
+dokka {
+  dokkaPublications.html {
+    outputDirectory.set(rootDir.resolve("docs/api/1.x"))
+    includes.from(project.layout.projectDirectory.file("README.md"))
+  }
+  basePublicationsDirectory.set(layout.buildDirectory.dir("dokkaDir"))
+  dokkaSourceSets.configureEach {
+    skipDeprecated.set(true)
+    documentedVisibilities.add(VisibilityModifier.Public)
+
+    externalDocumentationLinks.register("Gradle") {
+      packageListUrl("https://docs.gradle.org/${gradle.gradleVersion}/javadoc/element-list")
+      url("https://docs.gradle.org/${gradle.gradleVersion}/javadoc")
+    }
+
+    // KGP docs
+    externalDocumentationLinks.register("KGP") {
+      url("https://kotlinlang.org/api/kotlin-gradle-plugin/")
+    }
+
+    sourceLink {
+      localDirectory.set(layout.projectDirectory.dir("src"))
+      val relPath = rootProject.projectDir.toPath().relativize(projectDir.toPath())
+      remoteUrl(
+        providers.gradleProperty("POM_SCM_URL").map { scmUrl -> "$scmUrl/tree/main/$relPath/src" }
+      )
+      remoteLineSuffix.set("#L")
+    }
+  }
 }
 
 kotlin { explicitApi() }
