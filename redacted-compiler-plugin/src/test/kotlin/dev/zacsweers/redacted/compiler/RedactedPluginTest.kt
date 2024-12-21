@@ -31,20 +31,44 @@ import org.jetbrains.kotlin.compiler.plugin.CliOption
 import org.jetbrains.kotlin.compiler.plugin.CommandLineProcessor
 import org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi
 import org.jetbrains.kotlin.config.JvmTarget
+import org.jetbrains.kotlin.name.FqName
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
+import org.junit.runner.RunWith
+import org.junit.runners.Parameterized
 
+@RunWith(Parameterized::class)
 @OptIn(ExperimentalCompilerApi::class)
-class RedactedPluginTest {
+class RedactedPluginTest(redactedNames: Pair<FqName, FqName>) {
+
+  companion object {
+    @JvmStatic
+    @Parameterized.Parameters(name = "ir={0}")
+    fun data(): Collection<Array<Any>> {
+      return listOf(
+        arrayOf(
+          FqName.fromSegments(listOf("test", "Redacted")) to
+            FqName.fromSegments(listOf("test", "Unredacted"))
+        ),
+        arrayOf(
+          FqName.fromSegments(listOf("test", "Redacted2")) to
+            FqName.fromSegments(listOf("test", "Unredacted2"))
+        ),
+      )
+    }
+  }
 
   @Rule @JvmField var temporaryFolder: TemporaryFolder = TemporaryFolder()
+
+  private val redactedAnnotation = redactedNames.first
+  private val unredactedAnnotation = redactedNames.second
 
   private val redacted =
     kotlin(
       "Redacted.kt",
       """
-      package dev.zacsweers.redacted.compiler.test
+      package test
 
       import kotlin.annotation.AnnotationRetention.BINARY
       import kotlin.annotation.AnnotationTarget.PROPERTY
@@ -52,11 +76,11 @@ class RedactedPluginTest {
 
       @Retention(BINARY)
       @Target(PROPERTY, CLASS)
-      annotation class Redacted
+      annotation class ${redactedAnnotation.shortName().asString()}
 
       @Retention(BINARY)
       @Target(PROPERTY)
-      annotation class Unredacted
+      annotation class ${unredactedAnnotation.shortName().asString()}
       """,
     )
 
@@ -69,9 +93,9 @@ class RedactedPluginTest {
           """
                   package dev.zacsweers.redacted.compiler.test
 
-                  import dev.zacsweers.redacted.compiler.test.Redacted
+                  import $redactedAnnotation
 
-                  class NonDataClass(@Redacted val a: Int)
+                  class NonDataClass(@${redactedAnnotation.shortName().asString()} val a: Int)
                 """
             .trimIndent(),
         )
@@ -79,9 +103,12 @@ class RedactedPluginTest {
     assertThat(result.exitCode).isEqualTo(COMPILATION_ERROR)
 
     // Full log is something like this:
-    // e: /path/to/NonDataClass.kt:5:20 @Redacted is only supported on data classes!
+    // e: /path/to/NonDataClass.kt:5:20 @${redactedAnnotation.shortName().asString() is only
+    // supported on data classes!
     assertThat(result.messages).contains("NonDataClass.kt:5")
-    result.assertErrorMessage("@Redacted is only supported on data or value classes!")
+    result.assertErrorMessage(
+      "@${redactedAnnotation.shortName().asString()} is only supported on data or value classes!"
+    )
   }
 
   @Test
@@ -93,18 +120,21 @@ class RedactedPluginTest {
           """
           package dev.zacsweers.redacted.compiler.test
 
-          import dev.zacsweers.redacted.compiler.test.Redacted
+          import $redactedAnnotation
 
-          enum class NonClass(@Redacted val a: Int)
+          enum class NonClass(@${redactedAnnotation.shortName().asString()} val a: Int)
           """,
         )
       )
     assertThat(result.exitCode).isEqualTo(COMPILATION_ERROR)
 
     // Full log is something like this:
-    // e: /path/to/NonDataClass.kt:5:20 @Redacted is only supported on data classes!
+    // e: /path/to/NonDataClass.kt:5:20 @${redactedAnnotation.shortName().asString() is only
+    // supported on data classes!
     assertThat(result.messages).contains("NonClass.kt:5:")
-    result.assertErrorMessage("@Redacted does not support enum classes or entries!")
+    result.assertErrorMessage(
+      "@${redactedAnnotation.shortName().asString()} does not support enum classes or entries!"
+    )
   }
 
   @Test
@@ -116,9 +146,9 @@ class RedactedPluginTest {
           """
           package dev.zacsweers.redacted.compiler.test
 
-          import dev.zacsweers.redacted.compiler.test.Redacted
+          import $redactedAnnotation
 
-          data class CustomToString(@Redacted val a: Int) {
+          data class CustomToString(@${redactedAnnotation.shortName().asString()} val a: Int) {
             override fun toString(): String = "foo"
           }
           """,
@@ -127,10 +157,11 @@ class RedactedPluginTest {
     assertThat(result.exitCode).isEqualTo(COMPILATION_ERROR)
 
     // Full log is something like this:
-    // e: /path/to/NonDataClass.kt:5:20 @Redacted is only supported on data classes!
+    // e: /path/to/NonDataClass.kt:5:20 @${redactedAnnotation.shortName().asString() is only
+    // supported on data classes!
     assertThat(result.messages).contains("CustomToString.kt:6:")
     result.assertErrorMessage(
-      "@Redacted is only supported on data or value classes that do *not* have a custom toString() function"
+      "@${redactedAnnotation.shortName().asString()} is only supported on data or value classes that do *not* have a custom toString() function"
     )
   }
 
@@ -143,21 +174,24 @@ class RedactedPluginTest {
           """
           package dev.zacsweers.redacted.compiler.test
 
-          import dev.zacsweers.redacted.compiler.test.Redacted
+          import $redactedAnnotation
           import kotlin.jvm.JvmInline
 
           @JvmInline
-          value class AnnotatedValueProp(@Redacted val a: Int)
+          value class AnnotatedValueProp(@${redactedAnnotation.shortName().asString()} val a: Int)
           """,
         )
       )
     assertThat(result.exitCode).isEqualTo(COMPILATION_ERROR)
 
     // Full log is something like this:
-    // e: /path/to/AnnotatedValueProp.kt:5:1 @Redacted is redundant on value class properties
+    // e: /path/to/AnnotatedValueProp.kt:5:1 @${redactedAnnotation.shortName().asString() is
+    // redundant on value class properties
     // FIR reports this line number correctly, K1 reports it as 6
     assertThat(result.messages).contains("AnnotatedValueProp.kt:7:")
-    result.assertErrorMessage("@Redacted is redundant on value class properties")
+    result.assertErrorMessage(
+      "@${redactedAnnotation.shortName().asString()} is redundant on value class properties"
+    )
   }
 
   @Test
@@ -169,9 +203,9 @@ class RedactedPluginTest {
           """
           package dev.zacsweers.redacted.compiler.test
 
-          import dev.zacsweers.redacted.compiler.test.Redacted
+          import $redactedAnnotation
 
-          @Redacted
+          @${redactedAnnotation.shortName().asString()}
           data object CustomToString
           """,
         )
@@ -179,9 +213,12 @@ class RedactedPluginTest {
     assertThat(result.exitCode).isEqualTo(COMPILATION_ERROR)
 
     // Full log is something like this:
-    // e: /path/to/NonDataClass.kt: (5, 1): @Redacted is useless on object classes
+    // e: /path/to/NonDataClass.kt: (5, 1): @${redactedAnnotation.shortName().asString() is useless
+    // on object classes
     assertThat(result.messages).contains("DataObject.kt:5:")
-    result.assertErrorMessage("@Redacted is useless on object classes")
+    result.assertErrorMessage(
+      "@${redactedAnnotation.shortName().asString()} is useless on object classes"
+    )
   }
 
   @Test
@@ -193,19 +230,22 @@ class RedactedPluginTest {
           """
           package dev.zacsweers.redacted.compiler.test
 
-          import dev.zacsweers.redacted.compiler.test.Redacted
+          import $redactedAnnotation
 
-          @Redacted
-          data class DoubleAnnotation(@Redacted val a: Int)
+          @${redactedAnnotation.shortName().asString()}
+          data class DoubleAnnotation(@${redactedAnnotation.shortName().asString()} val a: Int)
           """,
         )
       )
     assertThat(result.exitCode).isEqualTo(COMPILATION_ERROR)
 
     // Full log is something like this:
-    // e: /path/to/NonDataClass.kt:5:20 @Redacted is only supported on data classes!
+    // e: /path/to/NonDataClass.kt:5:20 @${redactedAnnotation.shortName().asString() is only
+    // supported on data classes!
     assertThat(result.messages).contains("DoubleAnnotation.kt:")
-    result.assertErrorMessage("@Redacted should only be applied to the class or its properties")
+    result.assertErrorMessage(
+      "@${redactedAnnotation.shortName().asString()} should only be applied to the class or its properties"
+    )
   }
 
   @Test
@@ -217,9 +257,9 @@ class RedactedPluginTest {
           """
           package dev.zacsweers.redacted.compiler.test
 
-          import dev.zacsweers.redacted.compiler.test.Redacted
+          import $redactedAnnotation
 
-          data class Test(@Redacted val a: Int)
+          data class Test(@${redactedAnnotation.shortName().asString()} val a: Int)
           """,
         )
       )
@@ -239,9 +279,9 @@ class RedactedPluginTest {
           """
           package dev.zacsweers.redacted.compiler.test
 
-          import dev.zacsweers.redacted.compiler.test.Redacted
+          import $redactedAnnotation
 
-          data class Test(@Redacted val a: Int)
+          data class Test(@${redactedAnnotation.shortName().asString()} val a: Int)
           """,
         )
       )
@@ -259,9 +299,9 @@ class RedactedPluginTest {
           """
           package dev.zacsweers.redacted.compiler.test
 
-          import dev.zacsweers.redacted.compiler.test.Redacted
+          import $redactedAnnotation
 
-          data class Test(@Redacted val a: Int)
+          data class Test(@${redactedAnnotation.shortName().asString()} val a: Int)
           """,
         ),
       )
@@ -282,9 +322,9 @@ class RedactedPluginTest {
           """
           package dev.zacsweers.redacted.compiler.test
 
-          import dev.zacsweers.redacted.compiler.test.Redacted
+          import $redactedAnnotation
 
-          @Redacted
+          @${redactedAnnotation.shortName().asString()}
           data class SensitiveData(val ssn: String, val birthday: String)
           """,
         )
@@ -311,9 +351,9 @@ class RedactedPluginTest {
           package dev.zacsweers.redacted.compiler.test
 
           import kotlin.jvm.JvmInline
-          import dev.zacsweers.redacted.compiler.test.Redacted
+          import $redactedAnnotation
 
-          @Redacted
+          @${redactedAnnotation.shortName().asString()}
           @JvmInline
           value class ValueClass(val ssn: String)
           """,
@@ -340,34 +380,34 @@ class RedactedPluginTest {
           """
           package dev.zacsweers.redacted.compiler.test
 
-          import dev.zacsweers.redacted.compiler.test.Redacted
+          import $redactedAnnotation
 
           // This should be ignored
           data class UnAnnotated(val foo: String, val bar: String)
 
           data class Complex<T>(
-              @Redacted val redactedReferenceType: String,
-              @Redacted val redactedNullableReferenceType: String?,
+              @${redactedAnnotation.shortName().asString()} val redactedReferenceType: String,
+              @${redactedAnnotation.shortName().asString()} val redactedNullableReferenceType: String?,
               val referenceType: String,
               val nullableReferenceType: String?,
-              @Redacted val redactedPrimitiveType: Int,
-              @Redacted val redactedNullablePrimitiveType: Int?,
+              @${redactedAnnotation.shortName().asString()} val redactedPrimitiveType: Int,
+              @${redactedAnnotation.shortName().asString()} val redactedNullablePrimitiveType: Int?,
               val primitiveType: Int,
               val nullablePrimitiveType: Int?,
-              @Redacted val redactedArrayReferenceType: Array<String>,
-              @Redacted val redactedNullableArrayReferenceType: Array<String>?,
+              @${redactedAnnotation.shortName().asString()} val redactedArrayReferenceType: Array<String>,
+              @${redactedAnnotation.shortName().asString()} val redactedNullableArrayReferenceType: Array<String>?,
               val arrayReferenceType: Array<String>,
               val nullableArrayReferenceType: Array<String>?,
-              @Redacted val redactedArrayPrimitiveType: IntArray,
-              @Redacted val redactedNullableArrayPrimitiveType: IntArray?,
+              @${redactedAnnotation.shortName().asString()} val redactedArrayPrimitiveType: IntArray,
+              @${redactedAnnotation.shortName().asString()} val redactedNullableArrayPrimitiveType: IntArray?,
               val arrayPrimitiveType: IntArray,
               val nullableArrayGenericType: IntArray?,
-              @Redacted val redactedGenericCollectionType: List<T>,
-              @Redacted val redactedNullableGenericCollectionType: List<T>?,
+              @${redactedAnnotation.shortName().asString()} val redactedGenericCollectionType: List<T>,
+              @${redactedAnnotation.shortName().asString()} val redactedNullableGenericCollectionType: List<T>?,
               val genericCollectionType: List<T>,
               val nullableGenericCollectionType: List<T>?,
-              @Redacted val redactedGenericType: T,
-              @Redacted val redactedNullableGenericType: T?,
+              @${redactedAnnotation.shortName().asString()} val redactedGenericType: T,
+              @${redactedAnnotation.shortName().asString()} val redactedNullableGenericType: T?,
               val genericType: T,
               val nullableGenericType: T?
           )
@@ -458,11 +498,11 @@ class RedactedPluginTest {
           processor.option(OPTION_REPLACEMENT_STRING, replacementString ?: "██"),
           processor.option(
             OPTION_REDACTED_ANNOTATION,
-            "dev/zacsweers/redacted/compiler/test/Redacted",
+            redactedAnnotation.pathSegments().joinToString("/"),
           ),
           processor.option(
             OPTION_UNREDACTED_ANNOTATION,
-            "dev/zacsweers/redacted/compiler/test/Unredacted",
+            unredactedAnnotation.pathSegments().joinToString("/"),
           ),
         )
       inheritClassPath = true

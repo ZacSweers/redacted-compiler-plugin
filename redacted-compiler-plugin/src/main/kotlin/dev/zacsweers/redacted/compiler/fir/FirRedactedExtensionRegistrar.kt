@@ -61,7 +61,6 @@ internal class FirRedactedExtensionRegistrar(
 }
 
 internal class FirRedactedCheckers(session: FirSession) : FirAdditionalCheckersExtension(session) {
-
   override val declarationCheckers: DeclarationCheckers =
     object : DeclarationCheckers() {
       override val classCheckers: Set<FirClassChecker>
@@ -70,7 +69,6 @@ internal class FirRedactedCheckers(session: FirSession) : FirAdditionalCheckersE
 }
 
 internal object FirRedactedDeclarationChecker : FirClassChecker(MppCheckerKind.Common) {
-
   override fun check(declaration: FirClass, context: CheckerContext, reporter: DiagnosticReporter) {
     val classRedactedAnnotation =
       declaration.getAnnotationByClassId(context.session.redactedAnnotation, context.session)
@@ -100,6 +98,10 @@ internal object FirRedactedDeclarationChecker : FirClassChecker(MppCheckerKind.C
       }
     }
 
+    val redactedName = { context.session.redactedAnnotation.shortClassName.asString() }
+
+    val unRedactedName = { context.session.redactedAnnotation.shortClassName.asString() }
+
     if (classIsRedacted || supertypeIsRedacted || classIsUnRedacted || anyRedacted) {
       val customToStringFunction =
         declaration.declarations.filterIsInstance<FirFunction>().find {
@@ -109,7 +111,7 @@ internal object FirRedactedDeclarationChecker : FirClassChecker(MppCheckerKind.C
         reporter.reportOn(
           customToStringFunction.source,
           RedactedDiagnostics.REDACTED_ERROR,
-          "@Redacted is only supported on data or value classes that do *not* have a custom toString() function. Please remove the function or remove the @Redacted annotations.",
+          "@${redactedName()} is only supported on data or value classes that do *not* have a custom toString() function. Please remove the function or remove the @${redactedName()} annotations.",
           context,
         )
         return
@@ -122,7 +124,7 @@ internal object FirRedactedDeclarationChecker : FirClassChecker(MppCheckerKind.C
         reporter.reportOn(
           declaration.source,
           RedactedDiagnostics.REDACTED_ERROR,
-          "@Redacted does not support enum classes or entries!",
+          "@${redactedName()} does not support enum classes or entries!",
           context,
         )
         return
@@ -131,7 +133,7 @@ internal object FirRedactedDeclarationChecker : FirClassChecker(MppCheckerKind.C
         reporter.reportOn(
           declaration.source,
           RedactedDiagnostics.REDACTED_ERROR,
-          "@Redacted is only supported on data or value classes!",
+          "@${redactedName()} is only supported on data or value classes!",
           context,
         )
         return
@@ -140,7 +142,7 @@ internal object FirRedactedDeclarationChecker : FirClassChecker(MppCheckerKind.C
         reporter.reportOn(
           declaration.source,
           RedactedDiagnostics.REDACTED_ERROR,
-          "@Redacted is redundant on value class properties, just annotate the class instead.",
+          "@${redactedName()} is redundant on value class properties, just annotate the class instead.",
           context,
         )
         return
@@ -150,7 +152,7 @@ internal object FirRedactedDeclarationChecker : FirClassChecker(MppCheckerKind.C
           reporter.reportOn(
             classRedactedAnnotation!!.source,
             RedactedDiagnostics.REDACTED_ERROR,
-            "@Redacted is useless on object classes.",
+            "@${redactedName()} is useless on object classes.",
             context,
           )
           return
@@ -158,7 +160,7 @@ internal object FirRedactedDeclarationChecker : FirClassChecker(MppCheckerKind.C
           reporter.reportOn(
             classUnRedactedAnnotation.source,
             RedactedDiagnostics.REDACTED_ERROR,
-            "@Unredacted is useless on object classes.",
+            "@${unRedactedName()} is useless on object classes.",
             context,
           )
           return
@@ -168,7 +170,7 @@ internal object FirRedactedDeclarationChecker : FirClassChecker(MppCheckerKind.C
         reporter.reportOn(
           declaration.source,
           RedactedDiagnostics.REDACTED_ERROR,
-          "@Redacted and @Unredacted cannot be applied to a single class.",
+          "@${redactedName()} and @${unRedactedName()} cannot be applied to a single class.",
           context,
         )
         return
@@ -177,7 +179,7 @@ internal object FirRedactedDeclarationChecker : FirClassChecker(MppCheckerKind.C
         reporter.reportOn(
           declaration.source,
           RedactedDiagnostics.REDACTED_ERROR,
-          "@Unredacted cannot be applied to a class unless a supertype is marked @Redacted.",
+          "@${unRedactedName()} cannot be applied to a class unless a supertype is marked @${redactedName()}.",
           context,
         )
         return
@@ -186,7 +188,7 @@ internal object FirRedactedDeclarationChecker : FirClassChecker(MppCheckerKind.C
         reporter.reportOn(
           declaration.source,
           RedactedDiagnostics.REDACTED_ERROR,
-          "@Unredacted should only be applied to properties in a class or a supertype is marked @Redacted.",
+          "@${unRedactedName()} should only be applied to properties in a class or a supertype is marked @${redactedName()}.",
           context,
         )
         return
@@ -195,7 +197,7 @@ internal object FirRedactedDeclarationChecker : FirClassChecker(MppCheckerKind.C
         reporter.reportOn(
           declaration.source,
           RedactedDiagnostics.REDACTED_ERROR,
-          "@Redacted should only be applied to the class or its properties, not both.",
+          "@${redactedName()} should only be applied to the class or its properties, not both.",
           context,
         )
         return
