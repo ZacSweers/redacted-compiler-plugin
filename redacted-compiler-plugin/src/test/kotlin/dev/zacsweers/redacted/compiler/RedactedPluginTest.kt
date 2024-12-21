@@ -239,12 +239,13 @@ class RedactedPluginTest(redactedNames: Pair<FqName, FqName>) {
       )
     assertThat(result.exitCode).isEqualTo(COMPILATION_ERROR)
 
-    // Full log is something like this:
-    // e: /path/to/NonDataClass.kt:5:20 @${redactedAnnotation.shortName().asString() is only
-    // supported on data classes!
-    assertThat(result.messages).contains("DoubleAnnotation.kt:")
     result.assertErrorMessage(
-      "@${redactedAnnotation.shortName().asString()} should only be applied to the class or its properties"
+      """
+        @${redactedAnnotation.shortName().asString()} detected on multiple targets: 
+        class: 'DoubleAnnotation'
+        properties: 'a'
+      """
+        .trimIndent()
     )
   }
 
