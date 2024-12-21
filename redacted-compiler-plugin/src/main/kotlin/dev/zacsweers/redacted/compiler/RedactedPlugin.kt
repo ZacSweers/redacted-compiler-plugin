@@ -40,12 +40,18 @@ public class RedactedComponentRegistrar : CompilerPluginRegistrar() {
     val messageCollector =
       configuration.get(CommonConfigurationKeys.MESSAGE_COLLECTOR_KEY, MessageCollector.NONE)
     val replacementString = checkNotNull(configuration[KEY_REPLACEMENT_STRING])
-    val redactedAnnotations = checkNotNull(configuration[KEY_REDACTED_ANNOTATIONS])
-      .splitToSequence(",")
-      .mapTo(LinkedHashSet()) { ClassId.fromString(it) }
-    val unRedactedAnnotations = checkNotNull(configuration[KEY_UNREDACTED_ANNOTATION])
-      .splitToSequence(",")
-      .mapTo(LinkedHashSet()) { ClassId.fromString(it) }
+    val redactedAnnotations =
+      checkNotNull(configuration[KEY_REDACTED_ANNOTATIONS]).splitToSequence(",").mapTo(
+        LinkedHashSet()
+      ) {
+        ClassId.fromString(it)
+      }
+    val unRedactedAnnotations =
+      checkNotNull(configuration[KEY_UNREDACTED_ANNOTATION]).splitToSequence(",").mapTo(
+        LinkedHashSet()
+      ) {
+        ClassId.fromString(it)
+      }
     val usesK2 = configuration.languageVersionSettings.languageVersion.usesK2
 
     if (usesK2) {
@@ -57,7 +63,8 @@ public class RedactedComponentRegistrar : CompilerPluginRegistrar() {
       RedactedIrGenerationExtension(
         messageCollector,
         replacementString,
-        redactedAnnotations, unRedactedAnnotations
+        redactedAnnotations,
+        unRedactedAnnotations,
       )
     )
   }

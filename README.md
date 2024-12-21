@@ -66,7 +66,7 @@ redacted {
   // Define custom unredacted annotations.
   unredactedAnnotations.add("dev/zacsweers/redacted/annotations/Unredacted") // Default
 
-  // Define whether this plugin is enabled on this compilation. Useful if you want to 
+  // Define whether this plugin is enabled on this compilation. Useful if you want to
   // gate this behind a dynamic build configuration.
   enabled = true // Default
 
