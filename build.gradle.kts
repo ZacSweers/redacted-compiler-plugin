@@ -126,6 +126,4 @@ subprojects {
   }
 }
 
-dependencies {
-  dokka(project(":redacted-compiler-plugin-annotations"))
-}
+dependencies { dokka(project(":redacted-compiler-plugin-annotations")) }
