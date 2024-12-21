@@ -121,4 +121,12 @@ class SmokeTest {
     val genericType: T,
     val nullableGenericType: T?,
   )
+
+  @Test
+  fun valueExample() {
+    val sensitiveData = ValueClass("123-456-7890")
+    assertThat(sensitiveData.toString()).isEqualTo("ValueClass(██)")
+  }
+
+  @Redacted @JvmInline value class ValueClass(val ssn: String)
 }

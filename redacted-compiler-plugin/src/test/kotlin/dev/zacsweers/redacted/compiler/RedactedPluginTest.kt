@@ -27,7 +27,6 @@ import dev.zacsweers.redacted.compiler.RedactedCommandLineProcessor.Companion.OP
 import dev.zacsweers.redacted.compiler.RedactedCommandLineProcessor.Companion.OPTION_REDACTED_ANNOTATION
 import dev.zacsweers.redacted.compiler.RedactedCommandLineProcessor.Companion.OPTION_REPLACEMENT_STRING
 import dev.zacsweers.redacted.compiler.RedactedCommandLineProcessor.Companion.OPTION_UNREDACTED_ANNOTATION
-import dev.zacsweers.redacted.compiler.RedactedCommandLineProcessor.Companion.OPTION_VALIDATE_IR
 import org.jetbrains.kotlin.compiler.plugin.CliOption
 import org.jetbrains.kotlin.compiler.plugin.CommandLineProcessor
 import org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi
@@ -35,23 +34,9 @@ import org.jetbrains.kotlin.config.JvmTarget
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
-import org.junit.runner.RunWith
-import org.junit.runners.Parameterized
 
 @OptIn(ExperimentalCompilerApi::class)
-@RunWith(Parameterized::class)
-class RedactedPluginTest(private val useK2: Boolean, private val validateIr: Boolean) {
-
-  companion object {
-    @JvmStatic
-    @Parameterized.Parameters(name = "useK2 = {0}, validateIr = {1}")
-    fun data() =
-      listOf(
-        arrayOf(true, true),
-        arrayOf(true, false), // The default behavior
-        arrayOf(false, true),
-      )
-  }
+class RedactedPluginTest {
 
   @Rule @JvmField var temporaryFolder: TemporaryFolder = TemporaryFolder()
 
@@ -171,8 +156,7 @@ class RedactedPluginTest(private val useK2: Boolean, private val validateIr: Boo
     // Full log is something like this:
     // e: /path/to/AnnotatedValueProp.kt:5:1 @Redacted is redundant on value class properties
     // FIR reports this line number correctly, K1 reports it as 6
-    val lineNumber = if (useK2) 7 else 6
-    assertThat(result.messages).contains("AnnotatedValueProp.kt:$lineNumber:")
+    assertThat(result.messages).contains("AnnotatedValueProp.kt:7:")
     result.assertErrorMessage("@Redacted is redundant on value class properties")
   }
 
@@ -480,18 +464,11 @@ class RedactedPluginTest(private val useK2: Boolean, private val validateIr: Boo
             OPTION_UNREDACTED_ANNOTATION,
             "dev/zacsweers/redacted/compiler/test/Unredacted",
           ),
-          processor.option(OPTION_VALIDATE_IR, validateIr),
         )
       inheritClassPath = true
       sources = sourceFiles.asList() + redacted
       verbose = false
       jvmTarget = JvmTarget.fromString(System.getProperty("rdt.jvmTarget", "1.8"))!!.description
-      languageVersion =
-        if (this@RedactedPluginTest.useK2) {
-          "2.0"
-        } else {
-          "1.9"
-        }
     }
   }
 
@@ -510,14 +487,7 @@ class RedactedPluginTest(private val useK2: Boolean, private val validateIr: Boo
     return prepareCompilation(replacementString, *sourceFiles).compile()
   }
 
-  private fun CompilationResult.assertErrorMessage(
-    k1Message: String,
-    k2Message: String = k1Message,
-  ) {
-    if (useK2) {
-      assertThat(messages).contains(k2Message)
-    } else {
-      assertThat(messages).contains(k1Message)
-    }
+  private fun CompilationResult.assertErrorMessage(message: String) {
+    assertThat(messages).contains(message)
   }
 }

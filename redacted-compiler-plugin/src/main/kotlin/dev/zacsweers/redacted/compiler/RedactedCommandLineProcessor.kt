@@ -35,10 +35,6 @@ internal val KEY_UNREDACTED_ANNOTATION =
   CompilerConfigurationKey<String>(
     "The unredacted marker annotation (i.e. com/example/Unredacted) to look for when redacting"
   )
-internal val KEY_VALIDATE_IR =
-  CompilerConfigurationKey<Boolean>(
-    "Flag to enable validation in IR, which may be redundant since the same validation runs in FIR"
-  )
 
 @OptIn(ExperimentalCompilerApi::class)
 @AutoService(CommandLineProcessor::class)
@@ -80,15 +76,6 @@ public class RedactedCommandLineProcessor : CommandLineProcessor {
         required = true,
         allowMultipleOccurrences = false,
       )
-
-    val OPTION_VALIDATE_IR =
-      CliOption(
-        optionName = "validateIr",
-        valueDescription = "<true | false>",
-        description = KEY_VALIDATE_IR.toString(),
-        required = false,
-        allowMultipleOccurrences = false,
-      )
   }
 
   override val pluginId: String = "dev.zacsweers.redacted.compiler"
@@ -99,7 +86,6 @@ public class RedactedCommandLineProcessor : CommandLineProcessor {
       OPTION_REPLACEMENT_STRING,
       OPTION_REDACTED_ANNOTATION,
       OPTION_UNREDACTED_ANNOTATION,
-      OPTION_VALIDATE_IR,
     )
 
   override fun processOption(
@@ -112,7 +98,6 @@ public class RedactedCommandLineProcessor : CommandLineProcessor {
       "replacementString" -> configuration.put(KEY_REPLACEMENT_STRING, value)
       "redactedAnnotation" -> configuration.put(KEY_REDACTED_ANNOTATION, value)
       "unredactedAnnotation" -> configuration.put(KEY_UNREDACTED_ANNOTATION, value)
-      "validateIr" -> configuration.put(KEY_VALIDATE_IR, value.toBoolean())
       else -> error("Unknown plugin option: ${option.optionName}")
     }
 }

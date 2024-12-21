@@ -20,13 +20,9 @@ package dev.zacsweers.redacted.compiler
 import org.jetbrains.kotlin.backend.common.IrElementTransformerVoidWithContext
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
-import org.jetbrains.kotlin.cli.common.messages.CompilerMessageLocationWithRange
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
-import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSourceLocation
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
-import org.jetbrains.kotlin.ir.IrElement
 import org.jetbrains.kotlin.ir.IrStatement
-import org.jetbrains.kotlin.ir.backend.js.utils.isInstantiableEnum
 import org.jetbrains.kotlin.ir.builders.IrBlockBodyBuilder
 import org.jetbrains.kotlin.ir.builders.irBlockBody
 import org.jetbrains.kotlin.ir.builders.irCall
@@ -36,9 +32,6 @@ import org.jetbrains.kotlin.ir.builders.irGetField
 import org.jetbrains.kotlin.ir.builders.irReturn
 import org.jetbrains.kotlin.ir.builders.irString
 import org.jetbrains.kotlin.ir.declarations.IrClass
-import org.jetbrains.kotlin.ir.declarations.IrDeclaration
-import org.jetbrains.kotlin.ir.declarations.IrDeclarationOrigin
-import org.jetbrains.kotlin.ir.declarations.IrFile
 import org.jetbrains.kotlin.ir.declarations.IrFunction
 import org.jetbrains.kotlin.ir.declarations.IrProperty
 import org.jetbrains.kotlin.ir.declarations.IrValueParameter
@@ -46,14 +39,8 @@ import org.jetbrains.kotlin.ir.expressions.addArgument
 import org.jetbrains.kotlin.ir.symbols.UnsafeDuringIrConstructionAPI
 import org.jetbrains.kotlin.ir.types.isArray
 import org.jetbrains.kotlin.ir.types.isString
-import org.jetbrains.kotlin.ir.util.SYNTHETIC_OFFSET
-import org.jetbrains.kotlin.ir.util.file
 import org.jetbrains.kotlin.ir.util.getAllSuperclasses
 import org.jetbrains.kotlin.ir.util.hasAnnotation
-import org.jetbrains.kotlin.ir.util.isEnumClass
-import org.jetbrains.kotlin.ir.util.isEnumEntry
-import org.jetbrains.kotlin.ir.util.isFinalClass
-import org.jetbrains.kotlin.ir.util.isObject
 import org.jetbrains.kotlin.ir.util.isPrimitiveArray
 import org.jetbrains.kotlin.ir.util.parentClassOrNull
 import org.jetbrains.kotlin.ir.util.primaryConstructor
@@ -69,7 +56,6 @@ internal class RedactedIrVisitor(
   private val unRedactedAnnotation: FqName,
   private val replacementString: String,
   private val messageCollector: MessageCollector,
-  private val validateIr: Boolean = false,
 ) : IrElementTransformerVoidWithContext() {
 
   private class Property(
@@ -113,56 +99,6 @@ internal class RedactedIrVisitor(
     }
 
     if (classIsRedacted || supertypeIsRedacted || classIsUnredacted || anyRedacted) {
-      if (validateIr) {
-
-        if (declaration.origin == IrDeclarationOrigin.DEFINED) {
-          declaration.reportError(ErrorMessages.CUSTOM_TO_STRING_IN_REDACTED_CLASS_ERROR)
-          return super.visitFunctionNew(declaration)
-        }
-        if (
-          declarationParent.isInstantiableEnum ||
-            declarationParent.isEnumClass ||
-            declarationParent.isEnumEntry
-        ) {
-          declarationParent.reportError(ErrorMessages.REDACTED_ON_ENUM_CLASS_ERROR)
-          return super.visitFunctionNew(declaration)
-        }
-        if (
-          declarationParent.isFinalClass && !declarationParent.isData && !declarationParent.isValue
-        ) {
-          declarationParent.reportError(ErrorMessages.REDACTED_ON_NON_DATA_OR_VALUE_CLASS_ERROR)
-          return super.visitFunctionNew(declaration)
-        }
-        if (declarationParent.isValue && !classIsRedacted) {
-          declarationParent.reportError(ErrorMessages.REDACTED_ON_VALUE_CLASS_PROPERTY_ERROR)
-          return super.visitFunctionNew(declaration)
-        }
-        if (declarationParent.isObject) {
-          if (!supertypeIsRedacted) {
-            declarationParent.reportError(ErrorMessages.REDACTED_ON_OBJECT_ERROR)
-            return super.visitFunctionNew(declaration)
-          } else if (classIsUnredacted) {
-            declarationParent.reportError(ErrorMessages.UNREDACTED_ON_OBJECT_ERROR)
-            return super.visitFunctionNew(declaration)
-          }
-        }
-        if (classIsRedacted && classIsUnredacted) {
-          declarationParent.reportError(ErrorMessages.UNREDACTED_AND_REDACTED_ERROR)
-          return super.visitFunctionNew(declaration)
-        }
-        if (classIsUnredacted && !supertypeIsRedacted) {
-          declarationParent.reportError(ErrorMessages.UNREDACTED_ON_NONREDACTED_SUBTYPE_ERROR)
-          return super.visitFunctionNew(declaration)
-        }
-        if (anyUnredacted && (!classIsRedacted && !supertypeIsRedacted)) {
-          declarationParent.reportError(ErrorMessages.UNREDACTED_ON_NON_PROPERTY)
-          return super.visitFunctionNew(declaration)
-        }
-        if (!(classIsRedacted xor anyRedacted xor supertypeIsRedacted)) {
-          declarationParent.reportError(ErrorMessages.REDACTED_ON_CLASS_AND_PROPERTY_ERROR)
-          return super.visitFunctionNew(declaration)
-        }
-      }
       declaration.convertToGeneratedToString(
         properties,
         classIsRedacted,
@@ -278,27 +214,5 @@ internal class RedactedIrVisitor(
 
   private fun log(message: String) {
     messageCollector.report(CompilerMessageSeverity.LOGGING, "$LOG_PREFIX $message")
-  }
-
-  private fun IrDeclaration.reportError(message: String) {
-    val location = file.locationOf(this)
-    messageCollector.report(CompilerMessageSeverity.ERROR, "$LOG_PREFIX $message", location)
-  }
-
-  /** Finds the line and column of [irElement] within this file. */
-  private fun IrFile.locationOf(irElement: IrElement?): CompilerMessageSourceLocation {
-    val sourceRangeInfo =
-      fileEntry.getSourceRangeInfo(
-        beginOffset = irElement?.startOffset ?: SYNTHETIC_OFFSET,
-        endOffset = irElement?.endOffset ?: SYNTHETIC_OFFSET,
-      )
-    return CompilerMessageLocationWithRange.create(
-      path = sourceRangeInfo.filePath,
-      lineStart = sourceRangeInfo.startLineNumber + 1,
-      columnStart = sourceRangeInfo.startColumnNumber + 1,
-      lineEnd = sourceRangeInfo.endLineNumber + 1,
-      columnEnd = sourceRangeInfo.endColumnNumber + 1,
-      lineContent = null,
-    )!!
   }
 }
