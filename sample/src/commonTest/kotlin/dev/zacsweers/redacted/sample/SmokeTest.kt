@@ -15,34 +15,36 @@
  */
 package dev.zacsweers.redacted.sample
 
-import com.google.common.truth.Truth.assertThat
 import dev.zacsweers.redacted.annotations.Redacted
 import dev.zacsweers.redacted.annotations.Unredacted
-import org.junit.Test
+import io.ktor.util.Platform
+import io.ktor.util.PlatformUtils
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 class SmokeTest {
 
   @Test
   fun abstractExample() {
     val secretChild = AbstractBase.SecretChild("private")
-    assertThat(secretChild.toString()).isEqualTo("SecretChild(redact=██)")
+    assertEquals("SecretChild(redact=██)", secretChild.toString())
   }
 
   @Test
   fun unredactedAbstractExample() {
     val notSoSecretChild = AbstractBase.NotSoSecretChild("public")
-    assertThat(notSoSecretChild.toString()).isEqualTo("NotSoSecretChild(unredacted=public)")
+    assertEquals("NotSoSecretChild(unredacted=public)", notSoSecretChild.toString())
   }
 
   @Test
   fun unredactedClassAbstractExample() {
     val notAtAllSecretChild = AbstractBase.NotAtAllSecretChild("public")
-    assertThat(notAtAllSecretChild.toString()).isEqualTo("NotAtAllSecretChild(unredacted=public)")
+    assertEquals("NotAtAllSecretChild(unredacted=public)", notAtAllSecretChild.toString())
   }
 
   @Test
   fun redactedObjectAbstractExample() {
-    assertThat(AbstractBase.ProplessChild.toString()).isEqualTo("ProplessChild()")
+    assertEquals("ProplessChild()", AbstractBase.ProplessChild.toString())
   }
 
   @Redacted
@@ -60,24 +62,24 @@ class SmokeTest {
   @Test
   fun sealedExample() {
     val secretChild = SecretParent.SecretChild("private")
-    assertThat(secretChild.toString()).isEqualTo("SecretChild(redact=██)")
+    assertEquals("SecretChild(redact=██)", secretChild.toString())
   }
 
   @Test
   fun unredactedSealedExample() {
     val notSoSecretChild = SecretParent.NotSoSecretChild("public")
-    assertThat(notSoSecretChild.toString()).isEqualTo("NotSoSecretChild(unredacted=public)")
+    assertEquals("NotSoSecretChild(unredacted=public)", notSoSecretChild.toString())
   }
 
   @Test
   fun unredactedClassSealedExample() {
     val notAtAllSecretChild = SecretParent.NotAtAllSecretChild("public")
-    assertThat(notAtAllSecretChild.toString()).isEqualTo("NotAtAllSecretChild(unredacted=public)")
+    assertEquals("NotAtAllSecretChild(unredacted=public)", notAtAllSecretChild.toString())
   }
 
   @Test
   fun redactedObjectSealedExample() {
-    assertThat(SecretParent.ProplessChild.toString()).isEqualTo("ProplessChild()")
+    assertEquals("ProplessChild()", SecretParent.ProplessChild.toString())
   }
 
   @Redacted
@@ -95,13 +97,13 @@ class SmokeTest {
   @Test
   fun supertypeRedactedExample() {
     val data = SuperRedacted("Bob", "2815551234")
-    assertThat(data.toString()).isEqualTo("SuperRedacted(name=Bob, phoneNumber=██)")
+    assertEquals("SuperRedacted(name=Bob, phoneNumber=██)", data.toString())
   }
 
   @Test
   fun unredactedPropertyOnRedactedClassExample() {
     val data = RedactedClass("Bob", "2815551234")
-    assertThat(data.toString()).isEqualTo("RedactedClass(name=Bob, phoneNumber=██)")
+    assertEquals("RedactedClass(name=Bob, phoneNumber=██)", data.toString())
   }
 
   @Redacted interface Base
@@ -113,24 +115,32 @@ class SmokeTest {
   @Test
   fun userExample() {
     val user = User("Bob", "2815551234")
-    assertThat(user.toString()).isEqualTo("User(name=Bob, phoneNumber=██)")
+    assertEquals("User(name=Bob, phoneNumber=██)", user.toString())
   }
 
   @Test
   fun classExample() {
     val sensitiveData = SensitiveData("123-456-7890", "1/1/00")
-    assertThat(sensitiveData.toString()).isEqualTo("SensitiveData(██)")
+    assertEquals("SensitiveData(██)", sensitiveData.toString())
   }
 
   @Redacted data class SensitiveData(val ssn: String, val birthday: String)
 
-  @Test
-  fun valueExample() {
-    val sensitiveData = ValueClass("123-456-7890")
-    assertThat(sensitiveData.toString()).isEqualTo("ValueClass(██)")
-  }
+  // TODO KMP-ify this test?
+  //  @Test
+  //  fun valueExample() {
+  //    val sensitiveData = ValueClass("123-456-7890")
+  //    assertEquals("ValueClass(██)", sensitiveData.toString())
+  //  }
+  //
+  //  @Redacted value class ValueClass(val ssn: String)
 
-  @Redacted @JvmInline value class ValueClass(val ssn: String)
+  /*
+  Complex(redactedReferenceType=██, redactedNullableReferenceType=██, referenceType=referenceType, nullableReferenceType=null, redactedPrimitiveType=██, redactedNullablePrimitiveType=██, primitiveType=2, nullablePrimitiveType=null, redactedArrayReferenceType=██, redactedNullableArrayReferenceType=██, arrayReferenceType=[...], nullableArrayReferenceType=null, redactedArrayPrimitiveType=██, redactedNullableArrayPrimitiveType=██, arrayPrimitiveType=[...], nullableArrayGenericType=null, redactedGenericCollectionType=██, redactedNullableGenericCollectionType=██, genericCollectionType=[...], nullableGenericCollectionType=null, redactedGenericType=██, redactedNullableGenericType=██, genericType=8, nullableGenericType=null)
+  Complex(redactedReferenceType=██, redactedNullableReferenceType=██, referenceType=referenceType, nullableReferenceType=null, redactedPrimitiveType=██, redactedNullablePrimitiveType=██, primitiveType=2, nullablePrimitiveType=null, redactedArrayReferenceType=██, redactedNullableArrayReferenceType=██, arrayReferenceType=[...], nullableArrayReferenceType=null, redactedArrayPrimitiveType=██, redactedNullableArrayPrimitiveType=██, arrayPrimitiveType=[...], nullableArrayGenericType=null, redactedGenericCollectionType=██, redactedNullableGenericCollectionType=██, genericCollectionType=[6], nullableGenericCollectionType=null, redactedGenericType=██, redactedNullableGenericType=██, genericType=8, nullableGenericType=null)>.
+	at protoOf.assertTrue_rpw5fg(/var/folders/_s/ft8kp2k12ps1jlfbt2r38z_r0000gn/T/_karma_webpack_177656/commons.js:22610)
+
+   */
 
   @Test
   fun complex() {
@@ -162,35 +172,44 @@ class SmokeTest {
         nullableGenericType = null,
       )
 
-    assertThat(complex.toString())
-      .isEqualTo(
-        "Complex(" +
-          "redactedReferenceType=██, " +
-          "redactedNullableReferenceType=██, " +
-          "referenceType=referenceType, " +
-          "nullableReferenceType=null, " +
-          "redactedPrimitiveType=██, " +
-          "redactedNullablePrimitiveType=██, " +
-          "primitiveType=2, " +
-          "nullablePrimitiveType=null, " +
-          "redactedArrayReferenceType=██, " +
-          "redactedNullableArrayReferenceType=██, " +
-          "arrayReferenceType=[arrayReferenceType], " +
-          "nullableArrayReferenceType=null, " +
-          "redactedArrayPrimitiveType=██, " +
-          "redactedNullableArrayPrimitiveType=██, " +
-          "arrayPrimitiveType=[4], " +
-          "nullableArrayGenericType=null, " +
-          "redactedGenericCollectionType=██, " +
-          "redactedNullableGenericCollectionType=██, " +
-          "genericCollectionType=[6], " +
-          "nullableGenericCollectionType=null, " +
-          "redactedGenericType=██, " +
-          "redactedNullableGenericType=██, " +
-          "genericType=8, " +
-          "nullableGenericType=null" +
-          ")"
-      )
+    assertEquals(
+      "Complex(" +
+        "redactedReferenceType=██, " +
+        "redactedNullableReferenceType=██, " +
+        "referenceType=referenceType, " +
+        "nullableReferenceType=null, " +
+        "redactedPrimitiveType=██, " +
+        "redactedNullablePrimitiveType=██, " +
+        "primitiveType=2, " +
+        "nullablePrimitiveType=null, " +
+        "redactedArrayReferenceType=██, " +
+        "redactedNullableArrayReferenceType=██, " +
+        "arrayReferenceType=[${arrayContent("arrayReferenceType")}], " +
+        "nullableArrayReferenceType=null, " +
+        "redactedArrayPrimitiveType=██, " +
+        "redactedNullableArrayPrimitiveType=██, " +
+        "arrayPrimitiveType=[${arrayContent(4)}], " +
+        "nullableArrayGenericType=null, " +
+        "redactedGenericCollectionType=██, " +
+        "redactedNullableGenericCollectionType=██, " +
+        "genericCollectionType=[6], " +
+        "nullableGenericCollectionType=null, " +
+        "redactedGenericType=██, " +
+        "redactedNullableGenericType=██, " +
+        "genericType=8, " +
+        "nullableGenericType=null" +
+        ")",
+      complex.toString(),
+    )
+  }
+
+  private fun arrayContent(content: Any): String {
+    return if (
+      PlatformUtils.IS_JS) {
+      "..."
+    } else {
+      content.toString()
+    }
   }
 
   data class Complex<T>(

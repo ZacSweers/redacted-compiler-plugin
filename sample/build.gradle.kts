@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+import org.jetbrains.kotlin.gradle.dsl.JsModuleKind.MODULE_UMD
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -16,12 +18,31 @@ kotlin {
       }
     }
   }
+  js(IR) {
+    nodejs { testTask { useMocha { timeout = "30s" } } }
+    browser()
+    binaries.executable()
+  }
+
+  @OptIn(ExperimentalWasmDsl::class)
+  wasmJs {
+    binaries.executable()
+    browser {}
+  }
+  linuxX64()
+  macosX64()
+  macosArm64()
+  iosSimulatorArm64()
+  iosX64()
+
   sourceSets {
     commonMain { dependencies { implementation(project(":redacted-compiler-plugin-annotations")) } }
-    getByName("jvmTest") {
+    commonTest {
       dependencies {
-        implementation(libs.junit)
-        implementation(libs.truth)
+        implementation(libs.kotlin.test)
+        implementation("io.ktor:ktor-utils:3.0.2") {
+          because("For PlatformUtils use")
+        }
       }
     }
   }
