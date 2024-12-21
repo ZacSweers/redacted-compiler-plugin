@@ -21,13 +21,13 @@ import org.jetbrains.kotlin.name.ClassId
 
 internal class RedactedFirBuiltIns(
   session: FirSession,
-  val redactedAnnotation: ClassId,
-  val unRedactedAnnotation: ClassId,
+  val redactedAnnotations: Set<ClassId>,
+  val unRedactedAnnotations: Set<ClassId>,
 ) : FirExtensionSessionComponent(session) {
   companion object {
-    fun getFactory(redactedAnnotation: ClassId, unRedactedAnnotation: ClassId) =
+    fun getFactory(redactedAnnotations: Set<ClassId>, unRedactedAnnotations: Set<ClassId>) =
       Factory { session ->
-        RedactedFirBuiltIns(session, redactedAnnotation, unRedactedAnnotation)
+        RedactedFirBuiltIns(session, redactedAnnotations, unRedactedAnnotations)
       }
   }
 }
@@ -35,8 +35,8 @@ internal class RedactedFirBuiltIns(
 internal val FirSession.redactedFirBuiltIns: RedactedFirBuiltIns by
   FirSession.sessionComponentAccessor()
 
-internal val FirSession.redactedAnnotation: ClassId
-  get() = redactedFirBuiltIns.redactedAnnotation
+internal val FirSession.redactedAnnotations: Set<ClassId>
+  get() = redactedFirBuiltIns.redactedAnnotations
 
-internal val FirSession.unRedactedAnnotation: ClassId
-  get() = redactedFirBuiltIns.unRedactedAnnotation
+internal val FirSession.unRedactedAnnotations: Set<ClassId>
+  get() = redactedFirBuiltIns.unRedactedAnnotations

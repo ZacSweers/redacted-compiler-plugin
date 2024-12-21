@@ -40,25 +40,31 @@ public class RedactedComponentRegistrar : CompilerPluginRegistrar() {
     val messageCollector =
       configuration.get(CommonConfigurationKeys.MESSAGE_COLLECTOR_KEY, MessageCollector.NONE)
     val replacementString = checkNotNull(configuration[KEY_REPLACEMENT_STRING])
-    val redactedAnnotation = checkNotNull(configuration[KEY_REDACTED_ANNOTATION])
-    val unRedactedAnnotation = checkNotNull(configuration[KEY_UNREDACTED_ANNOTATION])
+    val redactedAnnotations =
+      checkNotNull(configuration[KEY_REDACTED_ANNOTATIONS]).splitToSequence(",").mapTo(
+        LinkedHashSet()
+      ) {
+        ClassId.fromString(it)
+      }
+    val unRedactedAnnotations =
+      checkNotNull(configuration[KEY_UNREDACTED_ANNOTATION]).splitToSequence(",").mapTo(
+        LinkedHashSet()
+      ) {
+        ClassId.fromString(it)
+      }
     val usesK2 = configuration.languageVersionSettings.languageVersion.usesK2
-    val redactedAnnotationClassId = ClassId.fromString(redactedAnnotation)
-    val fqRedactedAnnotation = redactedAnnotationClassId.asSingleFqName()
-    val unRedactedAnnotationClassId = ClassId.fromString(unRedactedAnnotation)
-    val fqUnRedactedAnnotation = unRedactedAnnotationClassId.asSingleFqName()
 
     if (usesK2) {
       FirExtensionRegistrarAdapter.registerExtension(
-        FirRedactedExtensionRegistrar(redactedAnnotationClassId, unRedactedAnnotationClassId)
+        FirRedactedExtensionRegistrar(redactedAnnotations, unRedactedAnnotations)
       )
     }
     IrGenerationExtension.registerExtension(
       RedactedIrGenerationExtension(
         messageCollector,
         replacementString,
-        fqRedactedAnnotation,
-        fqUnRedactedAnnotation,
+        redactedAnnotations,
+        unRedactedAnnotations,
       )
     )
   }
