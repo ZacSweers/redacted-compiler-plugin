@@ -221,7 +221,7 @@ internal object FirRedactedDeclarationChecker : FirClassChecker(MppCheckerKind.C
             ?: error("Not possible!")
 
         val message = buildString {
-          appendLine("@${redactedName.shortClassName.asString()} detected on multiple targets: ")
+          appendLine("@${redactedName.shortClassName.asString()} detected on multiple targets:")
           if (classIsRedacted) {
             appendLine("class: '${declaration.nameOrSpecialName.asString()}'")
           }
