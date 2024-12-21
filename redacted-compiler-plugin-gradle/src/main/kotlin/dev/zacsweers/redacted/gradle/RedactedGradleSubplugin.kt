@@ -46,18 +46,10 @@ public class RedactedGradleSubplugin : KotlinCompilerPluginSupportPlugin {
     val extension = project.extensions.getByType(RedactedPluginExtension::class.java)
     @Suppress("DEPRECATION")
     val annotations =
-      extension.redactedAnnotations.zip(extension.redactedAnnotation) {
-        annotations,
-        singleAnnotation ->
-        annotations + singleAnnotation
-      }
+      extension.redactedAnnotations.zip(extension.redactedAnnotation, Set<String>::plus)
     @Suppress("DEPRECATION")
     val unredactedAnnotations =
-      extension.unredactedAnnotations.zip(extension.unredactedAnnotation) {
-        annotations,
-        singleAnnotation ->
-        annotations + singleAnnotation
-      }
+      extension.unredactedAnnotations.zip(extension.unredactedAnnotation, Set<String>::plus)
 
     // Default annotation is used, so add it as a dependency
     // Note only multiplatform, jvm/android, and js are supported. Anyone else is on their own.
