@@ -241,7 +241,7 @@ class RedactedPluginTest(redactedNames: Pair<FqName, FqName>) {
 
     result.assertErrorMessage(
       """
-        @${redactedAnnotation.shortName().asString()} detected on multiple targets:
+        @${redactedAnnotation.shortName().asString()} detected on multiple targets: 
         class: 'DoubleAnnotation'
         properties: 'a'
       """
