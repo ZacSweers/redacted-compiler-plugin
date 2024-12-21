@@ -44,12 +44,28 @@ public class RedactedGradleSubplugin : KotlinCompilerPluginSupportPlugin {
   ): Provider<List<SubpluginOption>> {
     val project = kotlinCompilation.target.project
     val extension = project.extensions.getByType(RedactedPluginExtension::class.java)
-    val annotation = extension.redactedAnnotation
-    val unredactedAnnotation = extension.unredactedAnnotation
+    @Suppress("DEPRECATION")
+    val annotations =
+      extension.redactedAnnotations.zip(extension.redactedAnnotation) {
+        annotations,
+        singleAnnotation ->
+        annotations + singleAnnotation
+      }
+    @Suppress("DEPRECATION")
+    val unredactedAnnotations =
+      extension.unredactedAnnotations.zip(extension.unredactedAnnotation) {
+        annotations,
+        singleAnnotation ->
+        annotations + singleAnnotation
+      }
 
     // Default annotation is used, so add it as a dependency
     // Note only multiplatform, jvm/android, and js are supported. Anyone else is on their own.
-    if (annotation.get() == DEFAULT_ANNOTATION) {
+    val useDefaults =
+      annotations.getOrElse(DEFAULT_ANNOTATION_SET) == DEFAULT_ANNOTATION_SET ||
+        unredactedAnnotations.getOrElse(DEFAULT_UNREDACTED_ANNOTATION_SET) ==
+          DEFAULT_UNREDACTED_ANNOTATION_SET
+    if (useDefaults) {
       project.dependencies.add(
         kotlinCompilation.implementationConfigurationName,
         "dev.zacsweers.redacted:redacted-compiler-plugin-annotations:$VERSION",
@@ -62,8 +78,11 @@ public class RedactedGradleSubplugin : KotlinCompilerPluginSupportPlugin {
       listOf(
         SubpluginOption(key = "enabled", value = enabled.toString()),
         SubpluginOption(key = "replacementString", value = extension.replacementString.get()),
-        SubpluginOption(key = "redactedAnnotation", value = annotation.get()),
-        SubpluginOption(key = "unredactedAnnotation", value = unredactedAnnotation.get()),
+        SubpluginOption(key = "redactedAnnotations", value = annotations.get().joinToString(",")),
+        SubpluginOption(
+          key = "unredactedAnnotations",
+          value = unredactedAnnotations.get().joinToString(","),
+        ),
       )
     }
   }

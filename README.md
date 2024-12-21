@@ -57,17 +57,17 @@ You can configure custom behavior with properties on the `redacted` extension.
 
 ```kotlin
 redacted {
-  // Define a custom annotation. The -annotations artifact won't be automatically added to
+  // Define custom annotations. The -annotations artifact won't be automatically added to
   // dependencies if you define your own!
-  // Note that this must be in the format of a string where packages are delimited by '/' and
+  // Note that these must be in the format of a string where packages are delimited by '/' and
   // classes by '.', e.g. "kotlin/Map.Entry"
-  redactedAnnotation = "dev/zacsweers/redacted/annotations/Redacted" // Default
+  redactedAnnotations.add("dev/zacsweers/redacted/annotations/Redacted") // Default
 
-  // Define a custom unredacted annotation.
-  unredactedAnnotation = "dev/zacsweers/redacted/annotations/Unredacted" // Default
+  // Define custom unredacted annotations.
+  unredactedAnnotations.add("dev/zacsweers/redacted/annotations/Unredacted") // Default
 
-  // Define whether or not this is enabled. Useful if you want to gate this behind a dynamic
-  // build configuration.
+  // Define whether this plugin is enabled on this compilation. Useful if you want to
+  // gate this behind a dynamic build configuration.
   enabled = true // Default
 
   // Define a custom replacement string for redactions.

@@ -24,9 +24,9 @@ import com.tschuchort.compiletesting.PluginOption
 import com.tschuchort.compiletesting.SourceFile
 import com.tschuchort.compiletesting.SourceFile.Companion.kotlin
 import dev.zacsweers.redacted.compiler.RedactedCommandLineProcessor.Companion.OPTION_ENABLED
-import dev.zacsweers.redacted.compiler.RedactedCommandLineProcessor.Companion.OPTION_REDACTED_ANNOTATION
+import dev.zacsweers.redacted.compiler.RedactedCommandLineProcessor.Companion.OPTION_REDACTED_ANNOTATIONS
 import dev.zacsweers.redacted.compiler.RedactedCommandLineProcessor.Companion.OPTION_REPLACEMENT_STRING
-import dev.zacsweers.redacted.compiler.RedactedCommandLineProcessor.Companion.OPTION_UNREDACTED_ANNOTATION
+import dev.zacsweers.redacted.compiler.RedactedCommandLineProcessor.Companion.OPTION_UNREDACTED_ANNOTATIONS
 import org.jetbrains.kotlin.compiler.plugin.CliOption
 import org.jetbrains.kotlin.compiler.plugin.CommandLineProcessor
 import org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi
@@ -239,12 +239,13 @@ class RedactedPluginTest(redactedNames: Pair<FqName, FqName>) {
       )
     assertThat(result.exitCode).isEqualTo(COMPILATION_ERROR)
 
-    // Full log is something like this:
-    // e: /path/to/NonDataClass.kt:5:20 @${redactedAnnotation.shortName().asString() is only
-    // supported on data classes!
-    assertThat(result.messages).contains("DoubleAnnotation.kt:")
     result.assertErrorMessage(
-      "@${redactedAnnotation.shortName().asString()} should only be applied to the class or its properties"
+      """
+        @${redactedAnnotation.shortName().asString()} detected on multiple targets:
+        class: 'DoubleAnnotation'
+        properties: 'a'
+      """
+        .trimIndent()
     )
   }
 
@@ -497,11 +498,11 @@ class RedactedPluginTest(redactedNames: Pair<FqName, FqName>) {
           processor.option(OPTION_ENABLED, "true"),
           processor.option(OPTION_REPLACEMENT_STRING, replacementString ?: "██"),
           processor.option(
-            OPTION_REDACTED_ANNOTATION,
+            OPTION_REDACTED_ANNOTATIONS,
             redactedAnnotation.pathSegments().joinToString("/"),
           ),
           processor.option(
-            OPTION_UNREDACTED_ANNOTATION,
+            OPTION_UNREDACTED_ANNOTATIONS,
             unredactedAnnotation.pathSegments().joinToString("/"),
           ),
         )
