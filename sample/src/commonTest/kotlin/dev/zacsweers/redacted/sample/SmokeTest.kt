@@ -17,7 +17,6 @@ package dev.zacsweers.redacted.sample
 
 import dev.zacsweers.redacted.annotations.Redacted
 import dev.zacsweers.redacted.annotations.Unredacted
-import io.ktor.util.Platform
 import io.ktor.util.PlatformUtils
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -136,11 +135,11 @@ class SmokeTest {
   //  @Redacted value class ValueClass(val ssn: String)
 
   /*
-  Complex(redactedReferenceType=██, redactedNullableReferenceType=██, referenceType=referenceType, nullableReferenceType=null, redactedPrimitiveType=██, redactedNullablePrimitiveType=██, primitiveType=2, nullablePrimitiveType=null, redactedArrayReferenceType=██, redactedNullableArrayReferenceType=██, arrayReferenceType=[...], nullableArrayReferenceType=null, redactedArrayPrimitiveType=██, redactedNullableArrayPrimitiveType=██, arrayPrimitiveType=[...], nullableArrayGenericType=null, redactedGenericCollectionType=██, redactedNullableGenericCollectionType=██, genericCollectionType=[...], nullableGenericCollectionType=null, redactedGenericType=██, redactedNullableGenericType=██, genericType=8, nullableGenericType=null)
-  Complex(redactedReferenceType=██, redactedNullableReferenceType=██, referenceType=referenceType, nullableReferenceType=null, redactedPrimitiveType=██, redactedNullablePrimitiveType=██, primitiveType=2, nullablePrimitiveType=null, redactedArrayReferenceType=██, redactedNullableArrayReferenceType=██, arrayReferenceType=[...], nullableArrayReferenceType=null, redactedArrayPrimitiveType=██, redactedNullableArrayPrimitiveType=██, arrayPrimitiveType=[...], nullableArrayGenericType=null, redactedGenericCollectionType=██, redactedNullableGenericCollectionType=██, genericCollectionType=[6], nullableGenericCollectionType=null, redactedGenericType=██, redactedNullableGenericType=██, genericType=8, nullableGenericType=null)>.
-	at protoOf.assertTrue_rpw5fg(/var/folders/_s/ft8kp2k12ps1jlfbt2r38z_r0000gn/T/_karma_webpack_177656/commons.js:22610)
+   Complex(redactedReferenceType=██, redactedNullableReferenceType=██, referenceType=referenceType, nullableReferenceType=null, redactedPrimitiveType=██, redactedNullablePrimitiveType=██, primitiveType=2, nullablePrimitiveType=null, redactedArrayReferenceType=██, redactedNullableArrayReferenceType=██, arrayReferenceType=[...], nullableArrayReferenceType=null, redactedArrayPrimitiveType=██, redactedNullableArrayPrimitiveType=██, arrayPrimitiveType=[...], nullableArrayGenericType=null, redactedGenericCollectionType=██, redactedNullableGenericCollectionType=██, genericCollectionType=[...], nullableGenericCollectionType=null, redactedGenericType=██, redactedNullableGenericType=██, genericType=8, nullableGenericType=null)
+   Complex(redactedReferenceType=██, redactedNullableReferenceType=██, referenceType=referenceType, nullableReferenceType=null, redactedPrimitiveType=██, redactedNullablePrimitiveType=██, primitiveType=2, nullablePrimitiveType=null, redactedArrayReferenceType=██, redactedNullableArrayReferenceType=██, arrayReferenceType=[...], nullableArrayReferenceType=null, redactedArrayPrimitiveType=██, redactedNullableArrayPrimitiveType=██, arrayPrimitiveType=[...], nullableArrayGenericType=null, redactedGenericCollectionType=██, redactedNullableGenericCollectionType=██, genericCollectionType=[6], nullableGenericCollectionType=null, redactedGenericType=██, redactedNullableGenericType=██, genericType=8, nullableGenericType=null)>.
+  at protoOf.assertTrue_rpw5fg(/var/folders/_s/ft8kp2k12ps1jlfbt2r38z_r0000gn/T/_karma_webpack_177656/commons.js:22610)
 
-   */
+    */
 
   @Test
   fun complex() {
@@ -204,8 +203,7 @@ class SmokeTest {
   }
 
   private fun arrayContent(content: Any): String {
-    return if (
-      PlatformUtils.IS_JS) {
+    return if (PlatformUtils.IS_JS) {
       "..."
     } else {
       content.toString()

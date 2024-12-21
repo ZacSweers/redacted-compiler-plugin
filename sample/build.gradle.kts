@@ -1,5 +1,4 @@
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
-import org.jetbrains.kotlin.gradle.dsl.JsModuleKind.MODULE_UMD
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -40,9 +39,7 @@ kotlin {
     commonTest {
       dependencies {
         implementation(libs.kotlin.test)
-        implementation("io.ktor:ktor-utils:3.0.2") {
-          because("For PlatformUtils use")
-        }
+        implementation("io.ktor:ktor-utils:3.0.2") { because("For PlatformUtils use") }
       }
     }
   }

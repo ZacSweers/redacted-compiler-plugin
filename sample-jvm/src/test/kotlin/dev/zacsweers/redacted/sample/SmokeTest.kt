@@ -122,7 +122,6 @@ class SmokeTest {
     val nullableGenericType: T?,
   )
 
-
   @Test
   fun valueExample() {
     val sensitiveData = ValueClass("123-456-7890")
