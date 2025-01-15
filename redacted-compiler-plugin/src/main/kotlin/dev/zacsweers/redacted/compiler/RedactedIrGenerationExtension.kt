@@ -15,6 +15,7 @@
  */
 package dev.zacsweers.redacted.compiler
 
+import dev.zacsweers.redacted.compiler.fir.repro.CompanionFactoryTransformer
 import org.jetbrains.kotlin.backend.common.extensions.IrGenerationExtension
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
@@ -38,5 +39,8 @@ internal class RedactedIrGenerationExtension(
         messageCollector,
       )
     moduleFragment.transform(redactedTransformer, null)
+
+    val companionFactoryTransformer = CompanionFactoryTransformer(pluginContext)
+    moduleFragment.transform(companionFactoryTransformer, null)
   }
 }
