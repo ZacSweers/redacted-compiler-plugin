@@ -38,7 +38,7 @@ import org.jetbrains.kotlin.fir.declarations.utils.isExpect
 import org.jetbrains.kotlin.fir.declarations.utils.isExtension
 import org.jetbrains.kotlin.fir.declarations.utils.isExternal
 import org.jetbrains.kotlin.fir.declarations.utils.isFinal
-import org.jetbrains.kotlin.fir.declarations.utils.isInline
+import org.jetbrains.kotlin.fir.declarations.utils.isInlineOrValue
 import org.jetbrains.kotlin.fir.declarations.utils.nameOrSpecialName
 import org.jetbrains.kotlin.fir.expressions.FirAnnotation
 import org.jetbrains.kotlin.fir.extensions.FirExtensionRegistrar
@@ -148,7 +148,7 @@ internal object FirRedactedDeclarationChecker : FirClassChecker(MppCheckerKind.C
         )
         return
       }
-      if (declaration.isFinal && !(declaration.status.isData || declaration.isInline)) {
+      if (declaration.isFinal && !(declaration.status.isData || declaration.isInlineOrValue)) {
         reporter.reportOn(
           declaration.source,
           RedactedDiagnostics.REDACTED_ERROR,
@@ -157,7 +157,7 @@ internal object FirRedactedDeclarationChecker : FirClassChecker(MppCheckerKind.C
         )
         return
       }
-      if (declaration.isInline && !classIsRedacted) {
+      if (declaration.isInlineOrValue && !classIsRedacted) {
         reporter.reportOn(
           declaration.source,
           RedactedDiagnostics.REDACTED_ERROR,
