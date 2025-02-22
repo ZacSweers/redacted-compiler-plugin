@@ -4,6 +4,11 @@ Changelog
 **Unreleased**
 --------------
 
+1.12.1
+------
+
+_2025-02-22_
+
 - **Fix**: Fix CLI parsing for multiple custom annotations. Note that while the previous version was broken, it would have _also_ failed compilation so there shouldn't be a chance that broken redactions would have made it into a production build.
 - Update to Kotlin `2.1.10`.
 - Build against Gradle `8.12.1`.
