@@ -480,6 +480,39 @@ class RedactedPluginTest(redactedNames: Pair<FqName, FqName>) {
       )
   }
 
+  @Test
+  fun reproExample() {
+    val result =
+      compile(
+        kotlin(
+          "NonDataClass.kt",
+          """
+                  package dev.zacsweers.redacted
+
+                  annotation class RedactedType {
+                    annotation class Factory
+                  }
+
+                  @RedactedType
+                  class Example(val redactedString: String) {
+                    @RedactedType.Factory
+                    interface Factory {
+                      fun create(redactedString: String)
+                    }
+                    // Existing companion object
+                    companion object
+                  }
+                """
+            .trimIndent(),
+        )
+      )
+    assertThat(result.exitCode).isEqualTo(KotlinCompilation.ExitCode.OK)
+
+    val companionClass = (result as JvmCompilationResult).classLoader.loadClass("dev.zacsweers.redacted.Example\$Companion")
+    assertThat(companionClass.interfaces).hasLength(1)
+    assertThat(companionClass.interfaces[0].name).isEqualTo("dev.zacsweers.redacted.Example\$Factory")
+  }
+
   private fun prepareCompilation(vararg sourceFiles: SourceFile): KotlinCompilation {
     return prepareCompilation(null, *sourceFiles)
   }
