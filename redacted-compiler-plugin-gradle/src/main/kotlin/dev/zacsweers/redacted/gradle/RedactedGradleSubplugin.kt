@@ -70,10 +70,10 @@ public class RedactedGradleSubplugin : KotlinCompilerPluginSupportPlugin {
       listOf(
         SubpluginOption(key = "enabled", value = enabled.toString()),
         SubpluginOption(key = "replacementString", value = extension.replacementString.get()),
-        SubpluginOption(key = "redactedAnnotations", value = annotations.get().joinToString(",")),
+        SubpluginOption(key = "redactedAnnotations", value = annotations.get().joinToString(":")),
         SubpluginOption(
           key = "unredactedAnnotations",
-          value = unredactedAnnotations.get().joinToString(","),
+          value = unredactedAnnotations.get().joinToString(":"),
         ),
       )
     }

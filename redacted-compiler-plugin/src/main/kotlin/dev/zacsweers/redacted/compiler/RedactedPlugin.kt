@@ -23,7 +23,6 @@ import org.jetbrains.kotlin.compiler.plugin.CompilerPluginRegistrar
 import org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi
 import org.jetbrains.kotlin.config.CommonConfigurationKeys
 import org.jetbrains.kotlin.config.CompilerConfiguration
-import org.jetbrains.kotlin.config.languageVersionSettings
 import org.jetbrains.kotlin.fir.extensions.FirExtensionRegistrarAdapter
 import org.jetbrains.kotlin.name.ClassId
 
@@ -41,24 +40,21 @@ public class RedactedComponentRegistrar : CompilerPluginRegistrar() {
       configuration.get(CommonConfigurationKeys.MESSAGE_COLLECTOR_KEY, MessageCollector.NONE)
     val replacementString = checkNotNull(configuration[KEY_REPLACEMENT_STRING])
     val redactedAnnotations =
-      checkNotNull(configuration[KEY_REDACTED_ANNOTATIONS]).splitToSequence(",").mapTo(
+      checkNotNull(configuration[KEY_REDACTED_ANNOTATIONS]).splitToSequence(":").mapTo(
         LinkedHashSet()
       ) {
         ClassId.fromString(it)
       }
     val unRedactedAnnotations =
-      checkNotNull(configuration[KEY_UNREDACTED_ANNOTATION]).splitToSequence(",").mapTo(
+      checkNotNull(configuration[KEY_UNREDACTED_ANNOTATION]).splitToSequence(":").mapTo(
         LinkedHashSet()
       ) {
         ClassId.fromString(it)
       }
-    val usesK2 = configuration.languageVersionSettings.languageVersion.usesK2
 
-    if (usesK2) {
-      FirExtensionRegistrarAdapter.registerExtension(
-        FirRedactedExtensionRegistrar(redactedAnnotations, unRedactedAnnotations)
-      )
-    }
+    FirExtensionRegistrarAdapter.registerExtension(
+      FirRedactedExtensionRegistrar(redactedAnnotations, unRedactedAnnotations)
+    )
     IrGenerationExtension.registerExtension(
       RedactedIrGenerationExtension(
         messageCollector,
