@@ -15,6 +15,7 @@
  */
 package dev.zacsweers.redacted.compiler.fir
 
+import dev.zacsweers.redacted.compiler.fir.repro.SupertypeGeneratorExtension
 import dev.zacsweers.redacted.compiler.firstNotNullResult
 import dev.zacsweers.redacted.compiler.unsafeLazy
 import org.jetbrains.kotlin.descriptors.isEnumEntry
@@ -63,6 +64,7 @@ internal class FirRedactedExtensionRegistrar(
   override fun ExtensionRegistrarContext.configurePlugin() {
     +RedactedFirBuiltIns.getFactory(redactedAnnotations, unRedactedAnnotations)
     +::FirRedactedCheckers
+    +::SupertypeGeneratorExtension
   }
 }
 
