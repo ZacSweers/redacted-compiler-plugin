@@ -4,6 +4,14 @@ Changelog
 **Unreleased**
 --------------
 
+1.13.0
+------
+
+_2025-03-26_
+
+- Update to Kotlin `2.1.20`. This plugin version requires Kotlin `2.1.20` or later.
+- Build against Gradle `8.13`.
+
 1.12.1
 ------
 
