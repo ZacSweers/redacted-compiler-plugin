@@ -15,7 +15,6 @@
  */
 package dev.zacsweers.redacted.compiler
 
-import com.google.auto.service.AutoService
 import org.jetbrains.kotlin.compiler.plugin.AbstractCliOption
 import org.jetbrains.kotlin.compiler.plugin.CliOption
 import org.jetbrains.kotlin.compiler.plugin.CommandLineProcessor
@@ -37,7 +36,6 @@ internal val KEY_UNREDACTED_ANNOTATION =
   )
 
 @OptIn(ExperimentalCompilerApi::class)
-@AutoService(CommandLineProcessor::class)
 public class RedactedCommandLineProcessor : CommandLineProcessor {
 
   internal companion object {

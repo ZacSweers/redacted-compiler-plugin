@@ -54,7 +54,7 @@ import org.jetbrains.kotlin.fir.types.isString
 import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.util.OperatorNameConventions
 
-internal class FirRedactedExtensionRegistrar(
+public class RedactedFirExtensionRegistrar(
   private val redactedAnnotations: Set<ClassId>,
   private val unRedactedAnnotations: Set<ClassId>,
 ) : FirExtensionRegistrar() {

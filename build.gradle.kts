@@ -19,7 +19,6 @@ buildscript {
 plugins {
   alias(libs.plugins.kotlin.jvm) apply false
   alias(libs.plugins.dokka)
-  alias(libs.plugins.ksp) apply false
   alias(libs.plugins.mavenPublish) apply false
   alias(libs.plugins.spotless)
   alias(libs.plugins.binaryCompatibilityValidator)

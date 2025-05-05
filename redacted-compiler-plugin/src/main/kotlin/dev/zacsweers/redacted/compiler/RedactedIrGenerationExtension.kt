@@ -21,8 +21,7 @@ import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
 import org.jetbrains.kotlin.name.ClassId
 
-internal class RedactedIrGenerationExtension(
-  private val messageCollector: MessageCollector,
+public class RedactedIrGenerationExtension(
   private val replacementString: String,
   private val redactedAnnotations: Set<ClassId>,
   private val unRedactedAnnotations: Set<ClassId>,
@@ -35,7 +34,6 @@ internal class RedactedIrGenerationExtension(
         redactedAnnotations,
         unRedactedAnnotations,
         replacementString,
-        messageCollector,
       )
     moduleFragment.transform(redactedTransformer, null)
   }

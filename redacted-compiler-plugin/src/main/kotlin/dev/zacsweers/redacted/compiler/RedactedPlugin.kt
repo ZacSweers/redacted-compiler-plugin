@@ -15,19 +15,15 @@
  */
 package dev.zacsweers.redacted.compiler
 
-import com.google.auto.service.AutoService
-import dev.zacsweers.redacted.compiler.fir.FirRedactedExtensionRegistrar
+import dev.zacsweers.redacted.compiler.fir.RedactedFirExtensionRegistrar
 import org.jetbrains.kotlin.backend.common.extensions.IrGenerationExtension
-import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.compiler.plugin.CompilerPluginRegistrar
 import org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi
-import org.jetbrains.kotlin.config.CommonConfigurationKeys
 import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.fir.extensions.FirExtensionRegistrarAdapter
 import org.jetbrains.kotlin.name.ClassId
 
 @OptIn(ExperimentalCompilerApi::class)
-@AutoService(CompilerPluginRegistrar::class)
 public class RedactedComponentRegistrar : CompilerPluginRegistrar() {
 
   override val supportsK2: Boolean
@@ -36,8 +32,6 @@ public class RedactedComponentRegistrar : CompilerPluginRegistrar() {
   override fun ExtensionStorage.registerExtensions(configuration: CompilerConfiguration) {
     if (configuration[KEY_ENABLED] == false) return
 
-    val messageCollector =
-      configuration.get(CommonConfigurationKeys.MESSAGE_COLLECTOR_KEY, MessageCollector.NONE)
     val replacementString = checkNotNull(configuration[KEY_REPLACEMENT_STRING])
     val redactedAnnotations =
       checkNotNull(configuration[KEY_REDACTED_ANNOTATIONS]).splitToSequence(":").mapTo(
@@ -53,11 +47,10 @@ public class RedactedComponentRegistrar : CompilerPluginRegistrar() {
       }
 
     FirExtensionRegistrarAdapter.registerExtension(
-      FirRedactedExtensionRegistrar(redactedAnnotations, unRedactedAnnotations)
+      RedactedFirExtensionRegistrar(redactedAnnotations, unRedactedAnnotations)
     )
     IrGenerationExtension.registerExtension(
       RedactedIrGenerationExtension(
-        messageCollector,
         replacementString,
         redactedAnnotations,
         unRedactedAnnotations,

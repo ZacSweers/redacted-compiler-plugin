@@ -18,6 +18,7 @@ rootProject.name = "redacted-compiler-plugin"
 include(
   ":redacted-compiler-plugin",
   ":redacted-compiler-plugin-annotations",
+  ":compiler-tests",
   ":sample",
   ":sample-jvm",
 )

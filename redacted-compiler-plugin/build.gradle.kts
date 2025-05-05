@@ -2,7 +2,6 @@ plugins {
   kotlin("jvm")
   id("org.jetbrains.dokka")
   id("com.vanniktech.maven.publish")
-  id("com.google.devtools.ksp")
 }
 
 tasks.withType<Test>().configureEach {
@@ -14,8 +13,6 @@ kotlin { compilerOptions.freeCompilerArgs.add("-Xcontext-parameters") }
 dependencies {
   compileOnly(libs.kotlin.compilerEmbeddable)
   compileOnly(libs.kotlin.stdlib)
-  implementation(libs.autoService)
-  ksp(libs.autoService.ksp)
 
   testImplementation(libs.kotlin.reflect)
   testImplementation(libs.kotlin.stdlib)

@@ -56,7 +56,6 @@ internal class RedactedIrVisitor(
   private val redactedAnnotations: Set<ClassId>,
   private val unRedactedAnnotations: Set<ClassId>,
   private val replacementString: String,
-  private val messageCollector: MessageCollector,
 ) : IrElementTransformerVoidWithContext() {
 
   private class Property(
@@ -67,8 +66,6 @@ internal class RedactedIrVisitor(
   )
 
   override fun visitFunctionNew(declaration: IrFunction): IrStatement {
-    log("Reading <$declaration>")
-
     if (!declaration.isToStringFromAny()) return super.visitFunctionNew(declaration)
 
     val declarationParent =
@@ -213,7 +210,4 @@ internal class RedactedIrVisitor(
   private fun IrBlockBodyBuilder.receiver(irFunction: IrFunction) =
     irGet(irFunction.dispatchReceiverParameter!!)
 
-  private fun log(message: String) {
-    messageCollector.report(CompilerMessageSeverity.LOGGING, "$LOG_PREFIX $message")
-  }
 }
