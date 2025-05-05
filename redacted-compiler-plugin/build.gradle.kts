@@ -9,6 +9,8 @@ tasks.withType<Test>().configureEach {
   systemProperty("rdt.jvmTarget", libs.versions.jvmTarget.get())
 }
 
+kotlin { compilerOptions.freeCompilerArgs.add("-Xcontext-parameters") }
+
 dependencies {
   compileOnly(libs.kotlin.compilerEmbeddable)
   compileOnly(libs.kotlin.stdlib)
