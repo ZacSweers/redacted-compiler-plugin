@@ -1,3 +1,3 @@
 // RENDER_DIAGNOSTICS_FULL_TEXT
 
-class NonDataClass(@Redacted val a: Int)
+class <!REDACTED_ERROR!>NonDataClass<!>(@Redacted val a: Int)

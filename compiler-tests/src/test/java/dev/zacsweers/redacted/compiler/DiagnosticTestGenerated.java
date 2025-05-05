@@ -21,6 +21,36 @@ public class DiagnosticTestGenerated extends AbstractDiagnosticTest {
   }
 
   @Test
+  @TestMetadata("AnnotatedValueProp.kt")
+  public void testAnnotatedValueProp() {
+    runTest("compiler-tests/src/test/data/diagnostic/AnnotatedValueProp.kt");
+  }
+
+  @Test
+  @TestMetadata("CustomToString.kt")
+  public void testCustomToString() {
+    runTest("compiler-tests/src/test/data/diagnostic/CustomToString.kt");
+  }
+
+  @Test
+  @TestMetadata("DataObject.kt")
+  public void testDataObject() {
+    runTest("compiler-tests/src/test/data/diagnostic/DataObject.kt");
+  }
+
+  @Test
+  @TestMetadata("DoubleAnnotation.kt")
+  public void testDoubleAnnotation() {
+    runTest("compiler-tests/src/test/data/diagnostic/DoubleAnnotation.kt");
+  }
+
+  @Test
+  @TestMetadata("EnumClass.kt")
+  public void testEnumClass() {
+    runTest("compiler-tests/src/test/data/diagnostic/EnumClass.kt");
+  }
+
+  @Test
   @TestMetadata("NonDataClass.kt")
   public void testNonDataClass() {
     runTest("compiler-tests/src/test/data/diagnostic/NonDataClass.kt");

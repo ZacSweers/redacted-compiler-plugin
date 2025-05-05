@@ -22,8 +22,26 @@ public class BoxTestGenerated extends AbstractBoxTest {
   }
 
   @Test
+  @TestMetadata("ClassAnnotated.kt")
+  public void testClassAnnotated() {
+    runTest("compiler-tests/src/test/data/box/ClassAnnotated.kt");
+  }
+
+  @Test
   @TestMetadata("Complex.kt")
   public void testComplex() {
     runTest("compiler-tests/src/test/data/box/Complex.kt");
+  }
+
+  @Test
+  @TestMetadata("CustomReplacement.kt")
+  public void testCustomReplacement() {
+    runTest("compiler-tests/src/test/data/box/CustomReplacement.kt");
+  }
+
+  @Test
+  @TestMetadata("ValueClass.kt")
+  public void testValueClass() {
+    runTest("compiler-tests/src/test/data/box/ValueClass.kt");
   }
 }

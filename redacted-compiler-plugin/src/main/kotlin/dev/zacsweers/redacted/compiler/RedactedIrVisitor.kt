@@ -49,8 +49,6 @@ import org.jetbrains.kotlin.ir.util.properties
 import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.util.OperatorNameConventions
 
-internal const val LOG_PREFIX = "*** REDACTED (IR):"
-
 internal class RedactedIrVisitor(
   private val pluginContext: IrPluginContext,
   private val redactedAnnotations: Set<ClassId>,

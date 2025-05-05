@@ -261,7 +261,7 @@ internal object FirRedactedDeclarationChecker : FirClassChecker(MppCheckerKind.C
   private fun FirNamedFunctionSymbol.isToStringFromAny(session: FirSession): Boolean =
     name == OperatorNameConventions.TO_STRING &&
       dispatchReceiverType != null &&
-      isExtension &&
+      !isExtension &&
       valueParameterSymbols.isEmpty() &&
       resolvedReturnType.fullyExpandedType(session).isString
 
