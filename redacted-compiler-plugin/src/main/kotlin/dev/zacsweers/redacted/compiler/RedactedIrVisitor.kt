@@ -33,6 +33,7 @@ import org.jetbrains.kotlin.ir.builders.irReturn
 import org.jetbrains.kotlin.ir.builders.irString
 import org.jetbrains.kotlin.ir.declarations.IrClass
 import org.jetbrains.kotlin.ir.declarations.IrFunction
+import org.jetbrains.kotlin.ir.declarations.IrParameterKind
 import org.jetbrains.kotlin.ir.declarations.IrProperty
 import org.jetbrains.kotlin.ir.declarations.IrValueParameter
 import org.jetbrains.kotlin.ir.expressions.addArgument
@@ -75,7 +76,9 @@ internal class RedactedIrVisitor(
     val primaryConstructor =
       declarationParent.primaryConstructor ?: return super.visitFunctionNew(declaration)
     val constructorParameters =
-      primaryConstructor.valueParameters.associateBy { it.name.asString() }
+      primaryConstructor.parameters
+        .filter { it.kind == IrParameterKind.Regular }
+        .associateBy { it.name.asString() }
 
     val properties = mutableListOf<Property>()
     val classIsRedacted = redactedAnnotations.any(declarationParent::hasAnnotation)
@@ -112,9 +115,7 @@ internal class RedactedIrVisitor(
 
   private fun IrFunction.isToStringFromAny(): Boolean =
     name == OperatorNameConventions.TO_STRING &&
-      dispatchReceiverParameter != null &&
-      extensionReceiverParameter == null &&
-      valueParameters.isEmpty() &&
+      parameters.singleOrNull()?.kind == IrParameterKind.DispatchReceiver &&
       returnType.isString()
 
   private fun IrFunction.convertToGeneratedToString(
@@ -195,7 +196,7 @@ internal class RedactedIrVisitor(
                   context.irBuiltIns.dataClassArrayMemberToStringSymbol,
                   context.irBuiltIns.stringType,
                 )
-                .apply { putValueArgument(0, irPropertyValue) }
+                .apply { arguments[0] = irPropertyValue }
             } else {
               irPropertyValue
             }

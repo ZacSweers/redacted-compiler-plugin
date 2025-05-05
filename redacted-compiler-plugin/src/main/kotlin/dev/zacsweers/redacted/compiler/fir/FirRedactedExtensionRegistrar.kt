@@ -29,13 +29,11 @@ import org.jetbrains.kotlin.fir.analysis.checkers.declaration.FirClassChecker
 import org.jetbrains.kotlin.fir.analysis.extensions.FirAdditionalCheckersExtension
 import org.jetbrains.kotlin.fir.declarations.FirClass
 import org.jetbrains.kotlin.fir.declarations.FirDeclarationOrigin
-import org.jetbrains.kotlin.fir.declarations.FirFunction
-import org.jetbrains.kotlin.fir.declarations.FirProperty
 import org.jetbrains.kotlin.fir.declarations.getAnnotationByClassId
+import org.jetbrains.kotlin.fir.declarations.processAllDeclarations
 import org.jetbrains.kotlin.fir.declarations.toAnnotationClassIdSafe
 import org.jetbrains.kotlin.fir.declarations.utils.isEnumClass
 import org.jetbrains.kotlin.fir.declarations.utils.isExpect
-import org.jetbrains.kotlin.fir.declarations.utils.isExtension
 import org.jetbrains.kotlin.fir.declarations.utils.isExternal
 import org.jetbrains.kotlin.fir.declarations.utils.isFinal
 import org.jetbrains.kotlin.fir.declarations.utils.isInlineOrValue
@@ -44,14 +42,14 @@ import org.jetbrains.kotlin.fir.expressions.FirAnnotation
 import org.jetbrains.kotlin.fir.extensions.FirExtensionRegistrar
 import org.jetbrains.kotlin.fir.resolve.fullyExpandedType
 import org.jetbrains.kotlin.fir.resolve.toSymbol
-import org.jetbrains.kotlin.fir.symbols.SymbolInternals
-import org.jetbrains.kotlin.fir.symbols.resolvedAnnotationsWithClassIds
+import org.jetbrains.kotlin.fir.symbols.impl.FirNamedFunctionSymbol
+import org.jetbrains.kotlin.fir.symbols.impl.FirPropertySymbol
+import org.jetbrains.kotlin.fir.symbols.impl.isExtension
 import org.jetbrains.kotlin.fir.types.ConeClassLikeType
 import org.jetbrains.kotlin.fir.types.ConeErrorType
 import org.jetbrains.kotlin.fir.types.FirTypeRef
 import org.jetbrains.kotlin.fir.types.classId
-import org.jetbrains.kotlin.fir.types.coneType
-import org.jetbrains.kotlin.fir.types.coneTypeSafe
+import org.jetbrains.kotlin.fir.types.coneTypeOrNull
 import org.jetbrains.kotlin.fir.types.isString
 import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.util.OperatorNameConventions
@@ -81,8 +79,8 @@ internal object FirRedactedDeclarationChecker : FirClassChecker(MppCheckerKind.C
     val redactedClassId: ClassId,
   )
 
-  @OptIn(SymbolInternals::class)
-  override fun check(declaration: FirClass, context: CheckerContext, reporter: DiagnosticReporter) {
+  context(context: CheckerContext, reporter: DiagnosticReporter)
+  override fun check(declaration: FirClass) {
     val classRedactedAnnotations =
       context.session.redactedAnnotations.mapNotNull {
         declaration.getAnnotationByClassId(it, context.session)
@@ -95,8 +93,9 @@ internal object FirRedactedDeclarationChecker : FirClassChecker(MppCheckerKind.C
     val classIsUnRedacted = classUnRedactedAnnotations.isNotEmpty()
     val redactedSupertype: RedactedSupertype? by unsafeLazy {
       for (ref in declaration.superTypeRefs) {
-        val supertype = ref.coneTypeSafe<ConeClassLikeType>() ?: continue
+        val supertype = ref.coneTypeOrNull ?: continue
         if (supertype is ConeErrorType) continue
+        if (supertype !is ConeClassLikeType) continue
         val redactedAnnotation =
           supertype.classId?.toSymbol(context.session)?.resolvedAnnotationClassIds?.firstOrNull {
             it in context.session.redactedAnnotations
@@ -108,9 +107,21 @@ internal object FirRedactedDeclarationChecker : FirClassChecker(MppCheckerKind.C
       null
     }
 
-    val redactedProperties = mutableMapOf<FirProperty, Pair<FirAnnotation, ClassId>>()
-    val unredactedProperties = mutableMapOf<FirProperty, Pair<FirAnnotation, ClassId>>()
-    for (prop in declaration.declarations.filterIsInstance<FirProperty>()) {
+    val redactedProperties = mutableMapOf<FirPropertySymbol, Pair<FirAnnotation, ClassId>>()
+    val unredactedProperties = mutableMapOf<FirPropertySymbol, Pair<FirAnnotation, ClassId>>()
+
+    val properties = mutableListOf<FirPropertySymbol>()
+    var customToStringFunction: FirNamedFunctionSymbol? = null
+    declaration.processAllDeclarations(context.session) { symbol ->
+      if (symbol is FirPropertySymbol) {
+        properties += symbol
+      } else if (symbol is FirNamedFunctionSymbol) {
+        if (symbol.isToStringFromAny(context.session) && symbol.origin == FirDeclarationOrigin.Source) {
+          customToStringFunction = symbol
+        }
+      }
+    }
+    for (prop in properties) {
       prop.redactedAnnotation(context.session)?.let { redactedProperties[prop] = it }
       prop.unredactedAnnotation(context.session)?.let { unredactedProperties[prop] = it }
     }
@@ -122,16 +133,11 @@ internal object FirRedactedDeclarationChecker : FirClassChecker(MppCheckerKind.C
     val unRedactedName = { unredactedProperties.values.first().second.shortClassName.asString() }
 
     if (classIsRedacted || redactedSupertype != null || classIsUnRedacted || anyRedacted) {
-      val customToStringFunction =
-        declaration.declarations.filterIsInstance<FirFunction>().find {
-          it.isToStringFromAny(context.session) && it.origin == FirDeclarationOrigin.Source
-        }
       if (customToStringFunction != null) {
         reporter.reportOn(
           customToStringFunction.source,
           RedactedDiagnostics.REDACTED_ERROR,
           "@${redactedName()} is only supported on data or value classes that do *not* have a custom toString() function. Please remove the function or remove the @${redactedName()} annotations.",
-          context,
         )
         return
       }
@@ -144,7 +150,6 @@ internal object FirRedactedDeclarationChecker : FirClassChecker(MppCheckerKind.C
           declaration.source,
           RedactedDiagnostics.REDACTED_ERROR,
           "@${redactedName()} does not support enum classes or entries!",
-          context,
         )
         return
       }
@@ -153,7 +158,6 @@ internal object FirRedactedDeclarationChecker : FirClassChecker(MppCheckerKind.C
           declaration.source,
           RedactedDiagnostics.REDACTED_ERROR,
           "@${redactedName()} is only supported on data or value classes!",
-          context,
         )
         return
       }
@@ -162,7 +166,6 @@ internal object FirRedactedDeclarationChecker : FirClassChecker(MppCheckerKind.C
           declaration.source,
           RedactedDiagnostics.REDACTED_ERROR,
           "@${redactedName()} is redundant on value class properties, just annotate the class instead.",
-          context,
         )
         return
       }
@@ -173,7 +176,6 @@ internal object FirRedactedDeclarationChecker : FirClassChecker(MppCheckerKind.C
             classAnnotation.source,
             RedactedDiagnostics.REDACTED_ERROR,
             "@${classAnnotation.toAnnotationClassIdSafe(context.session)?.shortClassName?.asString()} is useless on object classes.",
-            context,
           )
           return
         } else if (classIsUnRedacted) {
@@ -181,7 +183,6 @@ internal object FirRedactedDeclarationChecker : FirClassChecker(MppCheckerKind.C
             classUnRedactedAnnotations.firstOrNull()?.source,
             RedactedDiagnostics.REDACTED_ERROR,
             "@${unRedactedName()} is useless on object classes.",
-            context,
           )
           return
         }
@@ -191,7 +192,6 @@ internal object FirRedactedDeclarationChecker : FirClassChecker(MppCheckerKind.C
           declaration.source,
           RedactedDiagnostics.REDACTED_ERROR,
           "@${redactedName()} and @${unRedactedName()} cannot be applied to a single class.",
-          context,
         )
         return
       }
@@ -200,7 +200,6 @@ internal object FirRedactedDeclarationChecker : FirClassChecker(MppCheckerKind.C
           declaration.source,
           RedactedDiagnostics.REDACTED_ERROR,
           "@${unRedactedName()} cannot be applied to a class unless a supertype is marked @${redactedName()}.",
-          context,
         )
         return
       }
@@ -209,7 +208,6 @@ internal object FirRedactedDeclarationChecker : FirClassChecker(MppCheckerKind.C
           declaration.source,
           RedactedDiagnostics.REDACTED_ERROR,
           "@${unRedactedName()} should only be applied to properties in a class or a supertype is marked @${redactedName()}.",
-          context,
         )
         return
       }
@@ -238,7 +236,6 @@ internal object FirRedactedDeclarationChecker : FirClassChecker(MppCheckerKind.C
             classRedactedAnnotations.first().source,
             RedactedDiagnostics.REDACTED_ERROR,
             message,
-            context,
           )
         } else {
           // Supertype
@@ -246,7 +243,6 @@ internal object FirRedactedDeclarationChecker : FirClassChecker(MppCheckerKind.C
             redactedSupertype?.ref?.source,
             RedactedDiagnostics.REDACTED_ERROR,
             message,
-            context,
           )
         }
         for ((_, annotationAndId) in redactedProperties) {
@@ -254,7 +250,6 @@ internal object FirRedactedDeclarationChecker : FirClassChecker(MppCheckerKind.C
             annotationAndId.first.source,
             RedactedDiagnostics.REDACTED_ERROR,
             message,
-            context,
           )
         }
         return
@@ -263,16 +258,15 @@ internal object FirRedactedDeclarationChecker : FirClassChecker(MppCheckerKind.C
     }
   }
 
-  private fun FirFunction.isToStringFromAny(session: FirSession): Boolean =
-    nameOrSpecialName == OperatorNameConventions.TO_STRING &&
+  private fun FirNamedFunctionSymbol.isToStringFromAny(session: FirSession): Boolean =
+    name == OperatorNameConventions.TO_STRING &&
       dispatchReceiverType != null &&
-      !isExtension &&
-      valueParameters.isEmpty() &&
-      returnTypeRef.coneType.fullyExpandedType(session).isString
+      isExtension &&
+      valueParameterSymbols.isEmpty() &&
+      resolvedReturnType.fullyExpandedType(session).isString
 
-  @OptIn(SymbolInternals::class)
-  private fun FirProperty.redactedAnnotation(session: FirSession): Pair<FirAnnotation, ClassId>? =
-    resolvedAnnotationsWithClassIds(symbol).firstNotNullResult {
+  private fun FirPropertySymbol.redactedAnnotation(session: FirSession): Pair<FirAnnotation, ClassId>? =
+    resolvedAnnotationsWithClassIds.firstNotNullResult {
       val classId = it.toAnnotationClassIdSafe(session)
       if (classId != null && classId in session.redactedAnnotations) {
         it to classId
@@ -281,9 +275,8 @@ internal object FirRedactedDeclarationChecker : FirClassChecker(MppCheckerKind.C
       }
     }
 
-  @OptIn(SymbolInternals::class)
-  private fun FirProperty.unredactedAnnotation(session: FirSession): Pair<FirAnnotation, ClassId>? =
-    resolvedAnnotationsWithClassIds(symbol).firstNotNullResult {
+  private fun FirPropertySymbol.unredactedAnnotation(session: FirSession): Pair<FirAnnotation, ClassId>? =
+    resolvedAnnotationsWithClassIds.firstNotNullResult {
       val classId = it.toAnnotationClassIdSafe(session)
       if (classId != null && classId in session.unRedactedAnnotations) {
         it to classId
