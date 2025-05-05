@@ -4,6 +4,9 @@ Changelog
 **Unreleased**
 --------------
 
+- Update Kotlin to `2.2.0`.
+- Build the Gradle plugin against Kotlin `2.0`.
+
 1.13.0
 ------
 
