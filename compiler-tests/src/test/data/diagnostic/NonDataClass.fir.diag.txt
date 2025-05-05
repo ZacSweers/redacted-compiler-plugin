@@ -1,0 +1,1 @@
+/NonDataClass.kt:(83,95): error: @Redacted is only supported on data or value classes!
