@@ -20,8 +20,6 @@ package dev.zacsweers.redacted.compiler
 import org.jetbrains.kotlin.backend.common.IrElementTransformerVoidWithContext
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
-import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
-import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.ir.IrStatement
 import org.jetbrains.kotlin.ir.builders.IrBlockBodyBuilder
 import org.jetbrains.kotlin.ir.builders.irBlockBody
@@ -31,10 +29,12 @@ import org.jetbrains.kotlin.ir.builders.irGet
 import org.jetbrains.kotlin.ir.builders.irGetField
 import org.jetbrains.kotlin.ir.builders.irReturn
 import org.jetbrains.kotlin.ir.builders.irString
+import org.jetbrains.kotlin.ir.declarations.IrAnnotationContainer
 import org.jetbrains.kotlin.ir.declarations.IrClass
 import org.jetbrains.kotlin.ir.declarations.IrFunction
 import org.jetbrains.kotlin.ir.declarations.IrParameterKind
 import org.jetbrains.kotlin.ir.declarations.IrProperty
+import org.jetbrains.kotlin.ir.declarations.IrSimpleFunction
 import org.jetbrains.kotlin.ir.declarations.IrValueParameter
 import org.jetbrains.kotlin.ir.expressions.addArgument
 import org.jetbrains.kotlin.ir.symbols.UnsafeDuringIrConstructionAPI
@@ -42,6 +42,7 @@ import org.jetbrains.kotlin.ir.types.isArray
 import org.jetbrains.kotlin.ir.types.isString
 import org.jetbrains.kotlin.ir.util.getAllSuperclasses
 import org.jetbrains.kotlin.ir.util.hasAnnotation
+import org.jetbrains.kotlin.ir.util.isFakeOverride
 import org.jetbrains.kotlin.ir.util.isPrimitiveArray
 import org.jetbrains.kotlin.ir.util.parentClassOrNull
 import org.jetbrains.kotlin.ir.util.primaryConstructor
@@ -64,6 +65,7 @@ internal class RedactedIrVisitor(
   )
 
   override fun visitFunctionNew(declaration: IrFunction): IrStatement {
+    if (declaration !is IrSimpleFunction) return super.visitFunctionNew(declaration)
     if (!declaration.isToStringFromAny()) return super.visitFunctionNew(declaration)
 
     val declarationParent =
@@ -85,8 +87,8 @@ internal class RedactedIrVisitor(
     var anyUnredacted = false
     for (prop in declarationParent.properties) {
       val parameter = constructorParameters[prop.name.asString()] ?: continue
-      val isRedacted = prop.isRedacted
-      val isUnredacted = prop.isUnredacted
+      val isRedacted = prop.isRedacted || parameter.isRedacted
+      val isUnredacted = prop.isUnredacted || parameter.isUnredacted
       if (isRedacted) {
         anyRedacted = true
       }
@@ -102,6 +104,7 @@ internal class RedactedIrVisitor(
         classIsRedacted,
         classIsUnredacted,
         supertypeIsRedacted,
+        anyUnredacted
       )
     }
 
@@ -113,11 +116,12 @@ internal class RedactedIrVisitor(
       parameters.singleOrNull()?.kind == IrParameterKind.DispatchReceiver &&
       returnType.isString()
 
-  private fun IrFunction.convertToGeneratedToString(
+  private fun IrSimpleFunction.convertToGeneratedToString(
     properties: List<Property>,
     classIsRedacted: Boolean,
     classIsUnredacted: Boolean,
     supertypeIsRedacted: Boolean,
+    hasUnredactedProperties: Boolean,
   ) {
     val parent = parent as IrClass
 
@@ -132,23 +136,17 @@ internal class RedactedIrVisitor(
           classIsRedacted = classIsRedacted,
           classIsUnredacted = classIsUnredacted,
           supertypeIsRedacted = supertypeIsRedacted,
+          hasUnredactedProperties = hasUnredactedProperties,
         )
       }
 
-    reflectivelySetFakeOverride(false)
+    isFakeOverride = false
   }
 
-  private fun IrFunction.reflectivelySetFakeOverride(isFakeOverride: Boolean) {
-    with(javaClass.getDeclaredField("isFakeOverride")) {
-      isAccessible = true
-      setBoolean(this@reflectivelySetFakeOverride, isFakeOverride)
-    }
-  }
-
-  private val IrProperty.isRedacted: Boolean
+  private val IrAnnotationContainer.isRedacted: Boolean
     get() = redactedAnnotations.any(::hasAnnotation)
 
-  private val IrProperty.isUnredacted: Boolean
+  private val IrAnnotationContainer.isUnredacted: Boolean
     get() = unRedactedAnnotations.any(::hasAnnotation)
 
   /**
@@ -163,10 +161,10 @@ internal class RedactedIrVisitor(
     classIsRedacted: Boolean,
     classIsUnredacted: Boolean,
     supertypeIsRedacted: Boolean,
+    hasUnredactedProperties: Boolean
   ) {
     val irConcat = irConcat()
     irConcat.addArgument(irString(irClass.name.asString() + "("))
-    val hasUnredactedProperties by unsafeLazy { irProperties.any { it.isUnredacted } }
     if (classIsRedacted && !classIsUnredacted && !hasUnredactedProperties) {
       irConcat.addArgument(irString(replacementString))
     } else {
@@ -207,5 +205,4 @@ internal class RedactedIrVisitor(
 
   private fun IrBlockBodyBuilder.receiver(irFunction: IrFunction) =
     irGet(irFunction.dispatchReceiverParameter!!)
-
 }

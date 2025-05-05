@@ -4,6 +4,7 @@ Changelog
 **Unreleased**
 --------------
 
+- **Fix**: Check both the parameter and property declarations for redacted annotations. Depending on the specified annotation target of custom annotations, these may end up in different places.
 - Update Kotlin to `2.2.0`.
 - Build the Gradle plugin against Kotlin `2.0`.
 

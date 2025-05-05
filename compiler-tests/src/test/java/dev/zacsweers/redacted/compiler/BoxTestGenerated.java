@@ -34,6 +34,12 @@ public class BoxTestGenerated extends AbstractBoxTest {
   }
 
   @Test
+  @TestMetadata("CustomAnnotationReplacement.kt")
+  public void testCustomAnnotationReplacement() {
+    runTest("compiler-tests/src/test/data/box/CustomAnnotationReplacement.kt");
+  }
+
+  @Test
   @TestMetadata("CustomReplacement.kt")
   public void testCustomReplacement() {
     runTest("compiler-tests/src/test/data/box/CustomReplacement.kt");
