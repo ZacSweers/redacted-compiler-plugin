@@ -37,11 +37,11 @@ class RedactedExtensionRegistrarConfigurator(testServices: TestServices) :
     val redactedAnnotations =
       module.directives[RedactedDirectives.REDACTED_ANNOTATIONS].mapTo(mutableSetOf()) {
         ClassId.fromString(it)
-      }
+      } + ClassId.fromString("dev/zacsweers/redacted/annotations/Redacted")
     val unredactedAnnotations =
       module.directives[RedactedDirectives.UNREDACTED_ANNOTATIONS].mapTo(mutableSetOf()) {
         ClassId.fromString(it)
-      }
+      } + ClassId.fromString("dev/zacsweers/redacted/annotations/Unredacted")
     val replacementString =
       module.directives[RedactedDirectives.REPLACEMENT_STRING].firstOrNull() ?: "██"
 
