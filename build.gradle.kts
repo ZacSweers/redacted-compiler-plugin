@@ -25,7 +25,7 @@ plugins {
 }
 
 apiValidation {
-  ignoredProjects += listOf("sample", "sample-jvm")
+  ignoredProjects += listOf("compiler-tests", "sample", "sample-jvm")
   @OptIn(ExperimentalBCVApi::class)
   klib {
     // This is only really possible to run on macOS
