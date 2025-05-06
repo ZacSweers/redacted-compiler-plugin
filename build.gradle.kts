@@ -54,7 +54,7 @@ spotless {
     trimTrailingWhitespace()
     endWithNewline()
     licenseHeaderFile("spotless/spotless.kt")
-    targetExclude("**/spotless.kt", "**/build/**")
+    targetExclude("**/spotless.kt", "**/build/**", "**/compiler-tests/src/test/data/**")
   }
   kotlinGradle {
     target("**/*.kts", "*.kts")
