@@ -55,6 +55,13 @@ spotless {
     endWithNewline()
     licenseHeaderFile("spotless/spotless.kt")
     targetExclude("**/spotless.kt", "**/build/**", "**/compiler-tests/src/test/data/**")
+    // TODO temporary until ktfmt supports context params
+    suppressLintsFor {
+      step = "ktfmt"
+      shortCode = "ktfmt"
+      path =
+        "redacted-compiler-plugin/src/main/kotlin/dev/zacsweers/redacted/compiler/fir/RedactedFirExtensionRegistrar.kt"
+    }
   }
   kotlinGradle {
     target("**/*.kts", "*.kts")

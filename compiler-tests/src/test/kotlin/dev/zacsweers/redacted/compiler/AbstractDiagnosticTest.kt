@@ -21,7 +21,9 @@ open class AbstractDiagnosticTest : AbstractFirLightTreeDiagnosticsTest() {
       configurePlugin()
 
       defaultDirectives {
-        JVM_TARGET.with(JvmTarget.fromString(System.getProperty("rdt.jvmTarget", JvmTarget.JVM_11.description))!!)
+        JVM_TARGET.with(
+          JvmTarget.fromString(System.getProperty("rdt.jvmTarget", JvmTarget.JVM_11.description))!!
+        )
         +FULL_JDK
       }
     }

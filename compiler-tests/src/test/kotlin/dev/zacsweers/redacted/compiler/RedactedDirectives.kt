@@ -8,6 +8,5 @@ object RedactedDirectives : SimpleDirectivesContainer() {
   val REPLACEMENT_STRING by stringDirective("Replacement string to use")
   val REDACTED_ANNOTATIONS by stringDirective("TODO")
   val UNREDACTED_ANNOTATIONS by stringDirective("TODO")
-  val ENABLED by
-    directive("TODO")
+  val ENABLED by directive("TODO")
 }
