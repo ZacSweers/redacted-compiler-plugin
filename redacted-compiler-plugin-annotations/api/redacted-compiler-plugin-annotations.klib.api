@@ -9,6 +9,7 @@
 open annotation class dev.zacsweers.redacted.annotations/Redacted : kotlin/Annotation { // dev.zacsweers.redacted.annotations/Redacted|null[0]
     constructor <init>() // dev.zacsweers.redacted.annotations/Redacted.<init>|<init>(){}[0]
 }
+
 open annotation class dev.zacsweers.redacted.annotations/Unredacted : kotlin/Annotation { // dev.zacsweers.redacted.annotations/Unredacted|null[0]
     constructor <init>() // dev.zacsweers.redacted.annotations/Unredacted.<init>|<init>(){}[0]
 }
