@@ -1,0 +1,8 @@
+/DoubleAnnotation.kt:(77,86): error: @Redacted detected on multiple targets:
+class: 'DoubleAnnotation'
+properties: 'a'
+
+
+/DoubleAnnotation.kt:(115,124): error: @Redacted detected on multiple targets:
+class: 'DoubleAnnotation'
+properties: 'a'

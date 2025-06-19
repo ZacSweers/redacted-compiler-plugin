@@ -11,3 +11,12 @@ public final class dev/zacsweers/redacted/compiler/RedactedComponentRegistrar : 
 	public fun registerExtensions (Lorg/jetbrains/kotlin/compiler/plugin/CompilerPluginRegistrar$ExtensionStorage;Lorg/jetbrains/kotlin/config/CompilerConfiguration;)V
 }
 
+public final class dev/zacsweers/redacted/compiler/RedactedIrGenerationExtension : org/jetbrains/kotlin/backend/common/extensions/IrGenerationExtension {
+	public fun <init> (Ljava/lang/String;Ljava/util/Set;Ljava/util/Set;)V
+	public fun generate (Lorg/jetbrains/kotlin/ir/declarations/IrModuleFragment;Lorg/jetbrains/kotlin/backend/common/extensions/IrPluginContext;)V
+}
+
+public final class dev/zacsweers/redacted/compiler/fir/RedactedFirExtensionRegistrar : org/jetbrains/kotlin/fir/extensions/FirExtensionRegistrar {
+	public fun <init> (Ljava/util/Set;Ljava/util/Set;)V
+}
+

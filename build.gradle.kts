@@ -19,14 +19,13 @@ buildscript {
 plugins {
   alias(libs.plugins.kotlin.jvm) apply false
   alias(libs.plugins.dokka)
-  alias(libs.plugins.ksp) apply false
   alias(libs.plugins.mavenPublish) apply false
   alias(libs.plugins.spotless)
   alias(libs.plugins.binaryCompatibilityValidator)
 }
 
 apiValidation {
-  ignoredProjects += listOf("sample", "sample-jvm")
+  ignoredProjects += listOf("compiler-tests", "sample", "sample-jvm")
   @OptIn(ExperimentalBCVApi::class)
   klib {
     // This is only really possible to run on macOS
@@ -55,7 +54,14 @@ spotless {
     trimTrailingWhitespace()
     endWithNewline()
     licenseHeaderFile("spotless/spotless.kt")
-    targetExclude("**/spotless.kt", "**/build/**")
+    targetExclude("**/spotless.kt", "**/build/**", "**/compiler-tests/src/test/data/**")
+    // TODO temporary until ktfmt supports context params
+    suppressLintsFor {
+      step = "ktfmt"
+      shortCode = "ktfmt"
+      path =
+        "redacted-compiler-plugin/src/main/kotlin/dev/zacsweers/redacted/compiler/fir/RedactedFirExtensionRegistrar.kt"
+    }
   }
   kotlinGradle {
     target("**/*.kts", "*.kts")
