@@ -103,7 +103,9 @@ internal object FirRedactedDeclarationChecker : FirClassChecker(MppCheckerKind.C
       if (symbol is FirPropertySymbol) {
         properties += symbol
       } else if (symbol is FirNamedFunctionSymbol) {
-        if (symbol.isToStringFromAny(context.session) && symbol.origin == FirDeclarationOrigin.Source) {
+        if (
+          symbol.isToStringFromAny(context.session) && symbol.origin == FirDeclarationOrigin.Source
+        ) {
           customToStringFunction = symbol
         }
       }
@@ -252,7 +254,9 @@ internal object FirRedactedDeclarationChecker : FirClassChecker(MppCheckerKind.C
       valueParameterSymbols.isEmpty() &&
       resolvedReturnType.fullyExpandedType(session).isString
 
-  private fun FirPropertySymbol.redactedAnnotation(session: FirSession): Pair<FirAnnotation, ClassId>? =
+  private fun FirPropertySymbol.redactedAnnotation(
+    session: FirSession
+  ): Pair<FirAnnotation, ClassId>? =
     resolvedAnnotationsWithClassIds.firstNotNullResult {
       val classId = it.toAnnotationClassIdSafe(session)
       if (classId != null && classId in session.redactedAnnotations) {
@@ -262,7 +266,9 @@ internal object FirRedactedDeclarationChecker : FirClassChecker(MppCheckerKind.C
       }
     }
 
-  private fun FirPropertySymbol.unredactedAnnotation(session: FirSession): Pair<FirAnnotation, ClassId>? =
+  private fun FirPropertySymbol.unredactedAnnotation(
+    session: FirSession
+  ): Pair<FirAnnotation, ClassId>? =
     resolvedAnnotationsWithClassIds.firstNotNullResult {
       val classId = it.toAnnotationClassIdSafe(session)
       if (classId != null && classId in session.unRedactedAnnotations) {
