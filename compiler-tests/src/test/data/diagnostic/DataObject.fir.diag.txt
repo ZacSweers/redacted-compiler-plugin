@@ -1,0 +1,1 @@
+/DataObject.kt:(77,86): error: @Redacted is useless on object classes.

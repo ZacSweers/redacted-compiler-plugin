@@ -1,0 +1,1 @@
+/EnumClass.kt:(88,96): error: @Redacted does not support enum classes or entries!

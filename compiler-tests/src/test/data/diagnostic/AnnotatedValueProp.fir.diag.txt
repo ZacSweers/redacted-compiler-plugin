@@ -1,0 +1,1 @@
+/AnnotatedValueProp.kt:(129,147): error: @Redacted is redundant on value class properties, just annotate the class instead.
