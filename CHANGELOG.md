@@ -12,6 +12,7 @@ _2025-06-23_
 - **Fix**: Check both the parameter and property declarations for redacted annotations. Depending on the specified annotation target of custom annotations, these may end up in different places.
 - Update Kotlin to `2.2.0`. This plugin version requires Kotlin `2.2.0` or later.
 - Update Gradle plugin to target Kotlin language version to `1.9` (requires Gradle 8.3+).
+- Build against Gradle `8.14.2`.
 
 1.13.0
 ------
