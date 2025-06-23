@@ -34,8 +34,9 @@ tasks.withType<KotlinCompile>().configureEach {
     jvmTarget.set(libs.versions.jvmTarget.map(JvmTarget::fromTarget))
 
     // Lower version for Gradle compat
-    languageVersion.set(KotlinVersion.KOTLIN_2_0)
-    apiVersion.set(KotlinVersion.KOTLIN_2_0)
+    progressiveMode.set(false)
+    @Suppress("DEPRECATION") languageVersion.set(KotlinVersion.KOTLIN_1_9)
+    @Suppress("DEPRECATION") apiVersion.set(KotlinVersion.KOTLIN_1_9)
   }
 }
 
