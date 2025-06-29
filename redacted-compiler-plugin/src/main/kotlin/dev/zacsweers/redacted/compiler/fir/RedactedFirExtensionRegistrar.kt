@@ -117,9 +117,9 @@ internal object FirRedactedDeclarationChecker : FirClassChecker(MppCheckerKind.C
     val anyRedacted = redactedProperties.isNotEmpty()
     val anyUnredacted = unredactedProperties.isNotEmpty()
 
-    val redactedName = { redactedProperties.values.first().second.shortClassName.asString() }
+    val redactedName = { redactedProperties.values.firstOrNull()?.second?.shortClassName?.asString() }
 
-    val unRedactedName = { unredactedProperties.values.first().second.shortClassName.asString() }
+    val unRedactedName = { unredactedProperties.values.firstOrNull()?.second?.shortClassName?.asString() }
 
     if (classIsRedacted || redactedSupertype != null || classIsUnRedacted || anyRedacted) {
       if (customToStringFunction != null) {
