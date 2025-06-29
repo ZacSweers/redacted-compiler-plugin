@@ -209,7 +209,10 @@ internal object FirRedactedDeclarationChecker : FirClassChecker(MppCheckerKind.C
       if (!(classIsRedacted xor anyRedacted xor (redactedSupertype != null))) {
         val redactedName =
           redactedProperties.values.firstOrNull()?.second
-            ?: classRedactedAnnotations.firstOrNull()?.first?.toAnnotationClassIdSafe(context.session)
+            ?: classRedactedAnnotations
+              .firstOrNull()
+              ?.first
+              ?.toAnnotationClassIdSafe(context.session)
             ?: redactedSupertype?.redactedClassId
             ?: error("Not possible!")
 
