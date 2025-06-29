@@ -27,9 +27,15 @@ public class DiagnosticTestGenerated extends AbstractDiagnosticTest {
   }
 
   @Test
-  @TestMetadata("CustomToString.kt")
-  public void testCustomToString() {
-    runTest("compiler-tests/src/test/data/diagnostic/CustomToString.kt");
+  @TestMetadata("CustomToStringRedactedClass.kt")
+  public void testCustomToStringRedactedClass() {
+    runTest("compiler-tests/src/test/data/diagnostic/CustomToStringRedactedClass.kt");
+  }
+
+  @Test
+  @TestMetadata("CustomToStringRedactedProperty.kt")
+  public void testCustomToStringRedactedProperty() {
+    runTest("compiler-tests/src/test/data/diagnostic/CustomToStringRedactedProperty.kt");
   }
 
   @Test

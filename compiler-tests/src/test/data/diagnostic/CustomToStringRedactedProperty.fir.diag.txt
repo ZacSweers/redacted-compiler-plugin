@@ -1,0 +1,1 @@
+/CustomToStringRedactedProperty.kt:(158,166): error: @Redacted is only supported on data or value classes that do *not* have a custom toString() function. Please remove the function or remove the @Redacted annotations.

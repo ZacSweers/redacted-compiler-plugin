@@ -69,14 +69,14 @@ internal object FirRedactedDeclarationChecker : FirClassChecker(MppCheckerKind.C
   context(context: CheckerContext, reporter: DiagnosticReporter)
   override fun check(declaration: FirClass) {
     val classRedactedAnnotations =
-      context.session.redactedAnnotations.mapNotNull {
-        declaration.getAnnotationByClassId(it, context.session)
+      context.session.redactedAnnotations.mapNotNull { classId ->
+        declaration.getAnnotationByClassId(classId, context.session)?.let { it to classId }
+      }
+    val classUnRedactedAnnotations =
+      context.session.unRedactedAnnotations.mapNotNull { classId ->
+        declaration.getAnnotationByClassId(classId, context.session)?.let { it to classId }
       }
     val classIsRedacted = classRedactedAnnotations.isNotEmpty()
-    val classUnRedactedAnnotations =
-      context.session.unRedactedAnnotations.mapNotNull {
-        declaration.getAnnotationByClassId(it, context.session)
-      }
     val classIsUnRedacted = classUnRedactedAnnotations.isNotEmpty()
     val redactedSupertype: RedactedSupertype? by unsafeLazy {
       for (ref in declaration.superTypeRefs) {
@@ -117,9 +117,15 @@ internal object FirRedactedDeclarationChecker : FirClassChecker(MppCheckerKind.C
     val anyRedacted = redactedProperties.isNotEmpty()
     val anyUnredacted = unredactedProperties.isNotEmpty()
 
-    val redactedName = { redactedProperties.values.first().second.shortClassName.asString() }
+    val redactedName = {
+      redactedProperties.values.firstOrNull()?.second?.shortClassName?.asString()
+        ?: classRedactedAnnotations.firstOrNull()?.second?.shortClassName?.asString()
+    }
 
-    val unRedactedName = { unredactedProperties.values.first().second.shortClassName.asString() }
+    val unRedactedName = {
+      unredactedProperties.values.firstOrNull()?.second?.shortClassName?.asString()
+        ?: classUnRedactedAnnotations.firstOrNull()?.second?.shortClassName?.asString()
+    }
 
     if (classIsRedacted || redactedSupertype != null || classIsUnRedacted || anyRedacted) {
       if (customToStringFunction != null) {
@@ -160,7 +166,7 @@ internal object FirRedactedDeclarationChecker : FirClassChecker(MppCheckerKind.C
       }
       if (declaration.classKind.isObject) {
         if (redactedSupertype == null) {
-          val classAnnotation = classRedactedAnnotations.first()
+          val classAnnotation = classRedactedAnnotations.first().first
           reporter.reportOn(
             classAnnotation.source,
             RedactedDiagnostics.REDACTED_ERROR,
@@ -169,7 +175,7 @@ internal object FirRedactedDeclarationChecker : FirClassChecker(MppCheckerKind.C
           return
         } else if (classIsUnRedacted) {
           reporter.reportOn(
-            classUnRedactedAnnotations.firstOrNull()?.source,
+            classUnRedactedAnnotations.firstOrNull()?.first?.source,
             RedactedDiagnostics.REDACTED_ERROR,
             "@${unRedactedName()} is useless on object classes.",
           )
@@ -203,7 +209,10 @@ internal object FirRedactedDeclarationChecker : FirClassChecker(MppCheckerKind.C
       if (!(classIsRedacted xor anyRedacted xor (redactedSupertype != null))) {
         val redactedName =
           redactedProperties.values.firstOrNull()?.second
-            ?: classRedactedAnnotations.firstOrNull()?.toAnnotationClassIdSafe(context.session)
+            ?: classRedactedAnnotations
+              .firstOrNull()
+              ?.first
+              ?.toAnnotationClassIdSafe(context.session)
             ?: redactedSupertype?.redactedClassId
             ?: error("Not possible!")
 
@@ -222,7 +231,7 @@ internal object FirRedactedDeclarationChecker : FirClassChecker(MppCheckerKind.C
 
         if (classIsRedacted) {
           reporter.reportOn(
-            classRedactedAnnotations.first().source,
+            classRedactedAnnotations.first().first.source,
             RedactedDiagnostics.REDACTED_ERROR,
             message,
           )
