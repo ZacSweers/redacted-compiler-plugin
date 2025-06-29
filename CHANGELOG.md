@@ -4,6 +4,15 @@ Changelog
 **Unreleased**
 --------------
 
+1.14.1
+------
+
+_2025-06-29_
+
+- **Fix**: Handle failed error message when no redacted properties.
+
+Special thanks to [@jonapoul](https://github.com/jonapoul) for contributing to this release!
+
 1.14.0
 ------
 
