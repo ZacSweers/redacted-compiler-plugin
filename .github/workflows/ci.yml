@@ -67,7 +67,7 @@ jobs:
         run: ./gradlew check --quiet
 
   publish:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && github.repository == 'zacsweers/redacted-compiler-plugin'
     needs: [ jvm, all-platforms ]
 
