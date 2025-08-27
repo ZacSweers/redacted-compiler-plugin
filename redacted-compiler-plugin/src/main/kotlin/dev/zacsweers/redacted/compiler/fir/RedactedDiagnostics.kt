@@ -2,15 +2,16 @@
 // SPDX-License-Identifier: Apache-2.0
 package dev.zacsweers.redacted.compiler.fir
 
+import dev.zacsweers.redacted.compiler.fir.RedactedDiagnostics.REDACTED_ERROR
 import org.jetbrains.kotlin.diagnostics.AbstractSourceElementPositioningStrategy
 import org.jetbrains.kotlin.diagnostics.DiagnosticFactory1DelegateProvider
 import org.jetbrains.kotlin.diagnostics.KtDiagnosticFactoryToRendererMap
+import org.jetbrains.kotlin.diagnostics.KtDiagnosticsContainer
 import org.jetbrains.kotlin.diagnostics.Severity
 import org.jetbrains.kotlin.diagnostics.SourceElementPositioningStrategies
 import org.jetbrains.kotlin.diagnostics.SourceElementPositioningStrategies.NAME_IDENTIFIER
 import org.jetbrains.kotlin.diagnostics.rendering.BaseDiagnosticRendererFactory
 import org.jetbrains.kotlin.diagnostics.rendering.CommonRenderers.STRING
-import org.jetbrains.kotlin.diagnostics.rendering.RootDiagnosticRendererFactory
 
 /**
  * The compiler and the IDE use a different version of this class, so use reflection to find the
@@ -27,25 +28,29 @@ private val psiElementClass by lazy {
     .kotlin
 }
 
-internal object RedactedDiagnostics : BaseDiagnosticRendererFactory() {
+/** Copy of [org.jetbrains.kotlin.diagnostics.error0] with hack for correct `PsiElement` class. */
+context(container: KtDiagnosticsContainer)
+private fun <A> error1(
+  positioningStrategy: AbstractSourceElementPositioningStrategy =
+    SourceElementPositioningStrategies.DEFAULT
+): DiagnosticFactory1DelegateProvider<A> {
+  return DiagnosticFactory1DelegateProvider<A>(
+    severity = Severity.ERROR,
+    positioningStrategy = positioningStrategy,
+    psiType = psiElementClass,
+    container = container,
+  )
+}
+
+internal object RedactedDiagnostics : KtDiagnosticsContainer() {
   val REDACTED_ERROR by error1<String>(NAME_IDENTIFIER)
 
-  override val MAP: KtDiagnosticFactoryToRendererMap =
-    KtDiagnosticFactoryToRendererMap("Redacted").apply { put(REDACTED_ERROR, "{0}", STRING) }
-
-  init {
-    RootDiagnosticRendererFactory.registerFactory(this)
+  override fun getRendererFactory(): BaseDiagnosticRendererFactory {
+    return RedactedErrorMessages
   }
+}
 
-  /** Copy of [org.jetbrains.kotlin.diagnostics.error0] with hack for correct `PsiElement` class. */
-  private fun <A> error1(
-    positioningStrategy: AbstractSourceElementPositioningStrategy =
-      SourceElementPositioningStrategies.DEFAULT
-  ): DiagnosticFactory1DelegateProvider<A> {
-    return DiagnosticFactory1DelegateProvider<A>(
-      severity = Severity.ERROR,
-      positioningStrategy = positioningStrategy,
-      psiType = psiElementClass,
-    )
-  }
+internal object RedactedErrorMessages : BaseDiagnosticRendererFactory() {
+  override val MAP by
+    KtDiagnosticFactoryToRendererMap("Redacted") { map -> map.put(REDACTED_ERROR, "{0}", STRING) }
 }
