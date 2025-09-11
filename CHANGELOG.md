@@ -4,6 +4,14 @@ Changelog
 **Unreleased**
 --------------
 
+1.15.0
+------
+
+_2025-09-11_
+
+- Update to Kotlin `2.2.20`. This release requires `2.2.20` or later.
+- Compile against Gradle `9.0`.
+
 1.14.1
 ------
 
