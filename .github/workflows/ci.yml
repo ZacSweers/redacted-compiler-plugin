@@ -39,7 +39,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Build with Gradle
-        run: ./gradlew check -Dkjs=false -Dknative=false --stacktrace -Pstring_concat=${{ matrix.stringConcat }} --quiet
+        run: ./gradlew check -Pstring_concat=${{ matrix.stringConcat }} --quiet
 
   all-platforms:
     name: "platform / ${{ matrix.os }}"
@@ -67,7 +67,7 @@ jobs:
         run: ./gradlew check --quiet
 
   publish:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && github.repository == 'zacsweers/redacted-compiler-plugin'
     needs: [ jvm, all-platforms ]
 
