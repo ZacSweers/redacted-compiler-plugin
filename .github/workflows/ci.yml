@@ -36,7 +36,7 @@ jobs:
           java-version: '23'
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v5
 
       - name: Build with Gradle
         run: ./gradlew check -Pstring_concat=${{ matrix.stringConcat }} --quiet
@@ -61,7 +61,7 @@ jobs:
           java-version: '23'
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v5
 
       - name: Test
         run: ./gradlew check --quiet
@@ -82,7 +82,7 @@ jobs:
           java-version: '23'
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v5
 
       - name: Upload snapshot (main only)
         env:
