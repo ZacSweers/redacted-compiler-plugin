@@ -18,14 +18,16 @@ buildscript {
 
 plugins {
   alias(libs.plugins.kotlin.jvm) apply false
+  alias(libs.plugins.kotlin.multiplatform) apply false
   alias(libs.plugins.dokka)
   alias(libs.plugins.mavenPublish) apply false
   alias(libs.plugins.spotless)
   alias(libs.plugins.binaryCompatibilityValidator)
+  alias(libs.plugins.buildConfig) apply false
 }
 
 apiValidation {
-  ignoredProjects += listOf("compiler-tests", "sample", "sample-jvm")
+  ignoredProjects += listOf("sample", "sample-jvm")
   @OptIn(ExperimentalBCVApi::class)
   klib {
     // This is only really possible to run on macOS
@@ -49,7 +51,7 @@ spotless {
     endWithNewline()
   }
   kotlin {
-    target("**/*.kt")
+    target("**/src/**/*.kt")
     ktfmt(libs.versions.ktfmt.get()).googleStyle()
     trimTrailingWhitespace()
     endWithNewline()
