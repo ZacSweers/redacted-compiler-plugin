@@ -24,7 +24,7 @@ binaryCompatibilityValidator = { id = "org.jetbrains.kotlinx.binary-compatibilit
 buildConfig = { id = "com.github.gmazzo.buildconfig", version = "5.7.0" }
 dokka = { id = "org.jetbrains.dokka", version = "2.0.0" }
 mavenPublish = { id = "com.vanniktech.maven.publish", version = "0.34.0" }
-spotless = { id = "com.diffplug.spotless", version = "7.2.1" }
+spotless = { id = "com.diffplug.spotless", version = "8.0.0" }
 
 [libraries]
 kotlin-bom = { module = "org.jetbrains.kotlin:kotlin-bom", version.ref = "kotlin" }
