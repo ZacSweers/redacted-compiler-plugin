@@ -13,8 +13,9 @@ import org.jetbrains.kotlin.name.ClassId
 @OptIn(ExperimentalCompilerApi::class)
 public class RedactedComponentRegistrar : CompilerPluginRegistrar() {
 
-  override val supportsK2: Boolean
-    get() = true
+  override val pluginId: String = "dev.zacsweers.redacted.compiler"
+
+  override val supportsK2: Boolean = true
 
   override fun ExtensionStorage.registerExtensions(configuration: CompilerConfiguration) {
     if (configuration[KEY_ENABLED] == false) return
