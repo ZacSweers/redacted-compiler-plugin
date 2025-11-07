@@ -13,19 +13,19 @@
 # limitations under the License.
 
 [versions]
-kotlin = "2.2.20"
+kotlin = "2.2.21"
 jdk = "23"
 jvmTarget = "11"
-ktfmt = "0.56"
+ktfmt = "0.59"
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 binaryCompatibilityValidator = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version = "0.18.1" }
-buildConfig = { id = "com.github.gmazzo.buildconfig", version = "5.6.8" }
-dokka = { id = "org.jetbrains.dokka", version = "2.0.0" }
+buildConfig = { id = "com.github.gmazzo.buildconfig", version = "5.7.1" }
+dokka = { id = "org.jetbrains.dokka", version = "2.1.0" }
 mavenPublish = { id = "com.vanniktech.maven.publish", version = "0.34.0" }
-spotless = { id = "com.diffplug.spotless", version = "7.2.1" }
+spotless = { id = "com.diffplug.spotless", version = "8.0.0" }
 
 [libraries]
 kotlin-bom = { module = "org.jetbrains.kotlin:kotlin-bom", version.ref = "kotlin" }
