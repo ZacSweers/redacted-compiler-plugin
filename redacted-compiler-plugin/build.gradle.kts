@@ -53,7 +53,7 @@ tasks.test {
   useJUnitPlatform()
   workingDir = rootDir
 
-  systemProperty("rdt.jvmTarget", libs.versions.jvmTarget.get())
+  systemProperty("rcp.jvmTarget", libs.versions.jvmTarget.get())
   systemProperty("redactedRuntime.classpath", redactedRuntimeClasspath.asPath)
 
   // Properties required to run the internal test framework.

@@ -22,7 +22,7 @@ open class AbstractDiagnosticTest : AbstractFirLightTreeDiagnosticsTest() {
 
       defaultDirectives {
         JVM_TARGET.with(
-          JvmTarget.fromString(System.getProperty("rdt.jvmTarget", JvmTarget.JVM_11.description))!!
+          JvmTarget.fromString(System.getProperty("rcp.jvmTarget", JvmTarget.JVM_11.description))!!
         )
         +FULL_JDK
       }
