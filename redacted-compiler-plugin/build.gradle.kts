@@ -21,7 +21,13 @@ idea { module.generatedSourceDirs.add(projectDir.resolve("test-gen/java")) }
 
 kotlin { compilerOptions.freeCompilerArgs.add("-Xcontext-parameters") }
 
-val redactedRuntimeClasspath: Configuration by configurations.creating { isTransitive = false }
+val redactedRuntime by configurations.dependencyScope("redactedRuntime") { isTransitive = false }
+
+val redactedRuntimeClasspath =
+  configurations.resolvable("redactedRuntimeClasspath") {
+    isTransitive = false
+    extendsFrom(redactedRuntime)
+  }
 
 dependencies {
   compileOnly(libs.kotlin.compiler)
@@ -30,7 +36,7 @@ dependencies {
   testFixturesApi(libs.kotlin.compilerTestFramework)
   testFixturesApi(libs.kotlin.compiler)
 
-  redactedRuntimeClasspath(project(":redacted-compiler-plugin-annotations"))
+  redactedRuntime(project(":redacted-compiler-plugin-annotations"))
 
   // Dependencies required to run the internal test framework.
   testRuntimeOnly(libs.junit)
@@ -48,13 +54,11 @@ buildConfig {
 }
 
 tasks.test {
-  dependsOn(redactedRuntimeClasspath)
-
   useJUnitPlatform()
   workingDir = rootDir
 
   systemProperty("rcp.jvmTarget", libs.versions.jvmTarget.get())
-  systemProperty("redactedRuntime.classpath", redactedRuntimeClasspath.asPath)
+  systemProperty("redactedRuntime.classpath", redactedRuntimeClasspath.map { it.asPath })
 
   // Properties required to run the internal test framework.
   setLibraryProperty("org.jetbrains.kotlin.test.kotlin-stdlib", "kotlin-stdlib")
