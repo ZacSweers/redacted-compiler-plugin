@@ -20,6 +20,7 @@ ktfmt = "0.59"
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 binaryCompatibilityValidator = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version = "0.18.1" }
 buildConfig = { id = "com.github.gmazzo.buildconfig", version = "5.7.1" }
 dokka = { id = "org.jetbrains.dokka", version = "2.1.0" }

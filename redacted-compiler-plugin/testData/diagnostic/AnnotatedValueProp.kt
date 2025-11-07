@@ -1,5 +1,5 @@
-// RENDER_DIAGNOSTICS_FULL_TEXT
-
+// Copyright (C) 2025 Zac Sweers
+// SPDX-License-Identifier: Apache-2.0
 import kotlin.jvm.JvmInline
 
 @JvmInline

@@ -3,9 +3,9 @@ import org.jetbrains.kotlin.gradle.dsl.JsModuleKind.MODULE_UMD
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 
 plugins {
-  kotlin("multiplatform")
-  id("org.jetbrains.dokka")
-  id("com.vanniktech.maven.publish")
+  alias(libs.plugins.kotlin.multiplatform)
+  alias(libs.plugins.dokka)
+  alias(libs.plugins.mavenPublish)
 }
 
 /*
