@@ -54,11 +54,15 @@ buildConfig {
 }
 
 tasks.test {
+  dependsOn(redactedRuntimeClasspath)
+  val redactedRuntimeClasspath = redactedRuntimeClasspath.map { it.asPath }
+
   useJUnitPlatform()
   workingDir = rootDir
 
   systemProperty("rcp.jvmTarget", libs.versions.jvmTarget.get())
-  systemProperty("redactedRuntime.classpath", redactedRuntimeClasspath.map { it.asPath })
+
+  doFirst { systemProperty("redactedRuntime.classpath", redactedRuntimeClasspath.get()) }
 
   // Properties required to run the internal test framework.
   setLibraryProperty("org.jetbrains.kotlin.test.kotlin-stdlib", "kotlin-stdlib")
