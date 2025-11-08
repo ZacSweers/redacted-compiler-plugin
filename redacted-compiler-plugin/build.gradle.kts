@@ -54,8 +54,8 @@ buildConfig {
 }
 
 tasks.test {
+  dependsOn(redactedRuntimeClasspath)
   val redactedRuntimeClasspath = redactedRuntimeClasspath.map { it.asPath }
-  inputs.files(redactedRuntimeClasspath)
 
   useJUnitPlatform()
   workingDir = rootDir
