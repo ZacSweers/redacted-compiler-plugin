@@ -39,7 +39,7 @@ kotlin {
     commonTest {
       dependencies {
         implementation(libs.kotlin.test)
-        implementation("io.ktor:ktor-utils:3.3.1") { because("For PlatformUtils use") }
+        implementation("io.ktor:ktor-utils:3.3.2") { because("For PlatformUtils use") }
       }
     }
   }
