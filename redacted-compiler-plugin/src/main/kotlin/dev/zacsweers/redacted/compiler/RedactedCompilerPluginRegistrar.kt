@@ -2,16 +2,17 @@
 // SPDX-License-Identifier: Apache-2.0
 package dev.zacsweers.redacted.compiler
 
+import dev.zacsweers.redacted.BuildConfig.KOTLIN_PLUGIN_ID
 import dev.zacsweers.redacted.compiler.fir.RedactedFirExtensionRegistrar
 import org.jetbrains.kotlin.backend.common.extensions.IrGenerationExtension
 import org.jetbrains.kotlin.compiler.plugin.CompilerPluginRegistrar
-import org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi
 import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.fir.extensions.FirExtensionRegistrarAdapter
 import org.jetbrains.kotlin.name.ClassId
 
-@OptIn(ExperimentalCompilerApi::class)
-public class RedactedComponentRegistrar : CompilerPluginRegistrar() {
+public class RedactedCompilerPluginRegistrar : CompilerPluginRegistrar() {
+
+  public val pluginId: String = KOTLIN_PLUGIN_ID
 
   override val pluginId: String = "dev.zacsweers.redacted.compiler"
 

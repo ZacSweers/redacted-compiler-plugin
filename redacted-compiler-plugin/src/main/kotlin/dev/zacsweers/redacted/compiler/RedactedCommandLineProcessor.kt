@@ -5,7 +5,6 @@ package dev.zacsweers.redacted.compiler
 import org.jetbrains.kotlin.compiler.plugin.AbstractCliOption
 import org.jetbrains.kotlin.compiler.plugin.CliOption
 import org.jetbrains.kotlin.compiler.plugin.CommandLineProcessor
-import org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi
 import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.config.CompilerConfigurationKey
 
@@ -22,7 +21,6 @@ internal val KEY_UNREDACTED_ANNOTATION =
     "The unredacted marker annotations (i.e. com/example/Unredacted) to look for when redacting"
   )
 
-@OptIn(ExperimentalCompilerApi::class)
 public class RedactedCommandLineProcessor : CommandLineProcessor {
 
   internal companion object {

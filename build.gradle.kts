@@ -125,7 +125,9 @@ subprojects {
   }
 
   plugins.withId("com.vanniktech.maven.publish") {
-    configure<MavenPublishBaseExtension> { publishToMavenCentral(automaticRelease = true) }
+    configure<MavenPublishBaseExtension> {
+      publishToMavenCentral(automaticRelease = true, validateDeployment = false)
+    }
 
     // configuration required to produce unique META-INF/*.kotlin_module file names
     tasks.withType<KotlinCompile>().configureEach {
