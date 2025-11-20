@@ -2,6 +2,7 @@ import com.vanniktech.maven.publish.MavenPublishBaseExtension
 import kotlinx.validation.ExperimentalBCVApi
 import org.jetbrains.dokka.gradle.DokkaExtension
 import org.jetbrains.dokka.gradle.engine.parameters.VisibilityModifier
+import org.jetbrains.kotlin.gradle.dsl.JvmDefaultMode
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmCompilerOptions
 import org.jetbrains.kotlin.gradle.dsl.KotlinProjectExtension
@@ -94,7 +95,7 @@ subprojects {
           if (project.name != "sample") {
             jvmTarget.set(libs.versions.jvmTarget.map(JvmTarget::fromTarget))
           }
-          freeCompilerArgs.addAll("-Xjvm-default=all")
+          jvmDefault.set(JvmDefaultMode.NO_COMPATIBILITY)
         }
       }
     }
