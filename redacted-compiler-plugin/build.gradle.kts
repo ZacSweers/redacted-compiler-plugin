@@ -19,7 +19,12 @@ sourceSets {
 
 idea { module.generatedSourceDirs.add(projectDir.resolve("test-gen/java")) }
 
-kotlin { compilerOptions.freeCompilerArgs.add("-Xcontext-parameters") }
+kotlin {
+  compilerOptions {
+    freeCompilerArgs.add("-Xcontext-parameters")
+    optIn.add("org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi")
+  }
+}
 
 val redactedRuntime by configurations.dependencyScope("redactedRuntime") { isTransitive = false }
 

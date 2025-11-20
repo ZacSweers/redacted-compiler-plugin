@@ -5,7 +5,6 @@ package dev.zacsweers.redacted.compiler
 import dev.zacsweers.redacted.compiler.fir.RedactedFirExtensionRegistrar
 import org.jetbrains.kotlin.backend.common.extensions.IrGenerationExtension
 import org.jetbrains.kotlin.compiler.plugin.CompilerPluginRegistrar
-import org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi
 import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.fir.extensions.FirExtensionRegistrarAdapter
 import org.jetbrains.kotlin.name.ClassId
@@ -29,7 +28,6 @@ fun TestConfigurationBuilder.configurePlugin() {
 
 class RedactedExtensionRegistrarConfigurator(testServices: TestServices) :
   EnvironmentConfigurator(testServices) {
-  @OptIn(ExperimentalCompilerApi::class)
   override fun CompilerPluginRegistrar.ExtensionStorage.registerCompilerExtensions(
     module: TestModule,
     configuration: CompilerConfiguration,
