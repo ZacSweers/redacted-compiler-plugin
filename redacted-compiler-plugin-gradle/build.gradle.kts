@@ -105,7 +105,9 @@ dependencies {
   compileOnly(libs.kotlin.stdlib)
 }
 
-configure<MavenPublishBaseExtension> { publishToMavenCentral(automaticRelease = true) }
+configure<MavenPublishBaseExtension> {
+  publishToMavenCentral(automaticRelease = true, validateDeployment = false)
+}
 
 // configuration required to produce unique META-INF/*.kotlin_module file names
 tasks.withType<KotlinCompile>().configureEach {

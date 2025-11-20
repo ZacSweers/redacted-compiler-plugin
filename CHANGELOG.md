@@ -4,7 +4,14 @@ Changelog
 **Unreleased**
 --------------
 
+1.15.1
+------
+
+_2025-11-20_
+
 - Add `RedactedCompilerPluginRegistrar.pluginId` for forward compatibility with Kotlin `2.3.0`'s new API.
+- Compile against Gradle `9.2.1`.
+- Compile against Kotlin `2.2.21`.
 
 1.15.0
 ------
