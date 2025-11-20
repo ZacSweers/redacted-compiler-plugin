@@ -13,7 +13,7 @@
 # limitations under the License.
 
 [versions]
-kotlin = "2.2.21"
+kotlin = "2.3.0-RC"
 jdk = "23"
 jvmTarget = "11"
 ktfmt = "0.59"

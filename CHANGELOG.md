@@ -4,6 +4,9 @@ Changelog
 **Unreleased**
 --------------
 
+- Compile against Kotlin `2.3.0`.This release requires Kotlin `2.3.0` or later.
+- Raise the Gradle plugin Kotlin target to `2.0`, which in turn requires Gradle `8.11` or later.
+
 1.15.1
 ------
 
