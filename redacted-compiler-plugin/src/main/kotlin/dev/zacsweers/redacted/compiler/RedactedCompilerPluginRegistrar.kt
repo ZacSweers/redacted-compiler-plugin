@@ -12,9 +12,7 @@ import org.jetbrains.kotlin.name.ClassId
 
 public class RedactedCompilerPluginRegistrar : CompilerPluginRegistrar() {
 
-  public val pluginId: String = KOTLIN_PLUGIN_ID
-
-  override val pluginId: String = "dev.zacsweers.redacted.compiler"
+  override val pluginId: String = KOTLIN_PLUGIN_ID
 
   override val supportsK2: Boolean = true
 
