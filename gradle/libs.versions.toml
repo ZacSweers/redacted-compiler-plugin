@@ -22,7 +22,7 @@ ktfmt = "0.59"
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 binaryCompatibilityValidator = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version = "0.18.1" }
-buildConfig = { id = "com.github.gmazzo.buildconfig", version = "6.0.1" }
+buildConfig = { id = "com.github.gmazzo.buildconfig", version = "6.0.3" }
 dokka = { id = "org.jetbrains.dokka", version = "2.1.0" }
 mavenPublish = { id = "com.vanniktech.maven.publish", version = "0.35.0" }
 spotless = { id = "com.diffplug.spotless", version = "8.1.0" }
