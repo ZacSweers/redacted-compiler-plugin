@@ -46,7 +46,7 @@ public class RedactedGradleSubplugin : KotlinCompilerPluginSupportPlugin {
           DEFAULT_UNREDACTED_ANNOTATION_SET
     if (useDefaults) {
       project.dependencies.add(
-        kotlinCompilation.implementationConfigurationName,
+        kotlinCompilation.defaultSourceSet.implementationConfigurationName,
         "dev.zacsweers.redacted:redacted-compiler-plugin-annotations:$VERSION",
       )
     }
