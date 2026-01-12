@@ -11,7 +11,7 @@ fun main() {
       testsRoot = "redacted-compiler-plugin/test-gen/java",
     ) {
       testClass<AbstractJvmBoxTest> { model("box") }
-      testClass<AbstractJvmDiagnosticTest> { model("diagnostic") }
+      testClass<AbstractDiagnosticTest> { model("diagnostic") }
     }
   }
 }
