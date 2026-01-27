@@ -14,7 +14,7 @@ import java.util.regex.Pattern;
 @SuppressWarnings("all")
 @TestMetadata("redacted-compiler-plugin/testData/box")
 @TestDataPath("$PROJECT_ROOT")
-public class BoxTestGenerated extends AbstractBoxTest {
+public class JvmBoxTestGenerated extends AbstractJvmBoxTest {
   @Test
   public void testAllFilesPresentInBox() {
     KtTestUtil.assertAllTestsPresentByMetadataWithExcluded(this.getClass(), new File("redacted-compiler-plugin/testData/box"), Pattern.compile("^(.+)\\.kt$"), null, true);
