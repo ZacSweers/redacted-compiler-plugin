@@ -24,8 +24,8 @@ kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref 
 binaryCompatibilityValidator = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version = "0.18.1" }
 buildConfig = { id = "com.github.gmazzo.buildconfig", version = "6.0.7" }
 dokka = { id = "org.jetbrains.dokka", version = "2.1.0" }
-mavenPublish = { id = "com.vanniktech.maven.publish", version = "0.35.0" }
-spotless = { id = "com.diffplug.spotless", version = "8.1.0" }
+mavenPublish = { id = "com.vanniktech.maven.publish", version = "0.36.0" }
+spotless = { id = "com.diffplug.spotless", version = "8.2.1" }
 
 [libraries]
 kotlin-bom = { module = "org.jetbrains.kotlin:kotlin-bom", version.ref = "kotlin" }
