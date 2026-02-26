@@ -10,7 +10,7 @@ fun main() {
       testDataRoot = "redacted-compiler-plugin/testData",
       testsRoot = "redacted-compiler-plugin/test-gen/java",
     ) {
-      testClass<AbstractBoxTest> { model("box") }
+      testClass<AbstractJvmBoxTest> { model("box") }
       testClass<AbstractDiagnosticTest> { model("diagnostic") }
     }
   }
