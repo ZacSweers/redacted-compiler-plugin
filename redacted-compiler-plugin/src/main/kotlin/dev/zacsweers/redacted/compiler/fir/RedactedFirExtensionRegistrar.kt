@@ -84,7 +84,7 @@ internal object FirRedactedDeclarationChecker : FirClassChecker(MppCheckerKind.C
         if (supertype is ConeErrorType) continue
         if (supertype !is ConeClassLikeType) continue
         val redactedAnnotation =
-          supertype.classId?.toSymbol()?.resolvedAnnotationClassIds?.firstOrNull {
+          supertype.classId.toSymbol()?.resolvedAnnotationClassIds?.firstOrNull {
             it in context.session.redactedAnnotations
           }
         if (redactedAnnotation != null) {

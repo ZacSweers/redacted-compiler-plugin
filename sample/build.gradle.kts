@@ -29,10 +29,8 @@ kotlin {
     browser {}
   }
   linuxX64()
-  macosX64()
   macosArm64()
   iosSimulatorArm64()
-  iosX64()
 
   sourceSets {
     commonMain { dependencies { implementation(project(":redacted-compiler-plugin-annotations")) } }
