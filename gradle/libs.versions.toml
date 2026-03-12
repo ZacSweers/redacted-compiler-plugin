@@ -14,7 +14,7 @@
 
 [versions]
 kotlin = "2.3.20-RC3"
-jdk = "23"
+jdk = "25"
 jvmTarget = "11"
 ktfmt = "0.61"
 
