@@ -4,6 +4,11 @@ Changelog
 **Unreleased**
 --------------
 
+1.16.0
+------
+
+_2026-03-16_
+
 - Compile against Kotlin `2.3.20`.This release requires Kotlin `2.3.20` or later.
 - Raise the Gradle plugin Kotlin target to `2.0`, which in turn requires Gradle `8.11` or later.
 - Remove the following deprecated targets. See: https://kotl.in/native-targets-tiers.
