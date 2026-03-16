@@ -33,7 +33,7 @@ jobs:
         uses: actions/setup-java@v5
         with:
           distribution: 'zulu'
-          java-version: '23'
+          java-version: '25'
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v5
@@ -58,7 +58,7 @@ jobs:
         uses: actions/setup-java@v5
         with:
           distribution: 'zulu'
-          java-version: '23'
+          java-version: '25'
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v5
@@ -79,7 +79,7 @@ jobs:
         uses: actions/setup-java@v5
         with:
           distribution: 'zulu'
-          java-version: '23'
+          java-version: '25'
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v5
