@@ -265,27 +265,25 @@ internal object FirRedactedDeclarationChecker : FirClassChecker(MppCheckerKind.C
 
   private fun FirPropertySymbol.redactedAnnotation(
     session: FirSession
-  ): Pair<FirAnnotation, ClassId>? =
-    resolvedAnnotationsWithClassIds.firstNotNullResult {
-      val classId = it.toAnnotationClassIdSafe(session)
-      if (classId != null && classId in session.redactedAnnotations) {
-        it to classId
-      } else {
-        null
-      }
+  ): Pair<FirAnnotation, ClassId>? = resolvedAnnotationsWithClassIds.firstNotNullResult {
+    val classId = it.toAnnotationClassIdSafe(session)
+    if (classId != null && classId in session.redactedAnnotations) {
+      it to classId
+    } else {
+      null
     }
+  }
 
   private fun FirPropertySymbol.unredactedAnnotation(
     session: FirSession
-  ): Pair<FirAnnotation, ClassId>? =
-    resolvedAnnotationsWithClassIds.firstNotNullResult {
-      val classId = it.toAnnotationClassIdSafe(session)
-      if (classId != null && classId in session.unRedactedAnnotations) {
-        it to classId
-      } else {
-        null
-      }
+  ): Pair<FirAnnotation, ClassId>? = resolvedAnnotationsWithClassIds.firstNotNullResult {
+    val classId = it.toAnnotationClassIdSafe(session)
+    if (classId != null && classId in session.unRedactedAnnotations) {
+      it to classId
+    } else {
+      null
     }
+  }
 
   private val FirClass.isInstantiableEnum: Boolean
     get() = isEnumClass && !isExpect && !isExternal
