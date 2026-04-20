@@ -4,7 +4,7 @@ pluginManagement {
     mavenCentral()
     gradlePluginPortal()
   }
-  plugins { id("com.gradle.develocity") version "4.4.0" }
+  plugins { id("com.gradle.develocity") version "4.4.1" }
 }
 
 dependencyResolutionManagement {
