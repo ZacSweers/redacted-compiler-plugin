@@ -15,6 +15,10 @@ import java.util.regex.Pattern;
 @TestMetadata("redacted-compiler-plugin/testData/box")
 @TestDataPath("$PROJECT_ROOT")
 public class JvmBoxTestGenerated extends AbstractJvmBoxTest {
+  private void run(String fileName) {
+    runTest("redacted-compiler-plugin/testData/box/" + fileName);
+  }
+
   @Test
   public void testAllFilesPresentInBox() {
     KtTestUtil.assertAllTestsPresentByMetadataWithExcluded(this.getClass(), new File("redacted-compiler-plugin/testData/box"), Pattern.compile("^(.+)\\.kt$"), null, true);
@@ -23,30 +27,30 @@ public class JvmBoxTestGenerated extends AbstractJvmBoxTest {
   @Test
   @TestMetadata("ClassAnnotated.kt")
   public void testClassAnnotated() {
-    runTest("redacted-compiler-plugin/testData/box/ClassAnnotated.kt");
+    run("ClassAnnotated.kt");
   }
 
   @Test
   @TestMetadata("Complex.kt")
   public void testComplex() {
-    runTest("redacted-compiler-plugin/testData/box/Complex.kt");
+    run("Complex.kt");
   }
 
   @Test
   @TestMetadata("CustomAnnotationReplacement.kt")
   public void testCustomAnnotationReplacement() {
-    runTest("redacted-compiler-plugin/testData/box/CustomAnnotationReplacement.kt");
+    run("CustomAnnotationReplacement.kt");
   }
 
   @Test
   @TestMetadata("CustomReplacement.kt")
   public void testCustomReplacement() {
-    runTest("redacted-compiler-plugin/testData/box/CustomReplacement.kt");
+    run("CustomReplacement.kt");
   }
 
   @Test
   @TestMetadata("ValueClass.kt")
   public void testValueClass() {
-    runTest("redacted-compiler-plugin/testData/box/ValueClass.kt");
+    run("ValueClass.kt");
   }
 }
