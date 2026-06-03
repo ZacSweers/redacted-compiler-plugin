@@ -15,6 +15,10 @@ import java.util.regex.Pattern;
 @TestMetadata("redacted-compiler-plugin/testData/diagnostic")
 @TestDataPath("$PROJECT_ROOT")
 public class DiagnosticTestGenerated extends AbstractDiagnosticTest {
+  private void run(String fileName) {
+    runTest("redacted-compiler-plugin/testData/diagnostic/" + fileName);
+  }
+
   @Test
   public void testAllFilesPresentInDiagnostic() {
     KtTestUtil.assertAllTestsPresentByMetadataWithExcluded(this.getClass(), new File("redacted-compiler-plugin/testData/diagnostic"), Pattern.compile("^(.+)\\.kt$"), null, true);
@@ -23,42 +27,42 @@ public class DiagnosticTestGenerated extends AbstractDiagnosticTest {
   @Test
   @TestMetadata("AnnotatedValueProp.kt")
   public void testAnnotatedValueProp() {
-    runTest("redacted-compiler-plugin/testData/diagnostic/AnnotatedValueProp.kt");
+    run("AnnotatedValueProp.kt");
   }
 
   @Test
   @TestMetadata("CustomToStringRedactedClass.kt")
   public void testCustomToStringRedactedClass() {
-    runTest("redacted-compiler-plugin/testData/diagnostic/CustomToStringRedactedClass.kt");
+    run("CustomToStringRedactedClass.kt");
   }
 
   @Test
   @TestMetadata("CustomToStringRedactedProperty.kt")
   public void testCustomToStringRedactedProperty() {
-    runTest("redacted-compiler-plugin/testData/diagnostic/CustomToStringRedactedProperty.kt");
+    run("CustomToStringRedactedProperty.kt");
   }
 
   @Test
   @TestMetadata("DataObject.kt")
   public void testDataObject() {
-    runTest("redacted-compiler-plugin/testData/diagnostic/DataObject.kt");
+    run("DataObject.kt");
   }
 
   @Test
   @TestMetadata("DoubleAnnotation.kt")
   public void testDoubleAnnotation() {
-    runTest("redacted-compiler-plugin/testData/diagnostic/DoubleAnnotation.kt");
+    run("DoubleAnnotation.kt");
   }
 
   @Test
   @TestMetadata("EnumClass.kt")
   public void testEnumClass() {
-    runTest("redacted-compiler-plugin/testData/diagnostic/EnumClass.kt");
+    run("EnumClass.kt");
   }
 
   @Test
   @TestMetadata("NonDataClass.kt")
   public void testNonDataClass() {
-    runTest("redacted-compiler-plugin/testData/diagnostic/NonDataClass.kt");
+    run("NonDataClass.kt");
   }
 }

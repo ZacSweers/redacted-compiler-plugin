@@ -40,7 +40,7 @@ plugins {
  */
 kotlin {
   jvm()
-  js(IR) {
+  js {
     compilations.configureEach {
       compileTaskProvider.configure {
         compilerOptions {
