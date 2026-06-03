@@ -4,6 +4,13 @@ Changelog
 **Unreleased**
 --------------
 
+1.17.0
+------
+
+_2026-06-03_
+
+- Compile against Kotlin `2.4.0`.This release requires Kotlin `2.4.0` or later. It may work on older versions but is untested.
+
 1.16.0
 ------
 
