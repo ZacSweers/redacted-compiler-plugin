@@ -16,7 +16,7 @@
 kotlin = "2.4.0"
 jdk = "25"
 jvmTarget = "11"
-ktfmt = "0.63"
+ktfmt = "0.64"
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
