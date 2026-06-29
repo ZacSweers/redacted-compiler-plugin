@@ -1,3 +1,5 @@
+// Copyright (C) 2026 Zac Sweers
+// SPDX-License-Identifier: Apache-2.0
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
 import kotlinx.validation.ExperimentalBCVApi
 import org.jetbrains.dokka.gradle.DokkaExtension
@@ -22,7 +24,6 @@ plugins {
   alias(libs.plugins.kotlin.multiplatform) apply false
   alias(libs.plugins.dokka)
   alias(libs.plugins.mavenPublish) apply false
-  alias(libs.plugins.spotless)
   alias(libs.plugins.binaryCompatibilityValidator)
   alias(libs.plugins.buildConfig) apply false
 }
@@ -41,36 +42,6 @@ dokka {
   dokkaPublications.html {
     outputDirectory.set(rootDir.resolve("docs/api/1.x"))
     includes.from(project.layout.projectDirectory.file("README.md"))
-  }
-}
-
-spotless {
-  format("misc") {
-    target("*.gradle", "*.md", ".gitignore")
-    trimTrailingWhitespace()
-    leadingTabsToSpaces(2)
-    endWithNewline()
-  }
-  kotlin {
-    target("**/src/**/*.kt")
-    ktfmt(libs.versions.ktfmt.get()).googleStyle()
-    trimTrailingWhitespace()
-    endWithNewline()
-    licenseHeaderFile("spotless/spotless.kt")
-    targetExclude("**/spotless.kt", "**/build/**", "**/compiler-tests/src/test/data/**")
-    // TODO temporary until ktfmt supports context params
-    suppressLintsFor {
-      step = "ktfmt"
-      shortCode = "ktfmt"
-      path =
-        "redacted-compiler-plugin/src/main/kotlin/dev/zacsweers/redacted/compiler/fir/RedactedFirExtensionRegistrar.kt"
-    }
-  }
-  kotlinGradle {
-    target("**/*.kts", "*.kts")
-    ktfmt(libs.versions.ktfmt.get()).googleStyle()
-    trimTrailingWhitespace()
-    endWithNewline()
   }
 }
 

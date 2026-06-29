@@ -1,3 +1,5 @@
+// Copyright (C) 2026 Zac Sweers
+// SPDX-License-Identifier: Apache-2.0
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
 import org.gradle.kotlin.dsl.configure
 import org.jetbrains.dokka.gradle.engine.parameters.VisibilityModifier
@@ -10,7 +12,6 @@ plugins {
   `java-gradle-plugin`
   alias(libs.plugins.dokka)
   alias(libs.plugins.mavenPublish)
-  alias(libs.plugins.spotless)
   alias(libs.plugins.buildConfig)
 }
 
@@ -81,23 +82,6 @@ dokka {
 }
 
 kotlin { explicitApi() }
-
-spotless {
-  format("misc") {
-    target("*.gradle", "*.md", ".gitignore")
-    trimTrailingWhitespace()
-    leadingTabsToSpaces(2)
-    endWithNewline()
-  }
-  kotlin {
-    target("**/*.kt")
-    ktfmt(libs.versions.ktfmt.get())
-    trimTrailingWhitespace()
-    endWithNewline()
-    licenseHeaderFile("../spotless/spotless.kt")
-    targetExclude("**/spotless.kt", "build/**")
-  }
-}
 
 dependencies {
   compileOnly(libs.kotlin.gradlePlugin)
