@@ -1,3 +1,5 @@
+// Copyright (C) 2026 Zac Sweers
+// SPDX-License-Identifier: Apache-2.0
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 

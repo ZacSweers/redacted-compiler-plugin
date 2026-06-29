@@ -1,0 +1,36 @@
+# kempt configuration: https://github.com/ZacSweers/kempt
+
+[ktfmt]
+version = "0.64"
+
+[gjf]
+version = "1.35.0"
+
+[license-header]
+file = "config/license-header.txt"
+
+[ktfmt.license-header]
+excludes = "config/license-header-excludes-kt.txt"
+
+[gjf.license-header]
+excludes = "config/license-header-excludes-java.txt"
+
+[paths]
+exclude = [
+  "**/build/**",
+  "**/testData/**",
+  "**/test-gen/**",
+]
+
+[ktfmt.paths]
+include = [
+  "**/*.kt",
+  "**/*.kts",
+]
+exclude = [
+  # TODO temporary until ktfmt supports context params
+  "redacted-compiler-plugin/src/main/kotlin/dev/zacsweers/redacted/compiler/fir/RedactedFirExtensionRegistrar.kt",
+]
+
+[hook]
+mode = "format"

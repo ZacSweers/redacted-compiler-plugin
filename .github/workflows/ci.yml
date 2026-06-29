@@ -16,6 +16,23 @@ concurrency:
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
+  format:
+    name: format
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+
+      - name: Install JDK
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'zulu'
+          java-version: '25'
+
+      - uses: ZacSweers/kempt@main
+        with:
+          cache: true
+
   jvm:
     name: jvm / StringConcat ${{ matrix.stringConcat }}
     runs-on: ubuntu-latest

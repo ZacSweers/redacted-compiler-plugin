@@ -1,0 +1,2 @@
+**/testData/**
+**/test-gen/**

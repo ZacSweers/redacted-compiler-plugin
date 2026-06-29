@@ -1,5 +1,5 @@
-import com.diffplug.gradle.spotless.SpotlessTask
-
+// Copyright (C) 2026 Zac Sweers
+// SPDX-License-Identifier: Apache-2.0
 plugins {
   alias(libs.plugins.kotlin.jvm)
   alias(libs.plugins.dokka)
@@ -92,8 +92,6 @@ val generateTests =
   }
 
 tasks.compileTestKotlin { dependsOn(generateTests) }
-
-tasks.withType<SpotlessTask>().configureEach { dependsOn(generateTests) }
 
 fun Test.setLibraryProperty(propName: String, jarName: String) {
   val path =
