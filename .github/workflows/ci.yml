@@ -96,10 +96,28 @@ jobs:
       - name: Test
         run: ./gradlew check --quiet
 
+  # https://jakewharton.com/fan-in-to-a-single-required-github-action/
+  final-status:
+    if: always()
+    runs-on: ubuntu-slim
+    needs:
+      - format
+      - generate-matrix
+      - jvm
+      - all-platforms
+    steps:
+      - name: Check
+        run: |
+          results=$(tr -d '\n' <<< '${{ toJSON(needs.*.result) }}')
+          if ! grep -q -v -E '(failure|cancelled)' <<< "$results"; then
+            echo "One or more required jobs failed"
+            exit 1
+          fi
+
   publish:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && github.repository == 'zacsweers/redacted-compiler-plugin'
-    needs: [ jvm, all-platforms ]
+    needs: final-status
 
     steps:
       - name: Checkout
