@@ -43,7 +43,7 @@ tasks.withType<KotlinCompile>().configureEach {
 
 tasks.withType<JavaCompile>().configureEach { options.release.set(21) }
 
-val redactedRuntime by configurations.dependencyScope("redactedRuntime") { isTransitive = false }
+val redactedRuntime = configurations.dependencyScope("redactedRuntime") { isTransitive = false }
 
 val redactedRuntimeClasspath =
   configurations.resolvable("redactedRuntimeClasspath") {
@@ -125,6 +125,12 @@ val shadowJar =
       "dev.zacsweers.metro.compiler.compat",
       "dev.zacsweers.redacted.shaded.dev.zacsweers.metro.compiler.compat",
     )
+
+    // Ignore the test fixtures and test source sets
+    sourceSetsClassesDirs.setFrom(
+      java.sourceSets.main.map { it.output.classesDirs.filter { dir -> dir.isDirectory } }
+    )
+    minimize { exclude(dependency("dev.zacsweers.metro:compiler-compat.*:.*")) }
   }
 
 for (configurationName in arrayOf("apiElements", "runtimeElements")) {
