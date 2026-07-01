@@ -4,6 +4,8 @@ Changelog
 **Unreleased**
 --------------
 
+- Integrate Metro's compiler-compat infra to support a wider range of Kotlin compiler versions.
+
 1.17.0
 ------
 

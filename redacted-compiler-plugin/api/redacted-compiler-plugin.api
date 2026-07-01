@@ -13,7 +13,8 @@ public final class dev/zacsweers/redacted/compiler/RedactedCompilerPluginRegistr
 }
 
 public final class dev/zacsweers/redacted/compiler/RedactedIrGenerationExtension : org/jetbrains/kotlin/backend/common/extensions/IrGenerationExtension {
-	public fun <init> (Ljava/lang/String;Ljava/util/Set;Ljava/util/Set;)V
+	public fun <init> (Ljava/lang/String;Ljava/util/Set;Ljava/util/Set;Ldev/zacsweers/metro/compiler/compat/CompatContext;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/util/Set;Ljava/util/Set;Ldev/zacsweers/metro/compiler/compat/CompatContext;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun generate (Lorg/jetbrains/kotlin/ir/declarations/IrModuleFragment;Lorg/jetbrains/kotlin/backend/common/extensions/IrPluginContext;)V
 }
 
