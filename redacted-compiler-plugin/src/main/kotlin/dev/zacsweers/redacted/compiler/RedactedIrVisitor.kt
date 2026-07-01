@@ -4,6 +4,7 @@
 
 package dev.zacsweers.redacted.compiler
 
+import dev.zacsweers.metro.compiler.compat.CompatContext
 import org.jetbrains.kotlin.backend.common.IrElementTransformerVoidWithContext
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
@@ -27,9 +28,10 @@ import org.jetbrains.kotlin.ir.expressions.addArgument
 import org.jetbrains.kotlin.ir.symbols.UnsafeDuringIrConstructionAPI
 import org.jetbrains.kotlin.ir.types.isArray
 import org.jetbrains.kotlin.ir.types.isString
+import org.jetbrains.kotlin.ir.util.classId
 import org.jetbrains.kotlin.ir.util.getAllSuperclasses
-import org.jetbrains.kotlin.ir.util.hasAnnotation
 import org.jetbrains.kotlin.ir.util.isPrimitiveArray
+import org.jetbrains.kotlin.ir.util.parentAsClass
 import org.jetbrains.kotlin.ir.util.parentClassOrNull
 import org.jetbrains.kotlin.ir.util.primaryConstructor
 import org.jetbrains.kotlin.ir.util.properties
@@ -41,6 +43,7 @@ internal class RedactedIrVisitor(
   private val redactedAnnotations: Set<ClassId>,
   private val unRedactedAnnotations: Set<ClassId>,
   private val replacementString: String,
+  private val compatContext: CompatContext,
 ) : IrElementTransformerVoidWithContext() {
 
   private class Property(
@@ -64,10 +67,12 @@ internal class RedactedIrVisitor(
         .associateBy { it.name.asString() }
 
     val properties = mutableListOf<Property>()
-    val classIsRedacted = redactedAnnotations.any(declarationParent::hasAnnotation)
-    val classIsUnredacted = unRedactedAnnotations.any(declarationParent::hasAnnotation)
+    val classIsRedacted = redactedAnnotations.any { declarationParent.hasAnnotationCompat(it) }
+    val classIsUnredacted = unRedactedAnnotations.any { declarationParent.hasAnnotationCompat(it) }
     val supertypeIsRedacted by unsafeLazy {
-      declarationParent.getAllSuperclasses().any { redactedAnnotations.any(it::hasAnnotation) }
+      declarationParent.getAllSuperclasses().any { supertype ->
+        redactedAnnotations.any { supertype.hasAnnotationCompat(it) }
+      }
     }
     var anyRedacted = false
     var anyUnredacted = false
@@ -130,10 +135,17 @@ internal class RedactedIrVisitor(
   }
 
   private val IrAnnotationContainer.isRedacted: Boolean
-    get() = redactedAnnotations.any(::hasAnnotation)
+    get() = redactedAnnotations.any { hasAnnotationCompat(it) }
 
   private val IrAnnotationContainer.isUnredacted: Boolean
-    get() = unRedactedAnnotations.any(::hasAnnotation)
+    get() = unRedactedAnnotations.any { hasAnnotationCompat(it) }
+
+  private fun IrAnnotationContainer.hasAnnotationCompat(classId: ClassId): Boolean =
+    with(compatContext) {
+      annotationsCompat().any { annotation ->
+        annotation.symbol.owner.parentAsClass.classId == classId
+      }
+    }
 
   /**
    * The actual body of the toString method. Copied from

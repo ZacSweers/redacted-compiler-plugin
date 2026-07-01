@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 package dev.zacsweers.redacted.compiler
 
+import dev.zacsweers.metro.compiler.compat.CompatContext
 import org.jetbrains.kotlin.backend.common.extensions.IrGenerationExtension
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
@@ -11,8 +12,8 @@ public class RedactedIrGenerationExtension(
   private val replacementString: String,
   private val redactedAnnotations: Set<ClassId>,
   private val unRedactedAnnotations: Set<ClassId>,
+  private val compatContext: CompatContext = CompatContext.create(),
 ) : IrGenerationExtension {
-
   override fun generate(moduleFragment: IrModuleFragment, pluginContext: IrPluginContext) {
     val redactedTransformer =
       RedactedIrVisitor(
@@ -20,6 +21,7 @@ public class RedactedIrGenerationExtension(
         redactedAnnotations,
         unRedactedAnnotations,
         replacementString,
+        compatContext,
       )
     moduleFragment.transform(redactedTransformer, null)
   }

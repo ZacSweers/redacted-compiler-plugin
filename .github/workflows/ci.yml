@@ -33,14 +33,27 @@ jobs:
         with:
           cache: true
 
+  generate-matrix:
+    name: generate jvm matrix
+    runs-on: ubuntu-slim
+    outputs:
+      matrix: ${{ steps.generate.outputs.matrix }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+
+      - name: Generate matrix
+        id: generate
+        run: ./scripts/generate-ci-matrix.sh
+
   jvm:
-    name: jvm / StringConcat ${{ matrix.stringConcat }}
+    name: jvm / Kotlin ${{ matrix.kotlin }} / StringConcat ${{ matrix.stringConcat }}
     runs-on: ubuntu-latest
+    needs: generate-matrix
 
     strategy:
       fail-fast: false
-      matrix:
-        stringConcat: [ 'inline', 'indy', 'indy-with-constants' ]
+      matrix: ${{ fromJSON(needs.generate-matrix.outputs.matrix) }}
 
     steps:
       - name: Checkout
@@ -56,7 +69,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v6
 
       - name: Build with Gradle
-        run: ./gradlew check -Pstring_concat=${{ matrix.stringConcat }} --quiet
+        run: ./gradlew :redacted-compiler-plugin:check :sample-jvm:check -PkotlinVersion=${{ matrix.kotlin }} -Pstring_concat=${{ matrix.stringConcat }} --quiet
 
   all-platforms:
     name: "platform / ${{ matrix.os }}"

@@ -1,11 +1,17 @@
 // Copyright (C) 2026 Zac Sweers
 // SPDX-License-Identifier: Apache-2.0
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import org.gradle.api.attributes.java.TargetJvmVersion
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
   alias(libs.plugins.kotlin.jvm)
   alias(libs.plugins.dokka)
   `java-test-fixtures`
   alias(libs.plugins.mavenPublish)
   alias(libs.plugins.buildConfig)
+  alias(libs.plugins.shadow) apply false
   idea
 }
 
@@ -19,9 +25,23 @@ sourceSets {
 
 idea { module.generatedSourceDirs.add(projectDir.resolve("test-gen/java")) }
 
-kotlin {
-  compilerOptions { optIn.add("org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi") }
+java {
+  sourceCompatibility = JavaVersion.VERSION_21
+  targetCompatibility = JavaVersion.VERSION_21
 }
+
+kotlin {
+  compilerOptions {
+    jvmTarget.set(JvmTarget.JVM_21)
+    optIn.add("org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi")
+  }
+}
+
+tasks.withType<KotlinCompile>().configureEach {
+  compilerOptions { jvmTarget.set(JvmTarget.JVM_21) }
+}
+
+tasks.withType<JavaCompile>().configureEach { options.release.set(21) }
 
 val redactedRuntime by configurations.dependencyScope("redactedRuntime") { isTransitive = false }
 
@@ -31,21 +51,48 @@ val redactedRuntimeClasspath =
     extendsFrom(redactedRuntime)
   }
 
+val embedded = configurations.dependencyScope("embedded")
+
+val embeddedClasspath = configurations.resolvable("embeddedClasspath") { extendsFrom(embedded) }
+
+val testKotlinVersion = providers.gradleProperty("kotlinVersion").orElse(libs.versions.kotlin)
+
+configurations.named("compileOnly").configure { extendsFrom(embedded) }
+
+configurations.named("testFixturesCompileOnly").configure { extendsFrom(embedded) }
+
+configurations.named("testImplementation").configure { extendsFrom(embedded) }
+
+listOf(
+    "compileClasspath",
+    "embeddedClasspath",
+    "testCompileClasspath",
+    "testFixturesCompileClasspath",
+    "testRuntimeClasspath",
+  )
+  .forEach { configurationName ->
+    configurations.named(configurationName) {
+      attributes.attribute(TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, 21)
+    }
+  }
+
 dependencies {
   compileOnly(libs.kotlin.compiler)
 
-  testFixturesApi(libs.kotlin.testJunit5)
-  testFixturesApi(libs.kotlin.compilerTestFramework)
-  testFixturesApi(libs.kotlin.compiler)
+  add(embedded.name, libs.metro.compilerCompat.k2420Beta1)
+
+  testKotlin("testFixturesApi", "kotlin-test-junit5")
+  testKotlin("testFixturesApi", "kotlin-compiler-internal-test-framework")
+  testKotlin("testFixturesApi", "kotlin-compiler")
 
   redactedRuntime(project(":redacted-compiler-plugin-annotations"))
 
   // Dependencies required to run the internal test framework.
   testRuntimeOnly(libs.junit)
-  testRuntimeOnly(libs.kotlin.reflect)
-  testRuntimeOnly(libs.kotlin.test)
-  testRuntimeOnly(libs.kotlin.scriptRuntime)
-  testRuntimeOnly(libs.kotlin.annotationsJvm)
+  testKotlin("testRuntimeOnly", "kotlin-reflect")
+  testKotlin("testRuntimeOnly", "kotlin-test")
+  testKotlin("testRuntimeOnly", "kotlin-script-runtime")
+  testKotlin("testRuntimeOnly", "kotlin-annotations-jvm")
 }
 
 buildConfig {
@@ -53,6 +100,36 @@ buildConfig {
 
   packageName("dev.zacsweers.redacted")
   buildConfigField("String", "KOTLIN_PLUGIN_ID", "\"dev.zacsweers.redacted.compiler\"")
+}
+
+tasks.jar.configure { enabled = false }
+
+val shadowJar =
+  tasks.register("shadowJar", ShadowJar::class.java) {
+    from(java.sourceSets.main.map { it.output })
+    configurations.add(embeddedClasspath)
+
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+    mergeServiceFiles()
+
+    exclude("module-info.class")
+    exclude("META-INF/versions/*/module-info.class")
+
+    dependencies {
+      exclude(dependency("org.jetbrains:.*"))
+      exclude(dependency("org.intellij:.*"))
+      exclude(dependency("org.jetbrains.kotlin:.*"))
+    }
+
+    relocate(
+      "dev.zacsweers.metro.compiler.compat",
+      "dev.zacsweers.redacted.shaded.dev.zacsweers.metro.compiler.compat",
+    )
+  }
+
+for (configurationName in arrayOf("apiElements", "runtimeElements")) {
+  configurations.named(configurationName) { artifacts.removeIf { true } }
+  artifacts.add(configurationName, shadowJar)
 }
 
 tasks.test {
@@ -101,4 +178,8 @@ fun Test.setLibraryProperty(propName: String, jarName: String) {
       .find { """$jarName-\d.*jar""".toRegex().matches(it.name) }
       ?.absolutePath ?: return
   systemProperty(propName, path)
+}
+
+fun DependencyHandler.testKotlin(configurationName: String, moduleName: String) {
+  addProvider(configurationName, testKotlinVersion.map { "org.jetbrains.kotlin:$moduleName:$it" })
 }

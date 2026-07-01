@@ -2,11 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 package dev.zacsweers.redacted.compiler
 
+import dev.zacsweers.metro.compiler.compat.CompatContext
 import dev.zacsweers.redacted.compiler.fir.RedactedFirExtensionRegistrar
-import org.jetbrains.kotlin.backend.common.extensions.IrGenerationExtension
 import org.jetbrains.kotlin.compiler.plugin.CompilerPluginRegistrar
 import org.jetbrains.kotlin.config.CompilerConfiguration
-import org.jetbrains.kotlin.fir.extensions.FirExtensionRegistrarAdapter
 import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.test.builders.TestConfigurationBuilder
 import org.jetbrains.kotlin.test.model.TestModule
@@ -43,11 +42,21 @@ class RedactedExtensionRegistrarConfigurator(testServices: TestServices) :
     val replacementString =
       module.directives[RedactedDirectives.REPLACEMENT_STRING].firstOrNull() ?: "██"
 
-    FirExtensionRegistrarAdapter.registerExtension(
-      RedactedFirExtensionRegistrar(redactedAnnotations, unredactedAnnotations)
-    )
-    IrGenerationExtension.registerExtension(
-      RedactedIrGenerationExtension(replacementString, redactedAnnotations, unredactedAnnotations)
-    )
+    val compatContext = CompatContext.create()
+
+    with(RedactedCompilerPluginRegistrar()) {
+      with(compatContext) {
+        this@registerCompilerExtensions.registerFirExtensionCompat(
+          RedactedFirExtensionRegistrar(redactedAnnotations, unredactedAnnotations)
+        )
+        this@registerCompilerExtensions.registerIrExtensionCompat(
+          RedactedIrGenerationExtension(
+            replacementString,
+            redactedAnnotations,
+            unredactedAnnotations,
+          )
+        )
+      }
+    }
   }
 }
