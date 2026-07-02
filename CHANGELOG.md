@@ -4,8 +4,13 @@ Changelog
 **Unreleased**
 --------------
 
+1.18.0
+------
+
+_2026-07-02_
+
 - Integrate Metro's compiler-compat infra to support a wider range of Kotlin compiler versions.
-- Test Kotlin `2.4.10-RC` and `2.4.20-Beta1`.
+- Test+support Kotlin `2.4.10-RC` and `2.4.20-Beta1`.
 
 1.17.0
 ------
