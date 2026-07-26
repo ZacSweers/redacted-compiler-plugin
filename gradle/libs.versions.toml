@@ -41,7 +41,7 @@ kotlin-compilerTestFramework = { module = "org.jetbrains.kotlin:kotlin-compiler-
 kotlin-testJunit5 = { module = "org.jetbrains.kotlin:kotlin-test-junit5", version.ref = "kotlin" }
 kotlin-scriptRuntime = { module = "org.jetbrains.kotlin:kotlin-script-runtime", version.ref = "kotlin" }
 kotlin-annotationsJvm = { module = "org.jetbrains.kotlin:kotlin-annotations-jvm", version.ref = "kotlin" }
-metro-compilerCompat-k2420Beta2 = { module = "dev.zacsweers.metro:compiler-compat-k2420_beta2", version.ref = "metro" }
+metro-compilerCompat-k2420Beta1 = { module = "dev.zacsweers.metro:compiler-compat-k2420_beta1", version.ref = "metro" }
 
 # Only present to trigger automatic renovate updates
 ktfmt = { module = "com.facebook:ktfmt", version.ref = "ktfmt" }
