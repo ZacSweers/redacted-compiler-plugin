@@ -4,6 +4,10 @@ pluginManagement {
   repositories {
     google()
     mavenCentral()
+    maven("https://central.sonatype.com/repository/maven-snapshots/") {
+      name = "central-portal-snapshots"
+      mavenContent { snapshotsOnly() }
+    }
     gradlePluginPortal()
   }
   plugins { id("com.gradle.develocity") version "4.5.0" }
@@ -13,6 +17,10 @@ dependencyResolutionManagement {
   repositories {
     google()
     mavenCentral()
+    maven("https://central.sonatype.com/repository/maven-snapshots/") {
+      name = "central-portal-snapshots"
+      mavenContent { snapshotsOnly() }
+    }
   }
 }
 
