@@ -17,6 +17,7 @@ kotlin = "2.4.20-Beta2"
 jdk = "25"
 jvmTarget = "11"
 ktfmt = "0.64"
+kotlinx-io = "0.9.1"
 metro = "1.4.0"
 
 [plugins]
