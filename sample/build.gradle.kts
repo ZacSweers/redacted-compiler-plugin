@@ -46,6 +46,16 @@ kotlin {
 }
 
 configurations.configureEach {
+  resolutionStrategy.eachDependency {
+    if (
+      requested.group == "org.jetbrains.kotlinx" &&
+        requested.name in setOf("kotlinx-io-core", "kotlinx-io-bytestring")
+    ) {
+      useVersion(libs.versions.kotlinx.io.get())
+      because("kotlinx-io 0.9.0 emits Wasm JS that is not browser-module compatible")
+    }
+  }
+
   resolutionStrategy.dependencySubstitution {
     substitute(module("dev.zacsweers.redacted:redacted-compiler-plugin-annotations"))
       .using(project(":redacted-compiler-plugin-annotations"))
