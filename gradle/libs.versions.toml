@@ -13,12 +13,12 @@
 # limitations under the License.
 
 [versions]
-kotlin = "2.4.20-Beta2"
+kotlin = "2.4.20-RC"
 jdk = "25"
 jvmTarget = "11"
 ktfmt = "0.64"
 kotlinx-io = "0.9.1"
-metro = "1.4.0"
+metro = "1.4.1"
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
@@ -42,7 +42,7 @@ kotlin-compilerTestFramework = { module = "org.jetbrains.kotlin:kotlin-compiler-
 kotlin-testJunit5 = { module = "org.jetbrains.kotlin:kotlin-test-junit5", version.ref = "kotlin" }
 kotlin-scriptRuntime = { module = "org.jetbrains.kotlin:kotlin-script-runtime", version.ref = "kotlin" }
 kotlin-annotationsJvm = { module = "org.jetbrains.kotlin:kotlin-annotations-jvm", version.ref = "kotlin" }
-metro-compilerCompat-latest = { module = "dev.zacsweers.metro:compiler-compat-k250_dev_498", version.ref = "metro" }
+metro-compilerCompat-latest = { module = "dev.zacsweers.metro:compiler-compat-latest", version.ref = "metro" }
 
 # Only present to trigger automatic renovate updates
 ktfmt = { module = "com.facebook:ktfmt", version.ref = "ktfmt" }
