@@ -79,7 +79,7 @@ listOf(
 dependencies {
   compileOnly(libs.kotlin.compiler)
 
-  add(embedded.name, libs.metro.compilerCompat.k2420Beta1)
+  add(embedded.name, libs.metro.compilerCompat.latest)
 
   testKotlin("testFixturesApi", "kotlin-test-junit5")
   testKotlin("testFixturesApi", "kotlin-compiler-internal-test-framework")
