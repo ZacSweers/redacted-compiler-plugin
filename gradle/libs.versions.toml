@@ -23,7 +23,7 @@ metro = "1.4.2"
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 binaryCompatibilityValidator = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version = "0.18.2" }
-buildConfig = { id = "com.github.gmazzo.buildconfig", version = "6.0.10" }
+buildConfig = { id = "com.github.gmazzo.buildconfig", version = "6.1.0" }
 dokka = { id = "org.jetbrains.dokka", version = "2.2.0" }
 mavenPublish = { id = "com.vanniktech.maven.publish", version = "0.37.0" }
 shadow = { id = "com.gradleup.shadow", version = "9.6.1" }
